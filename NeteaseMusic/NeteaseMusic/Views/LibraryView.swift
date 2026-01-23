@@ -1,0 +1,1015 @@
+import SwiftUI
+
+// MARK: - Apple Music 液态玻璃风格音乐库页
+struct LibraryView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @StateObject private var localStorage = LocalStorageService.shared
+    @StateObject private var localMusicService = LocalMusicService.shared
+    @State private var showLogin = false
+    @State private var cloudPlaylists: [CloudPlaylist] = []
+    @State private var cloudAlbums: [CloudAlbum] = []
+    @State private var likedSongIds: [Int] = []
+    @State private var isLoadingCloud = false
+    
+    private let userService = UserService.shared
+    
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 20) {
+                // 用户区域
+                liquidGlassUserSection
+                
+                // 网易Max 区域（登录后显示）
+                if authViewModel.isLoggedIn {
+                    cloudMusicSection
+                }
+
+                // 本地收藏库内容
+                liquidGlassLibraryContent
+            }
+            .padding(.bottom, 120)
+        }
+        .background(LiquidGlassBackground(colors: [.blue.opacity(0.08), .purple.opacity(0.06), .pink.opacity(0.04)]))
+        .navigationTitle("我的")
+        .fullScreenCover(isPresented: $showLogin) {
+            LoginSheetView()
+                .environmentObject(authViewModel)
+        }
+        .task {
+            if authViewModel.isLoggedIn {
+                // 等待用户信息加载完成
+                if authViewModel.currentUser == nil {
+                    await authViewModel.fetchCurrentUser()
+                }
+                await loadCloudData()
+            }
+        }
+        .onChange(of: authViewModel.currentUser) { _, newUser in
+            if newUser != nil && cloudPlaylists.isEmpty {
+                Task { await loadCloudData() }
+            }
+        }
+        .onChange(of: authViewModel.isLoggedIn) { _, isLoggedIn in
+            if !isLoggedIn {
+                // 退出登录时清空数据
+                cloudPlaylists = []
+                cloudAlbums = []
+                likedSongIds = []
+            }
+        }
+    }
+    
+    // MARK: - 加载云端数据
+    private func loadCloudData() async {
+        guard let userId = authViewModel.currentUser?.userId else {
+            print("未获取到 userId")
+            return
+        }
+        guard !isLoadingCloud else { return }
+        isLoadingCloud = true
+        print("开始加载云端数据, userId: \(userId)")
+        
+        do {
+            async let playlists = userService.getUserPlaylists(uid: userId)
+            async let albums = userService.getAlbumSublist()
+            async let likeIds = userService.getLikeList(uid: userId)
+            
+            cloudPlaylists = try await playlists
+            cloudAlbums = try await albums
+            likedSongIds = try await likeIds
+        } catch {
+            print("加载云端数据失败: \(error)")
+        }
+        
+        isLoadingCloud = false
+    }
+    
+    // MARK: - 液态玻璃用户区域
+    private var liquidGlassUserSection: some View {
+        VStack(spacing: 0) {
+            if authViewModel.isLoggedIn, let profile = authViewModel.currentUser {
+                // 已登录：显示用户卡片
+                NavigationLink(destination: ProfileCardView().environmentObject(authViewModel)) {
+                    LiquidGlassUserCard(
+                        avatarUrl: profile.avatarUrl.flatMap { URL(string: $0) },
+                        nickname: profile.nickname,
+                        level: profile.level
+                    )
+                }
+                .buttonStyle(LiquidGlassButtonStyle())
+            } else {
+                // 未登录：显示登录入口
+                Button(action: { showLogin = true }) {
+                    LiquidGlassLoginCard()
+                }
+                .buttonStyle(LiquidGlassButtonStyle())
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .task {
+            if authViewModel.isLoggedIn && authViewModel.currentUser == nil {
+                await authViewModel.fetchCurrentUser()
+            }
+        }
+    }
+    
+    // MARK: - 网易Max 云端音乐区域
+    private var cloudMusicSection: some View {
+        LiquidGlassSection(title: "网易Max") {
+            if isLoadingCloud {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .padding(.vertical, 40)
+                    Spacer()
+                }
+            } else {
+                LazyVGrid(columns: [
+                    GridItem(.flexible(), spacing: 12),
+                    GridItem(.flexible(), spacing: 12),
+                    GridItem(.flexible(), spacing: 12)
+                ], spacing: 16) {
+                    // 我的歌单
+                    NavigationLink {
+                        CloudPlaylistsView(playlists: cloudPlaylists.filter { !$0.isLikedPlaylist })
+                    } label: {
+                        CloudFeatureCard(
+                            icon: "music.note.list",
+                            iconColor: .red,
+                            title: "我的歌单",
+                            count: cloudPlaylists.filter { !$0.isLikedPlaylist }.count
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    
+                    // 喜欢的音乐
+                    NavigationLink {
+                        if let likedPlaylist = cloudPlaylists.first(where: { $0.isLikedPlaylist }) {
+                            CloudLikedSongsView(playlistId: likedPlaylist.id, songCount: likedSongIds.count)
+                        }
+                    } label: {
+                        CloudFeatureCard(
+                            icon: "heart.fill",
+                            iconColor: .pink,
+                            title: "喜欢的音乐",
+                            count: likedSongIds.count
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    
+                    // 收藏的专辑
+                    NavigationLink {
+                        CloudAlbumsView(albums: cloudAlbums)
+                    } label: {
+                        CloudFeatureCard(
+                            icon: "square.stack",
+                            iconColor: .purple,
+                            title: "收藏专辑",
+                            count: cloudAlbums.count
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 4)
+                .padding(.vertical, 8)
+            }
+        }
+    }
+    
+    // MARK: - 液态玻璃收藏库内容
+    private var liquidGlassLibraryContent: some View {
+        LiquidGlassSection(title: "本地音乐库") {
+            VStack(spacing: 0) {
+                // 本地歌曲
+                NavigationLink {
+                    LocalMusicView()
+                } label: {
+                    LiquidGlassLibraryRow(
+                        icon: "music.note.house.fill",
+                        iconColor: .green,
+                        title: "本地歌曲",
+                        count: localMusicService.localTracks.count
+                    )
+                }
+                .buttonStyle(.plain)
+                
+                LiquidGlassDivider()
+                
+                // 我喜欢的音乐
+                NavigationLink {
+                    FavoritesView()
+                } label: {
+                    LiquidGlassLibraryRow(
+                        icon: "heart.fill",
+                        iconColor: .red,
+                        title: "我喜欢的音乐",
+                        count: localStorage.favoritesCount
+                    )
+                }
+                .buttonStyle(.plain)
+
+                LiquidGlassDivider()
+
+                // 最近播放
+                NavigationLink {
+                    PlayHistoryView()
+                } label: {
+                    LiquidGlassLibraryRow(
+                        icon: "clock.fill",
+                        iconColor: .orange,
+                        title: "最近播放",
+                        count: localStorage.historyCount
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+// MARK: - 云端功能卡片
+struct CloudFeatureCard: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let count: Int
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            // 图标
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [iconColor.opacity(0.2), iconColor.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(iconColor)
+            }
+            .frame(width: 50, height: 50)
+            
+            // 标题
+            Text(title)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+            
+            // 数量
+            Text("\(count)")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(colorScheme == .dark ? Color.white.opacity(0.08) : Color.white.opacity(0.6))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: colorScheme == .dark
+                                    ? [.white.opacity(0.2), .clear]
+                                    : [.white.opacity(0.8), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
+        .shadow(color: iconColor.opacity(0.15), radius: 8, x: 0, y: 4)
+    }
+}
+
+// MARK: - 液态玻璃用户卡片
+struct LiquidGlassUserCard: View {
+    let avatarUrl: URL?
+    let nickname: String
+    let level: Int?
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            // 头像
+            LiquidGlassAvatar(imageUrl: avatarUrl, size: 56)
+            
+            VStack(alignment: .leading, spacing: 5) {
+                Text(nickname)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.primary)
+                
+                if let level = level {
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 9))
+                        Text("Lv.\(level)")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                Capsule()
+                                    .fill(Color.orange.opacity(0.15))
+                            )
+                    )
+                }
+            }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.secondary)
+        }
+        .padding(16)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(.ultraThinMaterial)
+                
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.8))
+                
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(
+                        LinearGradient(
+                            colors: colorScheme == .dark
+                                ? [.white.opacity(0.4), .white.opacity(0.1), .clear]
+                                : [.white.opacity(0.8), .white.opacity(0.3), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+            }
+        )
+        .shadow(color: .black.opacity(colorScheme == .dark ? 0.2 : 0.08), radius: 15, x: 0, y: 8)
+    }
+}
+
+// MARK: - 液态玻璃登录卡片
+struct LiquidGlassLoginCard: View {
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            // 头像占位
+            ZStack {
+                Circle()
+                    .fill(.ultraThinMaterial)
+                
+                Circle()
+                    .fill(colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.7))
+                
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: colorScheme == .dark
+                                ? [.white.opacity(0.4), .white.opacity(0.1), .clear]
+                                : [.white.opacity(0.8), .white.opacity(0.3), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                
+                Image(systemName: "person.circle")
+                    .font(.system(size: 28))
+                    .foregroundColor(.secondary)
+            }
+            .frame(width: 56, height: 56)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("点击登录")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.primary)
+                
+                Text("登录后享受更多功能")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.secondary)
+        }
+        .padding(16)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(.ultraThinMaterial)
+                
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.8))
+                
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(
+                        LinearGradient(
+                            colors: colorScheme == .dark
+                                ? [.white.opacity(0.4), .white.opacity(0.1), .clear]
+                                : [.white.opacity(0.8), .white.opacity(0.3), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+            }
+        )
+        .shadow(color: .black.opacity(colorScheme == .dark ? 0.2 : 0.08), radius: 15, x: 0, y: 8)
+    }
+}
+
+// MARK: - 液态玻璃库列表行
+struct LiquidGlassLibraryRow: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let count: Int
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            // 液态玻璃图标
+            ZStack {
+                Circle()
+                    .fill(.ultraThinMaterial)
+                
+                Circle()
+                    .fill(iconColor.opacity(colorScheme == .dark ? 0.2 : 0.15))
+                
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: colorScheme == .dark
+                                ? [.white.opacity(0.3), .white.opacity(0.1), .clear]
+                                : [.white.opacity(0.6), .white.opacity(0.2), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(iconColor)
+            }
+            .frame(width: 44, height: 44)
+            .shadow(color: iconColor.opacity(0.2), radius: 6, x: 0, y: 3)
+            
+            Text(title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            Text("\(count)")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.secondary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
+    }
+}
+
+// MARK: - 液态玻璃分割线
+struct LiquidGlassDivider: View {
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        Rectangle()
+            .fill(
+                LinearGradient(
+                    colors: colorScheme == .dark
+                        ? [.clear, .white.opacity(0.1), .clear]
+                        : [.clear, .black.opacity(0.08), .clear],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .frame(height: 1)
+            .padding(.leading, 74)
+    }
+}
+
+// MARK: - 云端歌单列表页面
+struct CloudPlaylistsView: View {
+    let playlists: [CloudPlaylist]
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(playlists) { playlist in
+                    NavigationLink {
+                        CloudPlaylistDetailView(playlist: playlist)
+                    } label: {
+                        PlaylistRowView(playlist: playlist)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding()
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("我的歌单")
+    }
+}
+
+// MARK: - 歌单行视图
+struct PlaylistRowView: View {
+    let playlist: CloudPlaylist
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            if let coverUrl = playlist.coverUrl, let url = URL(string: coverUrl) {
+                AsyncImage(url: url) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle().fill(Color.gray.opacity(0.2))
+                }
+                .frame(width: 60, height: 60)
+                .cornerRadius(8)
+            } else {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 60, height: 60)
+                    .overlay(Image(systemName: "music.note.list").foregroundColor(.gray))
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(playlist.name)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                Text("\(playlist.trackCount ?? 0) 首")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(colorScheme == .dark ? Color(.systemGray6) : .white)
+        )
+    }
+}
+
+// MARK: - 歌单详情页面
+struct CloudPlaylistDetailView: View {
+    let playlist: CloudPlaylist
+    @State private var tracks: [CloudTrack] = []
+    @State private var isLoading = true
+    @StateObject private var audioPlayer = AudioPlayer.shared
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                playlistHeader
+                playAllButton
+                
+                if isLoading {
+                    ProgressView().padding(.top, 40)
+                } else {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(tracks.enumerated()), id: \.element.id) { index, track in
+                            CloudTrackRow(track: track, index: index + 1) {
+                                playTrack(track, index: index)
+                            }
+                            if index < tracks.count - 1 {
+                                Divider().padding(.leading, 60)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+            .padding(.bottom, 100)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(playlist.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await loadTracks() }
+    }
+    
+    private var playlistHeader: some View {
+        VStack(spacing: 12) {
+            if let coverUrl = playlist.coverUrl, let url = URL(string: coverUrl) {
+                AsyncImage(url: url) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle().fill(Color.gray.opacity(0.2))
+                }
+                .frame(width: 180, height: 180)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+            }
+            
+            if let desc = playlist.description, !desc.isEmpty {
+                Text(desc)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                    .padding(.horizontal, 40)
+            }
+        }
+        .padding(.vertical, 20)
+    }
+    
+    private var playAllButton: some View {
+        Button(action: playAll) {
+            HStack {
+                Image(systemName: "play.fill")
+                Text("播放全部")
+                Text("(\(tracks.count))").foregroundColor(.white.opacity(0.8))
+            }
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                LinearGradient(colors: [.red, .red.opacity(0.8)], startPoint: .leading, endPoint: .trailing)
+            )
+            .cornerRadius(25)
+        }
+        .padding(.horizontal, 40)
+        .padding(.bottom, 20)
+        .disabled(tracks.isEmpty)
+    }
+    
+    private func loadTracks() async {
+        do {
+            tracks = try await MusicService.shared.getPlaylistTracks(playlistId: playlist.id)
+        } catch {
+            print("加载歌曲失败: \(error)")
+        }
+        isLoading = false
+    }
+    
+    private func playTrack(_ track: CloudTrack, index: Int) {
+        let playerTracks = tracks.map { $0.toTrack() }
+        audioPlayer.setPlaylist(playerTracks, startAt: index)
+    }
+    
+    private func playAll() {
+        guard !tracks.isEmpty else { return }
+        let playerTracks = tracks.map { $0.toTrack() }
+        audioPlayer.setPlaylist(playerTracks, startAt: 0)
+    }
+}
+
+// MARK: - 喜欢的音乐页面
+struct CloudLikedSongsView: View {
+    let playlistId: Int
+    let songCount: Int
+    @State private var tracks: [CloudTrack] = []
+    @State private var isLoading = true
+    @StateObject private var audioPlayer = AudioPlayer.shared
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                likedHeader
+                playAllButton
+                
+                if isLoading {
+                    ProgressView().padding(.top, 40)
+                } else {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(tracks.enumerated()), id: \.element.id) { index, track in
+                            CloudTrackRow(track: track, index: index + 1) {
+                                playTrack(track, index: index)
+                            }
+                            if index < tracks.count - 1 {
+                                Divider().padding(.leading, 60)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+            .padding(.bottom, 100)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("喜欢的音乐")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await loadTracks() }
+    }
+    
+    private var likedHeader: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                LinearGradient(colors: [.pink, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.white)
+            }
+            .frame(width: 180, height: 180)
+            .cornerRadius(12)
+            .shadow(color: .pink.opacity(0.3), radius: 10, x: 0, y: 5)
+            
+            Text("\(songCount) 首喜欢的歌曲")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 20)
+    }
+    
+    private var playAllButton: some View {
+        Button(action: playAll) {
+            HStack {
+                Image(systemName: "play.fill")
+                Text("播放全部")
+                Text("(\(tracks.count))").foregroundColor(.white.opacity(0.8))
+            }
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                LinearGradient(colors: [.pink, .red], startPoint: .leading, endPoint: .trailing)
+            )
+            .cornerRadius(25)
+        }
+        .padding(.horizontal, 40)
+        .padding(.bottom, 20)
+        .disabled(tracks.isEmpty)
+    }
+    
+    private func loadTracks() async {
+        do {
+            tracks = try await MusicService.shared.getPlaylistTracks(playlistId: playlistId)
+        } catch {
+            print("加载喜欢的歌曲失败: \(error)")
+        }
+        isLoading = false
+    }
+    
+    private func playTrack(_ track: CloudTrack, index: Int) {
+        let playerTracks = tracks.map { $0.toTrack() }
+        audioPlayer.setPlaylist(playerTracks, startAt: index)
+    }
+    
+    private func playAll() {
+        guard !tracks.isEmpty else { return }
+        let playerTracks = tracks.map { $0.toTrack() }
+        audioPlayer.setPlaylist(playerTracks, startAt: 0)
+    }
+}
+
+// MARK: - 收藏的专辑页面
+struct CloudAlbumsView: View {
+    let albums: [CloudAlbum]
+    
+    let columns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+    
+    var body: some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 16) {
+                ForEach(albums) { album in
+                    NavigationLink {
+                        CloudAlbumDetailView(album: album)
+                    } label: {
+                        AlbumCardView(album: album)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding()
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle("收藏的专辑")
+    }
+}
+
+// MARK: - 专辑卡片视图
+struct AlbumCardView: View {
+    let album: CloudAlbum
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let coverUrl = album.coverUrl, let url = URL(string: coverUrl) {
+                AsyncImage(url: url) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle().fill(Color.gray.opacity(0.2))
+                }
+                .frame(height: 160)
+                .cornerRadius(12)
+            } else {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(height: 160)
+                    .overlay(
+                        Image(systemName: "opticaldisc")
+                            .font(.system(size: 40))
+                            .foregroundColor(.gray)
+                    )
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(album.name)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                
+                Text(album.artistName)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        }
+    }
+}
+
+// MARK: - 专辑详情页面
+struct CloudAlbumDetailView: View {
+    let album: CloudAlbum
+    @State private var tracks: [CloudTrack] = []
+    @State private var isLoading = true
+    @StateObject private var audioPlayer = AudioPlayer.shared
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                albumHeader
+                playAllButton
+                
+                if isLoading {
+                    ProgressView().padding(.top, 40)
+                } else {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(tracks.enumerated()), id: \.element.id) { index, track in
+                            CloudTrackRow(track: track, index: index + 1) {
+                                playTrack(track, index: index)
+                            }
+                            if index < tracks.count - 1 {
+                                Divider().padding(.leading, 60)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+            .padding(.bottom, 100)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(album.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await loadTracks() }
+    }
+    
+    private var albumHeader: some View {
+        VStack(spacing: 12) {
+            if let coverUrl = album.coverUrl, let url = URL(string: coverUrl) {
+                AsyncImage(url: url) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle().fill(Color.gray.opacity(0.2))
+                }
+                .frame(width: 180, height: 180)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+            }
+            
+            Text(album.artistName)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 20)
+    }
+    
+    private var playAllButton: some View {
+        Button(action: playAll) {
+            HStack {
+                Image(systemName: "play.fill")
+                Text("播放全部")
+                Text("(\(tracks.count))").foregroundColor(.white.opacity(0.8))
+            }
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(
+                LinearGradient(colors: [.purple, .purple.opacity(0.8)], startPoint: .leading, endPoint: .trailing)
+            )
+            .cornerRadius(25)
+        }
+        .padding(.horizontal, 40)
+        .padding(.bottom, 20)
+        .disabled(tracks.isEmpty)
+    }
+    
+    private func loadTracks() async {
+        do {
+            tracks = try await MusicService.shared.getAlbumTracks(albumId: album.id)
+        } catch {
+            print("加载专辑歌曲失败: \(error)")
+        }
+        isLoading = false
+    }
+    
+    private func playTrack(_ track: CloudTrack, index: Int) {
+        let playerTracks = tracks.map { $0.toTrack() }
+        audioPlayer.setPlaylist(playerTracks, startAt: index)
+    }
+    
+    private func playAll() {
+        guard !tracks.isEmpty else { return }
+        let playerTracks = tracks.map { $0.toTrack() }
+        audioPlayer.setPlaylist(playerTracks, startAt: 0)
+    }
+}
+
+// MARK: - 云端歌曲行视图
+struct CloudTrackRow: View {
+    let track: CloudTrack
+    let index: Int
+    let onTap: () -> Void
+    @StateObject private var audioPlayer = AudioPlayer.shared
+    
+    private var isPlaying: Bool {
+        audioPlayer.currentTrack?.id == track.id
+    }
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Text("\(index)")
+                    .font(.system(size: 14))
+                    .foregroundColor(isPlaying ? .red : .secondary)
+                    .frame(width: 30)
+                
+                if let coverUrl = track.coverUrl, let url = URL(string: coverUrl) {
+                    AsyncImage(url: url) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle().fill(Color.gray.opacity(0.2))
+                    }
+                    .frame(width: 44, height: 44)
+                    .cornerRadius(6)
+                }
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(track.name)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(isPlaying ? .red : .primary)
+                        .lineLimit(1)
+                    
+                    Text(track.artistName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                
+                Spacer()
+                
+                if isPlaying {
+                    Image(systemName: "waveform")
+                        .font(.system(size: 14))
+                        .foregroundColor(.red)
+                        .symbolEffect(.variableColor.iterative)
+                }
+            }
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+#Preview {
+    NavigationStack {
+        LibraryView()
+            .environmentObject(AuthViewModel())
+    }
+}
