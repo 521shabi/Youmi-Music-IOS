@@ -192,110 +192,104 @@ private struct LiquidGlassCapsuleModifier<Content: View>: View {
     }
 }
 
-// MARK: - 迷你播放器状态（用于 Equatable 比较）
-private struct MiniPlayerState: Equatable {
-    let trackId: Int?
-    let trackName: String?
-    let artistName: String?
-    let coverUrl: String?
-    let isPlaying: Bool
-    let isLoading: Bool
-}
-
 // MARK: - 液体玻璃迷你播放器
 struct MiniPlayerView: View {
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var showPlayer = false
-    @State private var isPressed = false
-
-    // 提取状态用于比较，避免不必要的重绘
-    private var playerState: MiniPlayerState {
-        MiniPlayerState(
-            trackId: audioPlayer.currentTrack?.id,
-            trackName: audioPlayer.currentTrack?.name,
-            artistName: audioPlayer.currentTrack?.artistName,
-            coverUrl: audioPlayer.currentTrack?.coverUrl,
-            isPlaying: audioPlayer.isPlaying,
-            isLoading: audioPlayer.isLoading
-        )
-    }
 
     var body: some View {
-        MiniPlayerContent(
-            state: playerState,
-            isPressed: $isPressed,
-            showPlayer: $showPlayer,
-            onPlayPause: { audioPlayer.togglePlayPause() },
-            onNext: { audioPlayer.playNext() }
-        )
-        // 使用 overlay 而不是 fullScreenCover，让 PlayerView 保持存活
-        .overlay {
-            if showPlayer {
-                PlayerViewContainer(isPresented: $showPlayer)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(100)
+        HStack(spacing: 10) {
+            // 封面和歌曲信息区域 - 使用 Button 确保点击可靠
+            Button {
+                HapticFeedback.light()
+                showPlayer = true
+            } label: {
+                HStack(spacing: 12) {
+                    // 封面
+                    miniPlayerCover
+                    
+                    // 歌曲信息
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(audioPlayer.currentTrack?.name ?? "未播放")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(textColor)
+                            .lineLimit(1)
+                        
+                        Text(audioPlayer.currentTrack?.artistName ?? "")
+                            .font(.system(size: 13))
+                            .foregroundColor(secondaryTextColor)
+                            .lineLimit(1)
+                    }
+                    
+                    Spacer(minLength: 0)
+                }
+                .frame(minHeight: 56)
+                .contentShape(Rectangle())
             }
-        }
-        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: showPlayer)
-    }
-}
-
-// MARK: - PlayerView 容器（保持 PlayerView 存活）
-struct PlayerViewContainer: View {
-    @Binding var isPresented: Bool
-
-    var body: some View {
-        PlayerView(dismiss: { isPresented = false })
-            .ignoresSafeArea()
-    }
-}
-
-// MARK: - 迷你播放器内容（Equatable 优化）
-private struct MiniPlayerContent: View, Equatable {
-    let state: MiniPlayerState
-    @Binding var isPressed: Bool
-    @Binding var showPlayer: Bool
-    let onPlayPause: () -> Void
-    let onNext: () -> Void
-    
-    // 只比较状态，忽略闭包
-    static func == (lhs: MiniPlayerContent, rhs: MiniPlayerContent) -> Bool {
-        lhs.state == rhs.state && lhs.isPressed == rhs.isPressed
-    }
-    
-    var body: some View {
-        HStack(spacing: 14) {
-            // 封面
-            albumCover
-            
-            // 歌曲信息
-            songInfo
-            
-            Spacer()
+            .buttonStyle(MiniPlayerInfoButtonStyle())
             
             // 控制按钮
-            controlButtons
+            HStack(spacing: 0) {
+                // 播放/暂停按钮
+                Button {
+                    HapticFeedback.light()
+                    audioPlayer.togglePlayPause()
+                } label: {
+                    ZStack {
+                        if audioPlayer.isLoading {
+                            ProgressView()
+                                .frame(width: 24, height: 24)
+                        } else {
+                            Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    .frame(width: 52, height: 52)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(MiniPlayerInfoButtonStyle())
+
+                // 下一首按钮
+                Button {
+                    HapticFeedback.light()
+                    audioPlayer.playNext()
+                } label: {
+                    Image(systemName: "forward.fill")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.primary)
+                        .frame(width: 52, height: 52)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(MiniPlayerInfoButtonStyle())
+            }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .liquidGlass(in: RoundedRectangle(cornerRadius: 22))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(miniPlayerBackground)
+        .contentShape(RoundedRectangle(cornerRadius: 22))
+        .clipShape(RoundedRectangle(cornerRadius: 22))
         .padding(.horizontal, 12)
         .padding(.bottom, 8)
-        .contentShape(Rectangle())
-        .scaleEffect(isPressed ? 0.98 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isPressed)
-        .onTapGesture {
-            showPlayer = true
+        .fullScreenCover(isPresented: $showPlayer) {
+            PlayerView()
         }
-        .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
-            isPressed = pressing
-        }, perform: {})
     }
     
-    // MARK: - 专辑封面
-    private var albumCover: some View {
+    private var textColor: Color {
+        themeManager.themeStyle == .strangerThings ? .white : .primary
+    }
+    
+    private var secondaryTextColor: Color {
+        themeManager.themeStyle == .strangerThings ? .white.opacity(0.6) : .secondary
+    }
+    
+    // MARK: - 封面视图
+    @ViewBuilder
+    private var miniPlayerCover: some View {
         Group {
-            if let coverUrl = state.coverUrl,
+            if let coverUrl = audioPlayer.currentTrack?.coverUrl,
                let url = URL(string: coverUrl) {
                 CachedAsyncImage(url: url) { image in
                     image
@@ -304,78 +298,45 @@ private struct MiniPlayerContent: View, Equatable {
                 } placeholder: {
                     coverPlaceholder
                 }
+                .id(coverUrl)
             } else {
                 coverPlaceholder
             }
         }
-        .frame(width: 48, height: 48)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .frame(width: 44, height: 44)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
     
     private var coverPlaceholder: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color(.systemGray4), Color(.systemGray5)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+        RoundedRectangle(cornerRadius: 10)
+            .fill(Color(.systemGray5))
+            .overlay(
+                Image(systemName: "music.note")
+                    .font(.system(size: 18))
+                    .foregroundColor(.secondary)
             )
-            Image(systemName: "music.note")
-                .font(.system(size: 20))
-                .foregroundColor(.white.opacity(0.7))
-        }
     }
     
-    // MARK: - 歌曲信息
-    private var songInfo: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(state.trackName ?? "未播放")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.primary)
-                .lineLimit(1)
-            
-            Text(state.artistName ?? "")
-                .font(.system(size: 13))
-                .foregroundColor(.secondary)
-                .lineLimit(1)
-        }
-    }
-    
-    // MARK: - 控制按钮
-    // 缓存触觉反馈生成器（避免重复创建）
-    private static let impactGenerator = UIImpactFeedbackGenerator(style: .light)
-    
-    private var controlButtons: some View {
-        HStack(spacing: 8) {
-            // 播放/暂停按钮
-            Button(action: {
-                Self.impactGenerator.impactOccurred()
-                onPlayPause()
-            }) {
-                ZStack {
-                    if state.isLoading {
-                        ProgressView()
-                            .frame(width: 40, height: 40)
-                    } else {
-                        Image(systemName: state.isPlaying ? "pause.fill" : "play.fill")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.primary)
-                            .frame(width: 40, height: 40)
-                    }
-                }
-            }
-            .buttonStyle(MiniPlayerButtonStyle())
-            
-            // 下一首按钮
-            Button(action: {
-                Self.impactGenerator.impactOccurred()
-                onNext()
-            }) {
-                Image(systemName: "forward.fill")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.primary)
-                    .frame(width: 40, height: 40)
-            }
-            .buttonStyle(MiniPlayerButtonStyle())
+    // MARK: - 迷你播放器背景
+    @ViewBuilder
+    private var miniPlayerBackground: some View {
+        if #available(iOS 26.0, *), themeManager.themeStyle != .strangerThings {
+            RoundedRectangle(cornerRadius: 22)
+                .fill(.clear)
+                .glassEffect(.regular)
+                .allowsHitTesting(false)
+        } else if themeManager.themeStyle == .strangerThings {
+            ThemedMiniPlayerBackground()
+                .allowsHitTesting(false)
+        } else {
+            RoundedRectangle(cornerRadius: 22)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+                )
+                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+                .allowsHitTesting(false)
         }
     }
 }
@@ -386,6 +347,16 @@ struct MiniPlayerButtonStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.85 : 1.0)
             .animation(.spring(response: 0.2, dampingFraction: 0.7), value: configuration.isPressed)
+    }
+}
+
+// MARK: - 迷你播放器信息区域按钮样式
+struct MiniPlayerInfoButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.6 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 

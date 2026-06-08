@@ -1,6 +1,18 @@
 import SwiftUI
 
+// MARK: - 搜索导航目标
+struct ArtistDestination: Hashable {
+    let id: Int
+    let name: String
+}
+
+struct AlbumDestination: Hashable {
+    let id: Int
+    let name: String
+}
+
 // MARK: - 搜索历史管理器
+@MainActor
 class SearchHistoryManager: ObservableObject {
     static let shared = SearchHistoryManager()
     
@@ -89,10 +101,20 @@ enum SearchCategory: String, CaseIterable {
 struct FullScreenSearchView: View {
     @Binding var isSearchMode: Bool
     let previousTabIcon: String
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.dismiss) private var dismiss
     
     @State private var searchText = ""
     @FocusState private var isSearchFocused: Bool
     @Environment(\.colorScheme) private var colorScheme
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
+    private var backgroundColor: Color { isStrangerTheme ? Color(red: 0.05, green: 0.02, blue: 0.08) : Color(.systemBackground) }
+    private var cardBackground: Color { isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.systemGray5) }
     
     // 搜索状态
     @StateObject private var historyManager = SearchHistoryManager.shared
@@ -108,8 +130,14 @@ struct FullScreenSearchView: View {
     @State private var hasSearched = false
     @State private var errorMessage: String?
     
+    // 搜索任务管理（用于取消旧搜索）
+    @State private var searchTask: Task<Void, Never>?
+    
+    // 导航路径
+    @State private var navigationPath = NavigationPath()
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
                 // 上方搜索内容区域
                 ScrollView(showsIndicators: false) {
@@ -129,23 +157,30 @@ struct FullScreenSearchView: View {
                     .padding(.bottom, 100)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(.systemBackground))
+                .background(backgroundColor)
                 
                 Spacer(minLength: 0)
                 
                 // 底部搜索栏
                 searchBarView
             }
-            .background(Color(.systemBackground))
-            .navigationBarHidden(true)
+            .background(backgroundColor)
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: ArtistDestination.self) { dest in
+                ArtistDetailView(artistId: dest.id, artistName: dest.name)
+            }
+            .navigationDestination(for: AlbumDestination.self) { dest in
+                AlbumDetailView(albumId: dest.id, albumName: dest.name)
+            }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             loadHotSearches()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 isSearchFocused = true
             }
         }
-        .onChange(of: searchText) { _, newValue in
+        .onChangeCompat(of: searchText) { _, newValue in
             if newValue.isEmpty {
                 hasSearched = false
                 songResults = []
@@ -167,12 +202,12 @@ struct FullScreenSearchView: View {
                     } label: {
                         Text(category.rawValue)
                             .font(.system(size: 15, weight: selectedCategory == category ? .semibold : .regular))
-                            .foregroundColor(selectedCategory == category ? .white : .primary)
+                            .foregroundColor(selectedCategory == category ? .white : textColor)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(
                                 Capsule()
-                                    .fill(selectedCategory == category ? Color.red : Color(.systemGray5))
+                                    .fill(selectedCategory == category ? accentColor : cardBackground)
                             )
                     }
                 }
@@ -190,7 +225,7 @@ struct FullScreenSearchView: View {
                 HStack {
                     Text("最近搜索")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                     
                     Spacer()
                     
@@ -210,6 +245,7 @@ struct FullScreenSearchView: View {
                 ForEach(historyManager.history) { entry in
                     SearchHistoryRowView(
                         entry: entry,
+                        isStrangerTheme: isStrangerTheme,
                         onTap: {
                             searchText = entry.keyword
                             performSearch()
@@ -232,13 +268,13 @@ struct FullScreenSearchView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text("热门搜索")
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(textColor)
                     .padding(.horizontal, 16)
                     .padding(.top, 20)
                 
                 // 热搜列表
                 ForEach(Array(hotSearches.enumerated()), id: \.element.id) { index, item in
-                    HotSearchRow(index: index + 1, item: item) {
+                    HotSearchRow(index: index + 1, item: item, isStrangerTheme: isStrangerTheme) {
                         searchText = item.searchWord
                         performSearch()
                     }
@@ -251,23 +287,16 @@ struct FullScreenSearchView: View {
     @ViewBuilder
     private var searchResultsView: some View {
         if isSearching {
-            VStack(spacing: 16) {
-                ProgressView()
-                    .scaleEffect(1.2)
-                Text("搜索中...")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 60)
+            TrackListSkeletonView(count: 10)
+                .padding(.top, 20)
         } else if let error = errorMessage {
             VStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.system(size: 40))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                 Text(error)
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 60)
@@ -288,15 +317,15 @@ struct FullScreenSearchView: View {
     // MARK: - 最佳结果视图
     @ViewBuilder
     private var bestResultsView: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        LazyVStack(alignment: .leading, spacing: 0) {
             // 艺人结果（显示第一个匹配的艺人）
             if let firstArtist = artistResults.first {
-                BestMatchArtistRow(artist: firstArtist)
+                BestMatchArtistRow(artist: firstArtist, isStrangerTheme: isStrangerTheme)
             }
             
             // 歌曲结果
             ForEach(songResults) { song in
-                SearchResultRow(song: song, coverUrl: getCoverUrl(for: song)) {
+                SearchResultRow(song: song, coverUrl: getCoverUrl(for: song), isStrangerTheme: isStrangerTheme) {
                     playSong(song)
                 }
             }
@@ -313,9 +342,9 @@ struct FullScreenSearchView: View {
         if artistResults.isEmpty {
             emptyResultView
         } else {
-            VStack(alignment: .leading, spacing: 0) {
+            LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(artistResults) { artist in
-                    ArtistResultRow(artist: artist)
+                    ArtistResultRow(artist: artist, isStrangerTheme: isStrangerTheme)
                 }
             }
         }
@@ -327,9 +356,9 @@ struct FullScreenSearchView: View {
         if albumResults.isEmpty {
             emptyResultView
         } else {
-            VStack(alignment: .leading, spacing: 0) {
+            LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(albumResults) { album in
-                    AlbumResultRow(album: album)
+                    AlbumResultRow(album: album, isStrangerTheme: isStrangerTheme)
                 }
             }
         }
@@ -341,9 +370,9 @@ struct FullScreenSearchView: View {
         if songResults.isEmpty {
             emptyResultView
         } else {
-            VStack(alignment: .leading, spacing: 0) {
+            LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(songResults) { song in
-                    SearchResultRow(song: song, coverUrl: getCoverUrl(for: song)) {
+                    SearchResultRow(song: song, coverUrl: getCoverUrl(for: song), isStrangerTheme: isStrangerTheme) {
                         playSong(song)
                     }
                 }
@@ -356,17 +385,17 @@ struct FullScreenSearchView: View {
         VStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 40))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
             Text("未找到\"\(searchText)\"的相关结果")
                 .font(.system(size: 14))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 60)
     }
     
     // MARK: - 底部搜索栏
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @State private var showPlayer = false
     
     private var showMiniPlayer: Bool {
@@ -377,7 +406,7 @@ struct FullScreenSearchView: View {
         VStack(spacing: 0) {
             // 迷你播放器
             if showMiniPlayer {
-                SearchMiniPlayerBar(showPlayer: $showPlayer)
+                SearchMiniPlayerBar(showPlayer: $showPlayer, isStrangerTheme: isStrangerTheme)
             }
             
             // 搜索栏
@@ -386,13 +415,14 @@ struct FullScreenSearchView: View {
                 Button {
                     HapticFeedback.light()
                     isSearchFocused = false
+                    dismiss()
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         isSearchMode = false
                     }
                 } label: {
                     Image(systemName: previousTabIcon)
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                         .frame(width: 48, height: 48)
                 }
                 .liquidGlassCircle()
@@ -401,10 +431,11 @@ struct FullScreenSearchView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                     
                     TextField("艺人、歌曲、歌词以及更多内容", text: $searchText)
                         .font(.system(size: 16))
+                        .foregroundColor(textColor)
                         .focused($isSearchFocused)
                         .submitLabel(.search)
                         .onSubmit {
@@ -421,26 +452,30 @@ struct FullScreenSearchView: View {
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .font(.system(size: 18))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         }
                     }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
-                .liquidGlass(in: RoundedRectangle(cornerRadius: 16))
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : Color(.secondarySystemBackground))
+                )
                 
                 // 关闭按钮
                 Button {
                     HapticFeedback.light()
                     isSearchFocused = false
+                    dismiss()
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                         isSearchMode = false
                     }
                 } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                         .frame(width: 48, height: 48)
                 }
                 .liquidGlassCircle()
@@ -449,9 +484,15 @@ struct FullScreenSearchView: View {
             .padding(.vertical, 10)
         }
         .background(
-            Rectangle()
-                .fill(Color(.systemBackground).opacity(0.8))
-                .background(.ultraThinMaterial)
+            Group {
+                if isStrangerTheme {
+                    Rectangle()
+                        .fill(backgroundColor.opacity(0.95))
+                } else {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                }
+            }
         )
         .fullScreenCover(isPresented: $showPlayer) {
             PlayerView()
@@ -467,7 +508,9 @@ struct FullScreenSearchView: View {
                     hotSearches = Array(results.prefix(10))
                 }
             } catch {
+                #if DEBUG
                 print("加载热搜失败: \(error)")
+                #endif
             }
         }
     }
@@ -476,9 +519,13 @@ struct FullScreenSearchView: View {
     @State private var songDetailsCache: [Int: Track] = [:]
     
     // MARK: - 执行搜索
+    
     private func performSearch() {
         let keyword = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !keyword.isEmpty else { return }
+        
+        // 取消上一次搜索任务（避免旧结果覆盖新结果）
+        searchTask?.cancel()
         
         // 添加到搜索历史
         historyManager.addSearch(keyword: keyword)
@@ -488,14 +535,17 @@ struct FullScreenSearchView: View {
         errorMessage = nil
         selectedCategory = .best
         
-        Task {
+        searchTask = Task {
             do {
-                // 并行搜索歌曲、艺人、专辑
-                async let songs = MusicService.shared.search(keyword: keyword, limit: 30)
-                async let artists = MusicService.shared.searchArtists(keyword: keyword, limit: 10)
-                async let albums = MusicService.shared.searchAlbums(keyword: keyword, limit: 10)
+                // 网易云搜索
+                async let songsTask = MusicService.shared.search(keyword: keyword, limit: 30)
+                async let artistsTask = MusicService.shared.searchArtists(keyword: keyword, limit: 10)
+                async let albumsTask = MusicService.shared.searchAlbums(keyword: keyword, limit: 10)
                 
-                let (songRes, artistRes, albumRes) = try await (songs, artists, albums)
+                let (songRes, artistRes, albumRes) = try await (songsTask, artistsTask, albumsTask)
+                
+                // 检查任务是否已被取消（用户可能已发起新搜索）
+                guard !Task.isCancelled else { return }
                 
                 await MainActor.run {
                     songResults = songRes
@@ -508,6 +558,7 @@ struct FullScreenSearchView: View {
                 if !songRes.isEmpty {
                     let ids = songRes.map { $0.id }
                     if let details = try? await MusicService.shared.getSongDetail(ids: ids) {
+                        guard !Task.isCancelled else { return }
                         var cache: [Int: Track] = [:]
                         for track in details {
                             cache[track.id] = track
@@ -518,9 +569,11 @@ struct FullScreenSearchView: View {
                     }
                 }
             } catch {
-                await MainActor.run {
-                    errorMessage = "搜索失败，请重试"
-                    isSearching = false
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        errorMessage = "搜索失败，请重试"
+                        isSearching = false
+                    }
                 }
             }
         }
@@ -536,9 +589,33 @@ struct FullScreenSearchView: View {
     
     // MARK: - 播放歌曲
     private func playSong(_ song: SearchSong) {
-        let tracks = songResults.map { $0.toTrack() }
+        #if DEBUG
+        print("🔴 [FullScreenSearch] playSong 被调用: \(song.name), id: \(song.id)")
+        print("🔴 [FullScreenSearch] songResults数量: \(songResults.count)")
+        #endif
+        
+        // 转换时传入缓存的封面 URL
+        let tracks = songResults.map { s in
+            s.toTrack(withCoverUrl: getCoverUrl(for: s))
+        }
+        
+        #if DEBUG
+        print("🔴 [FullScreenSearch] tracks数量: \(tracks.count)")
+        #endif
+        
         if let index = songResults.firstIndex(where: { $0.id == song.id }) {
+            #if DEBUG
+            print("🔴 [FullScreenSearch] 找到索引: \(index)，开始播放")
+            #endif
             AudioPlayer.shared.setPlaylist(tracks, startAt: index)
+        } else {
+            #if DEBUG
+            print("🔴 [FullScreenSearch] 未找到匹配的歌曲索引")
+            #endif
+            // 如果找不到索引，直接播放第一首
+            if !tracks.isEmpty {
+                AudioPlayer.shared.setPlaylist(tracks, startAt: 0)
+            }
         }
         HapticFeedback.light()
     }
@@ -547,43 +624,65 @@ struct FullScreenSearchView: View {
 // MARK: - 搜索界面迷你播放器
 struct SearchMiniPlayerBar: View {
     @Binding var showPlayer: Bool
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    var isStrangerTheme: Bool = false
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
     
     var body: some View {
-        HStack(spacing: 12) {
-            // 封面
-            if let coverUrl = audioPlayer.currentTrack?.coverUrl,
-               let url = URL(string: coverUrl) {
-                CachedAsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Rectangle()
-                        .fill(Color(.systemGray5))
-                }
-                .frame(width: 44, height: 44)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-            } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray5))
+        HStack(spacing: 8) {
+            // 封面和歌曲信息区域 - 使用 Button 确保点击可靠
+            Button {
+                HapticFeedback.light()
+                showPlayer = true
+            } label: {
+                HStack(spacing: 12) {
+                    // 封面
+                    Group {
+                        if let coverUrl = audioPlayer.currentTrack?.coverUrl,
+                           let url = URL(string: coverUrl) {
+                            CachedAsyncImage(url: url) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                Rectangle()
+                                    .fill(Color(.systemGray5))
+                            }
+                            .id(coverUrl)
+                        } else {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(.systemGray5))
+                                .overlay(
+                                    Image(systemName: "music.note")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(.secondary)
+                                )
+                        }
+                    }
                     .frame(width: 44, height: 44)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
+                    // 歌曲信息
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(audioPlayer.currentTrack?.name ?? "未播放")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(textColor)
+                            .lineLimit(1)
+                        
+                        Text(audioPlayer.currentTrack?.artistName ?? "")
+                            .font(.system(size: 13))
+                            .foregroundColor(secondaryTextColor)
+                            .lineLimit(1)
+                    }
+                    
+                    Spacer(minLength: 0)
+                }
+                .frame(minHeight: 56)
+                .contentShape(Rectangle())
             }
-            
-            // 歌曲信息
-            VStack(alignment: .leading, spacing: 2) {
-                Text(audioPlayer.currentTrack?.name ?? "未播放")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-                
-                Text(audioPlayer.currentTrack?.artistName ?? "")
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-            }
-            
-            Spacer()
+            .buttonStyle(SearchMiniPlayerTapStyle())
             
             // 播放/暂停按钮
             Button {
@@ -592,9 +691,11 @@ struct SearchMiniPlayerBar: View {
             } label: {
                 Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.primary)
-                    .frame(width: 40, height: 40)
+                    .foregroundColor(textColor)
+                    .frame(width: 52, height: 52)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(SearchMiniPlayerTapStyle())
             
             // 下一首按钮
             Button {
@@ -603,26 +704,38 @@ struct SearchMiniPlayerBar: View {
             } label: {
                 Image(systemName: "forward.fill")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.primary)
-                    .frame(width: 40, height: 40)
+                    .foregroundColor(textColor)
+                    .frame(width: 52, height: 52)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(SearchMiniPlayerTapStyle())
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            showPlayer = true
-        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+}
+
+// MARK: - 搜索迷你播放器点击样式
+struct SearchMiniPlayerTapStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.6 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
 // MARK: - 最佳匹配艺人行
 struct BestMatchArtistRow: View {
     let artist: SearchArtistResult
+    var isStrangerTheme: Bool = false
     @Environment(\.colorScheme) private var colorScheme
     
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    
     var body: some View {
-        NavigationLink(destination: ArtistDetailView(artistId: artist.id, artistName: artist.name)) {
+        NavigationLink(value: ArtistDestination(id: artist.id, name: artist.name)) {
             HStack(spacing: 14) {
                 // 艺人头像（圆形）
                 if let avatarUrl = artist.avatarUrl, let url = URL(string: avatarUrl) {
@@ -643,7 +756,7 @@ struct BestMatchArtistRow: View {
                         .overlay(
                             Image(systemName: "person.fill")
                                 .font(.system(size: 24))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         )
                 }
                 
@@ -651,19 +764,19 @@ struct BestMatchArtistRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(artist.name)
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                         .lineLimit(1)
                     
                     Text("艺人")
                         .font(.system(size: 14))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -676,9 +789,13 @@ struct BestMatchArtistRow: View {
 // MARK: - 艺人结果行
 struct ArtistResultRow: View {
     let artist: SearchArtistResult
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
     
     var body: some View {
-        NavigationLink(destination: ArtistDetailView(artistId: artist.id, artistName: artist.name)) {
+        NavigationLink(value: ArtistDestination(id: artist.id, name: artist.name)) {
             HStack(spacing: 12) {
                 // 头像
                 if let avatarUrl = artist.avatarUrl, let url = URL(string: avatarUrl) {
@@ -698,25 +815,25 @@ struct ArtistResultRow: View {
                         .frame(width: 50, height: 50)
                         .overlay(
                             Image(systemName: "person.fill")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         )
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(artist.name)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                         .lineLimit(1)
                     
                     HStack(spacing: 8) {
                         Text("艺人")
                             .font(.system(size: 13))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                         
                         if let albumSize = artist.albumSize, albumSize > 0 {
                             Text("\(albumSize)张专辑")
                                 .font(.system(size: 13))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         }
                     }
                 }
@@ -725,7 +842,7 @@ struct ArtistResultRow: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -738,9 +855,13 @@ struct ArtistResultRow: View {
 // MARK: - 专辑结果行
 struct AlbumResultRow: View {
     let album: SearchAlbumResult
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
     
     var body: some View {
-        NavigationLink(destination: AlbumDetailView(albumId: album.id, albumName: album.name)) {
+        NavigationLink(value: AlbumDestination(id: album.id, name: album.name)) {
             HStack(spacing: 12) {
                 // 封面
                 if let picUrl = album.picUrl, let url = URL(string: picUrl) {
@@ -760,19 +881,19 @@ struct AlbumResultRow: View {
                         .frame(width: 50, height: 50)
                         .overlay(
                             Image(systemName: "square.stack")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         )
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(album.name)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                         .lineLimit(1)
                     
                     Text("专辑 · \(album.artistName)")
                         .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                         .lineLimit(1)
                 }
                 
@@ -780,7 +901,7 @@ struct AlbumResultRow: View {
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -793,19 +914,23 @@ struct AlbumResultRow: View {
 // MARK: - 搜索历史行视图
 struct SearchHistoryRowView: View {
     let entry: SearchHistoryEntry
+    var isStrangerTheme: Bool = false
     let onTap: () -> Void
     let onDelete: () -> Void
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
     
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 18))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
                 .frame(width: 24)
             
             Text(entry.keyword)
                 .font(.system(size: 16))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
                 .lineLimit(1)
             
             Spacer()
@@ -815,7 +940,7 @@ struct SearchHistoryRowView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .frame(width: 32, height: 32)
             }
         }
@@ -832,14 +957,18 @@ struct SearchHistoryRowView: View {
 struct HotSearchRow: View {
     let index: Int
     let item: HotSearch
+    var isStrangerTheme: Bool = false
     let onTap: () -> Void
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
     
     private var indexColor: Color {
         switch index {
-        case 1: return .red
+        case 1: return isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red
         case 2: return .orange
         case 3: return .yellow
-        default: return .secondary
+        default: return secondaryTextColor
         }
     }
     
@@ -854,7 +983,7 @@ struct HotSearchRow: View {
                 HStack(spacing: 6) {
                     Text(item.searchWord)
                         .font(.system(size: 16, weight: index <= 3 ? .semibold : .regular))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                         .lineLimit(1)
                     
                     // 热搜标签
@@ -866,7 +995,7 @@ struct HotSearchRow: View {
                 if let content = item.content, !content.isEmpty {
                     Text(content)
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                         .lineLimit(1)
                 }
             }
@@ -876,7 +1005,7 @@ struct HotSearchRow: View {
             if let score = item.score {
                 Text(formatScore(score))
                     .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
         }
         .padding(.horizontal, 16)
@@ -892,8 +1021,8 @@ struct HotSearchRow: View {
     private func hotSearchTag(iconType: Int) -> some View {
         let (text, color): (String, Color) = {
             switch iconType {
-            case 1: return ("热", .red)
-            case 2: return ("新", .blue)
+            case 1: return ("热", isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red)
+            case 2: return ("新", isStrangerTheme ? Color(red: 0.2, green: 0.6, blue: 1.0) : .blue)
             case 3: return ("飙", .orange)
             case 5: return ("荐", .purple)
             default: return ("", .clear)
@@ -923,8 +1052,12 @@ struct HotSearchRow: View {
 struct SearchResultRow: View {
     let song: SearchSong
     var coverUrl: String?  // 可选的封面 URL（优先使用）
+    var isStrangerTheme: Bool = false
     let onTap: () -> Void
     @Environment(\.colorScheme) private var colorScheme
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
     
     // 导航状态
     @State private var navigateToAlbum = false
@@ -954,7 +1087,7 @@ struct SearchResultRow: View {
                     .frame(width: 50, height: 50)
                     .overlay(
                         Image(systemName: "music.note")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     )
             }
             
@@ -962,12 +1095,12 @@ struct SearchResultRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(song.name)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(textColor)
                     .lineLimit(1)
                 
                 Text("\(song.artistName) - \(song.albumName)")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .lineLimit(1)
             }
             
@@ -1023,7 +1156,7 @@ struct SearchResultRow: View {
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .frame(width: 32, height: 32)
             }
         }
@@ -1035,20 +1168,19 @@ struct SearchResultRow: View {
         }
         .background(
             Group {
-                if let albumId = song.albumId {
-                    NavigationLink(destination: AlbumDetailView(albumId: albumId, albumName: song.albumName), isActive: $navigateToAlbum) {
-                        EmptyView()
-                    }
-                    .hidden()
-                }
-                if let artistId = song.artistId {
-                    NavigationLink(destination: ArtistDetailView(artistId: artistId, artistName: song.artistName), isActive: $navigateToArtist) {
-                        EmptyView()
-                    }
-                    .hidden()
-                }
+                EmptyView()
             }
         )
+        .navigationDestination(isPresented: $navigateToAlbum) {
+            if let albumId = song.albumId {
+                AlbumDetailView(albumId: albumId, albumName: song.albumName)
+            }
+        }
+        .navigationDestination(isPresented: $navigateToArtist) {
+            if let artistId = song.artistId {
+                ArtistDetailView(artistId: artistId, artistName: song.artistName)
+            }
+        }
     }
 }
 
@@ -1075,8 +1207,7 @@ struct SearchContentView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: 12),
-                GridItem(.flexible(), spacing: 12)
+                GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 12)
             ], spacing: 12) {
                 ForEach(playlistCategories) { category in
                     NavigationLink {
@@ -1108,7 +1239,7 @@ struct SearchCategoryCard: View {
     let category: SearchCategoryItem
     
     private var cardHeight: CGFloat {
-        (UIScreen.main.bounds.width - 44) / 2 * 0.6
+        min((UIScreen.main.bounds.width - 44) / 2 * 0.6, 180)
     }
     
     var body: some View {

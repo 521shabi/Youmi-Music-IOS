@@ -1,11 +1,18 @@
 import SwiftUI
 
 struct ToplistView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var toplists: [ToplistItem] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
     
     private let musicService = MusicService.shared
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var backgroundColor: Color { isStrangerTheme ? Color(red: 0.05, green: 0.02, blue: 0.08) : Color(.systemGroupedBackground) }
     
     // 官方榜单 ID
     private let officialIds = [19723756, 3779629, 2884035, 3778678] // 飙升榜、新歌榜、原创榜、热歌榜
@@ -34,7 +41,7 @@ struct ToplistView: View {
             .padding(.top, 16)
             .padding(.bottom, 100)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(ThemedBackground().environmentObject(themeManager))
         .navigationTitle("排行榜")
         .navigationBarTitleDisplayMode(.large)
         .task {
@@ -109,7 +116,7 @@ struct ToplistView: View {
             
             Text(title)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
             
             Spacer()
         }
@@ -121,12 +128,13 @@ struct ToplistView: View {
         VStack(spacing: 16) {
             ProgressView()
                 .scaleEffect(1.3)
+                .tint(isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : nil)
             Text("加载排行榜...")
                 .font(.system(size: 15))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
+        .background(backgroundColor)
     }
     
     // MARK: - Error View
@@ -140,10 +148,11 @@ struct ToplistView: View {
             
             Text("加载失败")
                 .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(textColor)
             
             Text(error)
                 .font(.system(size: 14))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
                 .multilineTextAlignment(.center)
             
             Button(action: {
@@ -155,13 +164,19 @@ struct ToplistView: View {
                     .padding(.horizontal, 28)
                     .padding(.vertical, 12)
                     .background(
-                        LinearGradient(colors: [.red, .pink], startPoint: .leading, endPoint: .trailing)
+                        LinearGradient(
+                            colors: isStrangerTheme 
+                                ? [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.1, blue: 0.2)]
+                                : [.red, .pink],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
                     .clipShape(Capsule())
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
+        .background(backgroundColor)
     }
     
     // MARK: - Load Data

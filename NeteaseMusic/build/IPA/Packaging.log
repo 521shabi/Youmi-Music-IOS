@@ -1,0 +1,225 @@
+2026-01-28 01:24:26 +0000 [MT] Initial pipeline context: <IDEDistributionProcessingPipelineContext: 0xb1c1de100; archive(resolved)="<IDEArchive: 0xb1c0275d0>", distributionTask(resolved)="2", distributionDestination(resolved)="1", distributionMethod(resolved)="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team(resolved)="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	Chain (14, self inclusive):
+	<IDEDistributionProcessingPipelineContext: 0xb1c1de100; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionProcessingPipelineContext: 0xb1c1dcc00; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12e580; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12d680; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12d400; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12d180; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12cf00; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12cc80; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12ca00; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="<IDEProvisioningBasicTeam: 0xb1e2ac0e0; teamID='NLBB5JFQDD', teamName='(null)'>">
+	<IDEDistributionContext: 0xb1c12c780; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="(null)">
+	<IDEDistributionContext: 0xb1c12c500; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="(null)">
+	<IDEDistributionContext: 0xb1c12c280; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="(null)">
+	<IDEDistributionContext: 0xb1c12c000; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0xb1c18c290>", team="(null)">
+	<IDEDistributionContext: 0x1031de6d0; archive = "<IDEArchive: 0xb1c0275d0>", distributionMethod="(null)", team="(null)">
+</IDEDistributionProcessingPipelineContext: 0xb1c1de100>
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionCreateDestRootStep
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionCopyItemStep
+2026-01-28 01:24:26 +0000 [MT] Running /usr/bin/ditto '-V' '/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app' '/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app'
+2026-01-28 01:24:26 +0000  >>> Copying /Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app 
+2026-01-28 01:24:26 +0000  copying file ./_CodeSignature/CodeResources ... 
+2026-01-28 01:24:26 +0000  3963 bytes for ./_CodeSignature/CodeResources
+2026-01-28 01:24:26 +0000  copying file ./PlugIns/LyricWidgetExtension.appex/_CodeSignature/CodeResources ... 
+2026-01-28 01:24:26 +0000  2040 bytes for ./PlugIns/LyricWidgetExtension.appex/_CodeSignature/CodeResources
+2026-01-28 01:24:26 +0000  copying file ./PlugIns/LyricWidgetExtension.appex/LyricWidgetExtension ... 
+2026-01-28 01:24:26 +0000  206432 bytes for ./PlugIns/LyricWidgetExtension.appex/LyricWidgetExtension
+2026-01-28 01:24:26 +0000  copying file ./PlugIns/LyricWidgetExtension.appex/embedded.mobileprovision ... 
+2026-01-28 01:24:26 +0000  12580 bytes for ./PlugIns/LyricWidgetExtension.appex/embedded.mobileprovision
+2026-01-28 01:24:26 +0000  copying file ./PlugIns/LyricWidgetExtension.appex/Info.plist ... 
+2026-01-28 01:24:26 +0000  1366 bytes for ./PlugIns/LyricWidgetExtension.appex/Info.plist
+2026-01-28 01:24:26 +0000  copying file ./AppIcon60x60@2x.png ... 
+2026-01-28 01:24:26 +0000  15846 bytes for ./AppIcon60x60@2x.png
+2026-01-28 01:24:26 +0000  copying file ./NeteaseMusic ... 
+2026-01-28 01:24:26 +0000  3455184 bytes for ./NeteaseMusic
+2026-01-28 01:24:26 +0000  copying file ./Assets.car ... 
+2026-01-28 01:24:26 +0000  2048520 bytes for ./Assets.car
+2026-01-28 01:24:26 +0000  copying file ./AppIcon76x76@2x~ipad.png ... 
+2026-01-28 01:24:26 +0000  24584 bytes for ./AppIcon76x76@2x~ipad.png
+2026-01-28 01:24:26 +0000  copying file ./embedded.mobileprovision ... 
+2026-01-28 01:24:26 +0000  12492 bytes for ./embedded.mobileprovision
+2026-01-28 01:24:26 +0000  copying file ./Info.plist ... 
+2026-01-28 01:24:26 +0000  1261 bytes for ./Info.plist
+2026-01-28 01:24:26 +0000  copying file ./PkgInfo ... 
+2026-01-28 01:24:26 +0000  8 bytes for ./PkgInfo
+2026-01-28 01:24:26 +0000 [MT] /usr/bin/ditto exited with 0
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionEmbedProfileStep
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionInfoPlistStep
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionInfoPlistStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionInfoPlistStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionAppThinningPlistStep
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionAppThinningPlistStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionSymbolsStep
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionSymbolsStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionAppThinningStep
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionAppThinningStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionArchThinningStep
+2026-01-28 01:24:26 +0000 [MT] Archs to thin for item /Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex are []
+2026-01-28 01:24:26 +0000 [MT] Archs to thin for item /Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app are []
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionODRStep
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionStripXattrsStep
+2026-01-28 01:24:26 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2026-01-28 01:24:26 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionCodesignStep
+2026-01-28 01:24:26 +0000 [MT] Entitlements for <IDEDistributionItem: 0xb1e1d1740; bundleID='com.youmi.neteasemusic.LyricWidget', path='<DVTFilePath:0xb1c1412d0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xb1e1d16e0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xb1c1b4300; name='Apple Development: 3841479998@qq.com (Q83LXJAUP2)', hash='D6885B0DF93D84E9230134EBE0224F1CE16415CA', serialNumber='463ABE61716BB6F05A88CB3B2BDA57FD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2026-01-03 19:45:07 +0000''>', entitlements='{
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic.LyricWidget";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}', teamID='NLBB5JFQDD', identifier='com.youmi.neteasemusic.LyricWidget', executablePath='<DVTFilePath:0xb1c1413b0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/LyricWidgetExtension'>', hardenedRuntime='0'>'>: {
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic.LyricWidget";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}
+2026-01-28 01:24:26 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-01-28 01:24:26 +0000 [MT] Entitlements for <IDEDistributionItem: 0xb1e1d1740; bundleID='com.youmi.neteasemusic.LyricWidget', path='<DVTFilePath:0xb1c1412d0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xb1e1d16e0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xb1c1b43c0; name='Apple Development: 3841479998@qq.com (Q83LXJAUP2)', hash='D6885B0DF93D84E9230134EBE0224F1CE16415CA', serialNumber='463ABE61716BB6F05A88CB3B2BDA57FD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2026-01-03 19:45:07 +0000''>', entitlements='{
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic.LyricWidget";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}', teamID='NLBB5JFQDD', identifier='com.youmi.neteasemusic.LyricWidget', executablePath='<DVTFilePath:0xb1c1413b0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/LyricWidgetExtension'>', hardenedRuntime='0'>'> are: {
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic.LyricWidget";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}
+2026-01-28 01:24:26 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0xb1e1d1740; bundleID='com.youmi.neteasemusic.LyricWidget', path='<DVTFilePath:0xb1c1412d0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xb1e1d16e0; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xb1c1b43c0; name='Apple Development: 3841479998@qq.com (Q83LXJAUP2)', hash='D6885B0DF93D84E9230134EBE0224F1CE16415CA', serialNumber='463ABE61716BB6F05A88CB3B2BDA57FD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2026-01-03 19:45:07 +0000''>', entitlements='{
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic.LyricWidget";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}', teamID='NLBB5JFQDD', identifier='com.youmi.neteasemusic.LyricWidget', executablePath='<DVTFilePath:0xb1c1413b0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/LyricWidgetExtension'>', hardenedRuntime='0'>'> to: /var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/entitlements~~~tBfVyj
+2026-01-28 01:24:26 +0000 [MT] invoking codesign: <NSConcreteTask: 0xb1c2a7d90; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    D6885B0DF93D84E9230134EBE0224F1CE16415CA,
+    "--entitlements",
+    "/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/entitlements~~~tBfVyj",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex"
+)'>
+2026-01-28 01:24:26 +0000 [MT] codesign output: /var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex: replacing existing signature
+/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex: signed bundle with Mach-O thin (arm64) [com.youmi.neteasemusic.LyricWidget]
+2026-01-28 01:24:26 +0000 [MT] Entitlements for <IDEDistributionItem: 0xb1e1d17a0; bundleID='com.youmi.neteasemusic', path='<DVTFilePath:0xb1c027640:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xb1e1d1800; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xb1c1b4300; name='Apple Development: 3841479998@qq.com (Q83LXJAUP2)', hash='D6885B0DF93D84E9230134EBE0224F1CE16415CA', serialNumber='463ABE61716BB6F05A88CB3B2BDA57FD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2026-01-03 19:45:07 +0000''>', entitlements='{
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}', teamID='NLBB5JFQDD', identifier='com.youmi.neteasemusic', executablePath='<DVTFilePath:0xb1e1d10e0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/NeteaseMusic'>', hardenedRuntime='0'>'>: {
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}
+2026-01-28 01:24:26 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2026-01-28 01:24:26 +0000 [MT] Entitlements for <IDEDistributionItem: 0xb1e1d17a0; bundleID='com.youmi.neteasemusic', path='<DVTFilePath:0xb1c027640:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xb1e1d1800; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xb1c1b43c0; name='Apple Development: 3841479998@qq.com (Q83LXJAUP2)', hash='D6885B0DF93D84E9230134EBE0224F1CE16415CA', serialNumber='463ABE61716BB6F05A88CB3B2BDA57FD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2026-01-03 19:45:07 +0000''>', entitlements='{
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}', teamID='NLBB5JFQDD', identifier='com.youmi.neteasemusic', executablePath='<DVTFilePath:0xb1e1d10e0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/NeteaseMusic'>', hardenedRuntime='0'>'> are: {
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}
+2026-01-28 01:24:26 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0xb1e1d17a0; bundleID='com.youmi.neteasemusic', path='<DVTFilePath:0xb1c027640:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0xb1e1d1800; isSigned='1', isAdHocSigned='0', signingCertificate='<DVTSigningCertificate: 0xb1c1b43c0; name='Apple Development: 3841479998@qq.com (Q83LXJAUP2)', hash='D6885B0DF93D84E9230134EBE0224F1CE16415CA', serialNumber='463ABE61716BB6F05A88CB3B2BDA57FD', certificateKinds='(
+    "1.2.840.113635.100.6.1.12",
+    "1.2.840.113635.100.6.1.2"
+), issueDate='2026-01-03 19:45:07 +0000''>', entitlements='{
+    "application-identifier" = "NLBB5JFQDD.com.youmi.neteasemusic";
+    "com.apple.developer.team-identifier" = NLBB5JFQDD;
+    "com.apple.security.application-groups" =     (
+        "group.com.youmi.neteasemusic"
+    );
+    "get-task-allow" = 1;
+}', teamID='NLBB5JFQDD', identifier='com.youmi.neteasemusic', executablePath='<DVTFilePath:0xb1e1d10e0:'/Users/shijiexuanzenanti/Desktop/iosyoumi/NeteaseMusic/build/NeteaseMusic.xcarchive/Products/Applications/NeteaseMusic.app/NeteaseMusic'>', hardenedRuntime='0'>'> to: /var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/entitlements~~~PPiqCy
+2026-01-28 01:24:26 +0000 [MT] invoking codesign: <NSConcreteTask: 0xb1c2a7bb0; launchPath='/usr/bin/codesign', arguments='(
+    "-f",
+    "-s",
+    D6885B0DF93D84E9230134EBE0224F1CE16415CA,
+    "--entitlements",
+    "/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/entitlements~~~PPiqCy",
+    "--preserve-metadata=identifier,flags,runtime,launch-constraints,library-constraints",
+    "--generate-entitlement-der",
+    "--strip-disallowed-xattrs",
+    "-vvv",
+    "/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app"
+)'>
+2026-01-28 01:24:26 +0000 [MT] codesign output: /var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app: replacing existing signature
+/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app: signed app bundle with Mach-O thin (arm64) [com.youmi.neteasemusic]
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionZipODRItemStep
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionCreateIPAStep
+2026-01-28 01:24:26 +0000 [MT] Running /usr/bin/ditto '-V' '-c' '-k' '--norsrc' '/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root' '/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Packages/NeteaseMusic.ipa'
+2026-01-28 01:24:26 +0000  >>> Copying /var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root 
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/_CodeSignature/CodeResources ... 
+2026-01-28 01:24:26 +0000  3963 bytes for ./Payload/NeteaseMusic.app/_CodeSignature/CodeResources
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/_CodeSignature/CodeResources ... 
+2026-01-28 01:24:26 +0000  2040 bytes for ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/_CodeSignature/CodeResources
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/LyricWidgetExtension ... 
+2026-01-28 01:24:26 +0000  206432 bytes for ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/LyricWidgetExtension
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/embedded.mobileprovision ... 
+2026-01-28 01:24:26 +0000  12580 bytes for ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/embedded.mobileprovision
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/Info.plist ... 
+2026-01-28 01:24:26 +0000  1366 bytes for ./Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex/Info.plist
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/AppIcon60x60@2x.png ... 
+2026-01-28 01:24:26 +0000  15846 bytes for ./Payload/NeteaseMusic.app/AppIcon60x60@2x.png
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/NeteaseMusic ... 
+2026-01-28 01:24:26 +0000  3455184 bytes for ./Payload/NeteaseMusic.app/NeteaseMusic
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/Assets.car ... 
+2026-01-28 01:24:26 +0000  2048520 bytes for ./Payload/NeteaseMusic.app/Assets.car
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/AppIcon76x76@2x~ipad.png ... 
+2026-01-28 01:24:26 +0000  24584 bytes for ./Payload/NeteaseMusic.app/AppIcon76x76@2x~ipad.png
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/embedded.mobileprovision ... 
+2026-01-28 01:24:26 +0000  12492 bytes for ./Payload/NeteaseMusic.app/embedded.mobileprovision
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/Info.plist ... 
+2026-01-28 01:24:26 +0000  1261 bytes for ./Payload/NeteaseMusic.app/Info.plist
+2026-01-28 01:24:26 +0000  copying file ./Payload/NeteaseMusic.app/PkgInfo ... 
+2026-01-28 01:24:26 +0000  8 bytes for ./Payload/NeteaseMusic.app/PkgInfo
+2026-01-28 01:24:26 +0000 [MT] /usr/bin/ditto exited with 0
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionAppStoreInformationStep
+2026-01-28 01:24:26 +0000 [MT] Skipping step: IDEDistributionAppStoreInformationStep because it said so
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionGenerateProcessedDistributionItems
+2026-01-28 01:24:26 +0000 [MT] IDEDistributionItem init <DVTFilePath:0xb1c344690:'/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app/PlugIns/LyricWidgetExtension.appex'>
+2026-01-28 01:24:26 +0000 [MT] IDEDistributionItem init <DVTFilePath:0xb1c344700:'/var/folders/t0/xpj89pq93qjd0b06gw65cdh00000gn/T/XcodeDistPipeline.~~~xSdVm5/Root/Payload/NeteaseMusic.app'>
+2026-01-28 01:24:26 +0000 [MT] Processing step: IDEDistributionCreateManifestStep

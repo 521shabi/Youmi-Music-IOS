@@ -2,8 +2,16 @@ import SwiftUI
 
 struct ProfileCardView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.colorScheme) var colorScheme
     @State private var showLogoutAlert = false
+    
+    // MARK: - 主题相关属性
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
+    private var cardBackground: Color { isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15).opacity(0.9) : (colorScheme == .dark ? Color(.systemGray6) : .white) }
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -30,7 +38,15 @@ struct ProfileCardView: View {
                 loadingView
             }
         }
-        .background(Color(.systemGroupedBackground))
+        .background(
+            Group {
+                if isStrangerTheme {
+                    StrangerThingsBackground()
+                } else {
+                    Color(.systemGroupedBackground)
+                }
+            }
+        )
         .navigationBarTitleDisplayMode(.inline)
         .refreshable {
             await authViewModel.fetchCurrentUser()
@@ -225,8 +241,16 @@ struct ProfileCardView: View {
         .padding(.vertical, 20)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .fill(colorScheme == .dark ? Color(.systemGray6) : .white)
-                .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 10)
+                .fill(cardBackground)
+                .shadow(color: isStrangerTheme ? accentColor.opacity(0.2) : .black.opacity(0.08), radius: 20, x: 0, y: 10)
+        )
+        .overlay(
+            Group {
+                if isStrangerTheme {
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(accentColor.opacity(0.5), lineWidth: 1)
+                }
+            }
         )
         .padding(.horizontal, 20)
     }
@@ -241,10 +265,10 @@ struct ProfileCardView: View {
         VStack(spacing: 6) {
             Text(formatNumber(value))
                 .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
             Text(title)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
         .frame(maxWidth: .infinity)
     }
@@ -302,7 +326,15 @@ struct ProfileCardView: View {
         content()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(colorScheme == .dark ? Color(.systemGray6) : .white)
+                    .fill(cardBackground)
+            )
+            .overlay(
+                Group {
+                    if isStrangerTheme {
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(accentColor.opacity(0.3), lineWidth: 1)
+                    }
+                }
             )
     }
     
@@ -310,22 +342,22 @@ struct ProfileCardView: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(iconColor)
+                .foregroundColor(isStrangerTheme ? accentColor : iconColor)
                 .frame(width: 36, height: 36)
                 .background(
                     Circle()
-                        .fill(iconColor.opacity(0.12))
+                        .fill(isStrangerTheme ? accentColor.opacity(0.2) : iconColor.opacity(0.12))
                 )
             
             Text(title)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
             
             Spacer()
             
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
@@ -339,13 +371,21 @@ struct ProfileCardView: View {
                 Text("退出登录")
                     .font(.body)
                     .fontWeight(.medium)
-                    .foregroundColor(.red)
+                    .foregroundColor(accentColor)
                 Spacer()
             }
             .padding(.vertical, 16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(colorScheme == .dark ? Color(.systemGray6) : .white)
+                    .fill(cardBackground)
+            )
+            .overlay(
+                Group {
+                    if isStrangerTheme {
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(accentColor.opacity(0.3), lineWidth: 1)
+                    }
+                }
             )
         }
         .padding(.horizontal, 20)

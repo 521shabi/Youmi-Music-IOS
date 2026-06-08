@@ -1,0 +1,1 @@
+LyricWidgetExtension.debug.dylib

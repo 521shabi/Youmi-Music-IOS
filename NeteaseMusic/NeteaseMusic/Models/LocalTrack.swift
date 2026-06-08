@@ -22,6 +22,10 @@ struct LocalTrack: Codable, Identifiable {
     // 内嵌歌词
     let embeddedLyrics: String?
     
+    // 在线歌曲来源（用于追踪下载来源）
+    let sourceTrackId: Int?        // 原始 Track ID
+    let sourceCoverUrl: String?    // 原始封面 URL
+    
     // 计算属性
     var artistName: String {
         artist.isEmpty ? "未知艺术家" : artist
@@ -78,7 +82,9 @@ struct LocalTrack: Codable, Identifiable {
         sampleRate: Double? = nil,
         artworkData: Data? = nil,
         embeddedLyrics: String? = nil,
-        addedDate: Date = Date()
+        addedDate: Date = Date(),
+        sourceTrackId: Int? = nil,
+        sourceCoverUrl: String? = nil
     ) {
         self.id = id
         self.fileName = fileName
@@ -94,6 +100,8 @@ struct LocalTrack: Codable, Identifiable {
         self.artworkData = artworkData
         self.embeddedLyrics = embeddedLyrics
         self.addedDate = addedDate
+        self.sourceTrackId = sourceTrackId
+        self.sourceCoverUrl = sourceCoverUrl
     }
     
     // 转换为 Track 用于播放器

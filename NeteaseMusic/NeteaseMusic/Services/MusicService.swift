@@ -10,18 +10,18 @@ class MusicService {
 
     // MARK: - 通用网络请求方法
 
-    /// 通用 GET 请求（自动解码）
+    /// 通用 GET 请求（自动解码，走 NetworkService 统一管理 cookie）
     private func fetch<T: Decodable>(_ endpoint: String) async throws -> T {
         guard let url = URL(string: "\(APIConfig.baseURL)/\(endpoint)") else {
             throw NetworkError.invalidURL
         }
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
         return try decoder.decode(T.self, from: data)
     }
 
-    /// 通用 GET 请求（带完整 URL）
+    /// 通用 GET 请求（带完整 URL，走 NetworkService）
     private func fetchURL<T: Decodable>(_ url: URL) async throws -> T {
-        let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
         return try decoder.decode(T.self, from: data)
     }
 
@@ -46,11 +46,24 @@ class MusicService {
         return result
     }
 
-    /// 获取歌单详情
+    /// 获取歌单详情（带缓存 + 请求去重）
     /// - Parameter id: 歌单ID
     func getPlaylistDetail(id: Int) async throws -> PlaylistDetail? {
-        let response: PlaylistDetailResponse = try await fetch("playlist/detail?id=\(id)")
-        return response.playlist
+        let cacheKey = "playlistDetail_\(id)"
+        return try await APICache.shared.deduplicated(cacheKey, ttl: 5 * 60) { [self] in
+            let response: PlaylistDetailResponse = try await fetch("playlist/detail?id=\(id)")
+            return response.playlist as PlaylistDetail?
+        }
+    }
+    
+    /// 获取歌单所有歌曲（用于歌曲数量较多的歌单）
+    /// - Parameters:
+    ///   - id: 歌单ID
+    ///   - limit: 每次获取数量，默认500
+    ///   - offset: 偏移量
+    func getPlaylistAllTracks(id: Int, limit: Int = 500, offset: Int = 0) async throws -> [Track] {
+        let response: PlaylistAllTracksResponse = try await fetch("playlist/track/all?id=\(id)&limit=\(limit)&offset=\(offset)")
+        return response.songs ?? []
     }
 
     /// 获取Banner（带缓存）
@@ -201,25 +214,33 @@ class MusicService {
     ///   - songName: 歌曲名
     ///   - artistName: 歌手名
     func getAppleMusicAnimatedCover(songName: String, artistName: String) async throws -> String? {
-        // Step 1: 用 iTunes Search API 搜索获取专辑ID
+        // Step 1 & 2: 并行执行 iTunes 搜索和 Token 获取
         let searchTerm = "\(songName) \(artistName)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         guard let searchUrl = URL(string: "https://itunes.apple.com/search?term=\(searchTerm)&media=music&entity=song&limit=1") else {
             throw NetworkError.invalidURL
         }
-        
-        let (searchData, _) = try await URLSession.shared.data(from: searchUrl)
+
+        async let tokenTask = AppleMusicTokenManager.shared.getToken()
+        async let searchTask: (Data, URLResponse) = URLSession.shared.data(from: searchUrl)
+
+        guard let token = await tokenTask else {
+            print("❌ 无法获取 Apple Music Token")
+            return nil
+        }
+
+        let (searchData, _) = try await searchTask
         let searchResponse = try JSONDecoder().decode(ITunesSearchResponse.self, from: searchData)
-        
-        guard let collectionId = searchResponse.results?.first?.collectionId else {
+
+        guard let result = searchResponse.results?.first else {
+            print("🎵 iTunes 未找到: \(songName) - \(artistName)")
             return nil
         }
-        
-        // Step 2: 获取 Bearer Token
-        guard let token = await AppleMusicTokenManager.shared.getToken() else {
-            print(" 无法获取 Apple Music Token")
+
+        guard let collectionId = result.collectionId else {
+            print("🎵 无专辑ID: \(songName)")
             return nil
         }
-        
+
         // Step 3: 调用 Apple Music AMP API 获取动态封面
         guard let ampUrl = URL(string: "https://amp-api.music.apple.com/v1/catalog/cn/albums/\(collectionId)?extend=editorialVideo") else {
             throw NetworkError.invalidURL
@@ -233,19 +254,146 @@ class MusicService {
         let ampResponse = try JSONDecoder().decode(AppleMusicAlbumResponse.self, from: ampData)
         
         // Step 4: 提取动态封面 URL
-        // 优先使用 3:4 竖版视频（锁屏动态封面需要），其次是 1:1 正方形
         if let editorialVideo = ampResponse.data?.first?.attributes?.editorialVideo {
-            return editorialVideo.motionTallVideo3x4?.video ??
-                   editorialVideo.motionSquareVideo1x1?.video ??
-                   editorialVideo.motionDetailSquare?.video
+            let videoUrl = editorialVideo.motionTallVideo3x4?.video ??
+                           editorialVideo.motionSquareVideo1x1?.video ??
+                           editorialVideo.motionDetailSquare?.video
+            
+            if videoUrl != nil {
+                print("✅ 找到动态封面: \(songName)")
+            } else {
+                print("⚠️ 专辑无动态封面: \(songName) (albumId: \(collectionId))")
+            }
+            return videoUrl
         }
         
+        print("⚠️ 专辑无 editorialVideo: \(songName) (albumId: \(collectionId))")
         return nil
+    }
+    
+    // MARK: - 心动模式 API
+    
+    /// 获取心动模式歌曲列表
+    /// - Parameters:
+    ///   - songId: 当前歌曲ID
+    ///   - playlistId: 歌单ID（必须是用户自己的歌单）
+    ///   - startMusicId: 开始歌曲ID（可选，用于分页）
+    func getHeartbeatList(songId: Int, playlistId: Int, startMusicId: Int? = nil) async throws -> [Track] {
+        var endpoint = "playmode/intelligence/list?id=\(songId)&pid=\(playlistId)"
+        if let startId = startMusicId {
+            endpoint += "&sid=\(startId)"
+        }
+        
+        guard let url = URL(string: "\(APIConfig.baseURL)/\(endpoint)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "GET")
+        
+        // 先检查code
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let code = json["code"] as? Int {
+            if code == 301 {
+                throw NetworkError.serverError(301, "需要登录")
+            } else if code != 200 {
+                throw NetworkError.serverError(code, json["message"] as? String)
+            }
+        }
+        
+        let response = try JSONDecoder().decode(HeartbeatModeResponse.self, from: data)
+        return response.data?.compactMap { $0.toTrack() } ?? []
+    }
+    
+    /// 获取用户的"喜欢的音乐"歌单ID
+    func getUserLikedPlaylistId() async throws -> Int? {
+        guard let url = URL(string: "\(APIConfig.baseURL)/user/account") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "GET")
+        
+        // 解析用户ID
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let profile = json["profile"] as? [String: Any],
+              let userId = profile["userId"] as? Int else {
+            return nil
+        }
+        
+        // 获取用户歌单
+        guard let playlistUrl = URL(string: "\(APIConfig.baseURL)/user/playlist?uid=\(userId)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (playlistData, _) = try await NetworkService.shared.requestWithCookie(url: playlistUrl, method: "GET")
+        
+        guard let playlistJson = try? JSONSerialization.jsonObject(with: playlistData) as? [String: Any],
+              let playlists = playlistJson["playlist"] as? [[String: Any]] else {
+            return nil
+        }
+        
+        // 第一个歌单通常是"喜欢的音乐"
+        return playlists.first?["id"] as? Int
+    }
+    
+    // MARK: - 雷达歌单 API
+    
+    /// 获取用户的私人雷达歌单
+    func getRadarPlaylist() async throws -> [Track] {
+        guard let url = URL(string: "\(APIConfig.baseURL)/user/account") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "GET")
+        
+        // 解析用户ID
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let code = json["code"] as? Int,
+              code == 200,
+              let profile = json["profile"] as? [String: Any],
+              let userId = profile["userId"] as? Int else {
+            throw NetworkError.serverError(301, "需要登录")
+        }
+        
+        // 获取用户歌单
+        guard let playlistUrl = URL(string: "\(APIConfig.baseURL)/user/playlist?uid=\(userId)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (playlistData, _) = try await NetworkService.shared.requestWithCookie(url: playlistUrl, method: "GET")
+        
+        guard let playlistJson = try? JSONSerialization.jsonObject(with: playlistData) as? [String: Any],
+              let playlists = playlistJson["playlist"] as? [[String: Any]] else {
+            throw NetworkError.serverError(500, "获取歌单失败")
+        }
+        
+        // 查找私人雷达歌单（名字包含"私人雷达"）
+        guard let radarPlaylist = playlists.first(where: { 
+            ($0["name"] as? String)?.contains("私人雷达") == true 
+        }),
+              let radarId = radarPlaylist["id"] as? Int else {
+            // 没有私人雷达歌单
+            return []
+        }
+        
+        // 获取雷达歌单的歌曲
+        return try await getPlaylistAllTracks(id: radarId)
+    }
+    
+    /// 获取每日推荐歌曲
+    func getDailyRecommendSongs() async throws -> [Track] {
+        guard let url = URL(string: "\(APIConfig.baseURL)/recommend/songs") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "GET")
+        let response = try JSONDecoder().decode(DailyRecommendSongsResponse.self, from: data)
+        
+        return response.data?.dailySongs ?? []
     }
     
     // MARK: - 评论 API
     
-    /// 获取歌曲评论
+    /// 获取歌曲评论（旧版接口）
     /// - Parameters:
     ///   - id: 歌曲ID
     ///   - limit: 每页数量
@@ -255,23 +403,110 @@ class MusicService {
             throw NetworkError.invalidURL
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
-        return try JSONDecoder().decode(CommentResponse.self, from: data)
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+        return try decoder.decode(CommentResponse.self, from: data)
+    }
+    
+    /// 获取歌曲评论（新版接口，支持排序）
+    /// - Parameters:
+    ///   - id: 歌曲ID
+    ///   - sortType: 排序方式 1=推荐 2=热度 3=时间（最新）
+    ///   - pageNo: 页码，从1开始
+    ///   - pageSize: 每页数量
+    ///   - cursor: 分页游标，第一页不传，后续传上一页返回的cursor
+    func getCommentsNew(id: Int, sortType: Int = 3, pageNo: Int = 1, pageSize: Int = 20, cursor: String? = nil) async throws -> CommentNewResponse {
+        var urlString = "\(APIConfig.baseURL)/comment/new?id=\(id)&type=0&sortType=\(sortType)&pageNo=\(pageNo)&pageSize=\(pageSize)"
+        if let cursor = cursor {
+            urlString += "&cursor=\(cursor)"
+        }
+        
+        guard let url = URL(string: urlString) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+        return try decoder.decode(CommentNewResponse.self, from: data)
+    }
+    
+    /// 获取热门评论
+    /// - Parameters:
+    ///   - id: 歌曲ID
+    ///   - limit: 每页数量
+    ///   - offset: 偏移量
+    func getHotComments(id: Int, limit: Int = 20, offset: Int = 0) async throws -> HotCommentResponse {
+        guard let url = URL(string: "\(APIConfig.baseURL)/comment/hot?id=\(id)&type=0&limit=\(limit)&offset=\(offset)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+        return try decoder.decode(HotCommentResponse.self, from: data)
+    }
+    
+    /// 发送歌曲评论
+    /// - Parameters:
+    ///   - id: 歌曲ID
+    ///   - content: 评论内容
+    ///   - commentId: 回复的评论ID（可选，用于回复评论）
+    func sendComment(id: Int, content: String, commentId: Int? = nil) async throws -> SendCommentResponse {
+        var urlString = "\(APIConfig.baseURL)/comment?t=1&type=0&id=\(id)&content=\(content.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? content)"
+        
+        // 如果是回复评论
+        if let commentId = commentId {
+            urlString = "\(APIConfig.baseURL)/comment?t=2&type=0&id=\(id)&content=\(content.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? content)&commentId=\(commentId)"
+        }
+        
+        guard let url = URL(string: urlString) else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "POST")
+        return try JSONDecoder().decode(SendCommentResponse.self, from: data)
+    }
+    
+    /// 点赞/取消点赞评论
+    /// - Parameters:
+    ///   - id: 歌曲ID
+    ///   - commentId: 评论ID
+    ///   - like: true点赞，false取消
+    func likeComment(id: Int, commentId: Int, like: Bool) async throws -> BaseResponse {
+        let t = like ? 1 : 0
+        guard let url = URL(string: "\(APIConfig.baseURL)/comment/like?id=\(id)&cid=\(commentId)&t=\(t)&type=0") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "POST")
+        return try JSONDecoder().decode(BaseResponse.self, from: data)
+    }
+    
+    /// 获取评论的楼层回复
+    /// - Parameters:
+    ///   - id: 歌曲ID
+    ///   - commentId: 父评论ID
+    ///   - limit: 每页数量
+    ///   - time: 分页参数，第一页传0，后续传上一页最后一条回复的time
+    func getCommentFloor(id: Int, commentId: Int, limit: Int = 20, time: Int = 0) async throws -> CommentFloorResponse {
+        guard let url = URL(string: "\(APIConfig.baseURL)/comment/floor?parentCommentId=\(commentId)&id=\(id)&type=0&limit=\(limit)&time=\(time)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+        return try decoder.decode(CommentFloorResponse.self, from: data)
     }
     
     // MARK: - 歌手 API
     
-    /// 获取歌手详情
+    /// 获取歌手详情（带缓存 + 请求去重）
     /// - Parameter id: 歌手ID
     func getArtistDetail(id: Int) async throws -> ArtistDetail? {
-        guard let url = URL(string: "\(APIConfig.baseURL)/artist/detail?id=\(id)") else {
-            throw NetworkError.invalidURL
+        let cacheKey = "artistDetail_\(id)"
+        return try await APICache.shared.deduplicated(cacheKey, ttl: 10 * 60) { [self] in
+            guard let url = URL(string: "\(APIConfig.baseURL)/artist/detail?id=\(id)") else {
+                throw NetworkError.invalidURL
+            }
+            let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+            let response = try JSONDecoder().decode(ArtistDetailResponse.self, from: data)
+            return response.data?.artist as ArtistDetail?
         }
-        
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(ArtistDetailResponse.self, from: data)
-        
-        return response.data?.artist
     }
     
     /// 获取歌手热门歌曲
@@ -281,8 +516,8 @@ class MusicService {
             throw NetworkError.invalidURL
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(ArtistTopSongsResponse.self, from: data)
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+        let response = try decoder.decode(ArtistTopSongsResponse.self, from: data)
         
         return response.songs ?? []
     }
@@ -297,25 +532,26 @@ class MusicService {
             throw NetworkError.invalidURL
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(ArtistAlbumsResponse.self, from: data)
+        let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+        let response = try decoder.decode(ArtistAlbumsResponse.self, from: data)
         
         return response.hotAlbums ?? []
     }
     
     // MARK: - 专辑 API
     
-    /// 获取专辑详情
+    /// 获取专辑详情（带缓存 + 请求去重）
     /// - Parameter id: 专辑ID
     func getAlbumDetail(id: Int) async throws -> (album: AlbumDetail?, songs: [Track]) {
-        guard let url = URL(string: "\(APIConfig.baseURL)/album?id=\(id)") else {
-            throw NetworkError.invalidURL
+        let cacheKey = "albumDetail_\(id)"
+        return try await APICache.shared.deduplicated(cacheKey, ttl: 10 * 60) { [self] in
+            guard let url = URL(string: "\(APIConfig.baseURL)/album?id=\(id)") else {
+                throw NetworkError.invalidURL
+            }
+            let (data, _) = try await network.requestWithCookie(url: url, method: "GET")
+            let response = try JSONDecoder().decode(AlbumDetailResponse.self, from: data)
+            return (response.album, response.songs ?? []) as (album: AlbumDetail?, songs: [Track])
         }
-        
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let response = try JSONDecoder().decode(AlbumDetailResponse.self, from: data)
-        
-        return (response.album, response.songs ?? [])
     }
     
     // MARK: - 云端音乐 API
@@ -344,6 +580,62 @@ class MusicService {
         let response = try JSONDecoder().decode(CloudAlbumDetailResponse.self, from: data)
         
         return response.songs ?? []
+    }
+    
+    // MARK: - 私人FM API
+    
+    /// 获取私人FM歌曲
+    func getPersonalFM() async throws -> [Track] {
+        guard let url = URL(string: "\(APIConfig.baseURL)/personal_fm") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "GET")
+        let response = try JSONDecoder().decode(PersonalFMResponse.self, from: data)
+        
+        guard response.code == 200 else {
+            throw NetworkError.serverError(response.code, "获取私人FM失败")
+        }
+        
+        return response.data?.map { $0.toTrack() } ?? []
+    }
+    
+    /// 将歌曲丢进FM垃圾桶（不再推荐）
+    func fmTrash(id: Int) async throws {
+        guard let url = URL(string: "\(APIConfig.baseURL)/fm_trash?id=\(id)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "POST")
+        let response = try JSONDecoder().decode(FMTrashResponse.self, from: data)
+        
+        guard response.code == 200 else {
+            throw NetworkError.serverError(response.code, "操作失败")
+        }
+    }
+    
+    // MARK: - 搜索建议 API
+    
+    /// 获取搜索建议
+    func getSearchSuggest(keyword: String) async throws -> SearchSuggestResult? {
+        let encoded = keyword.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? keyword
+        let response: SearchSuggestResponse = try await fetch("search/suggest?keywords=\(encoded)")
+        return response.result
+    }
+    
+    // MARK: - 云盘 API
+    
+    /// 获取云盘歌曲列表
+    /// - Parameters:
+    ///   - limit: 每页数量
+    ///   - offset: 偏移量
+    func getCloudDisk(limit: Int = 50, offset: Int = 0) async throws -> CloudDiskResponse {
+        guard let url = URL(string: "\(APIConfig.baseURL)/user/cloud?limit=\(limit)&offset=\(offset)") else {
+            throw NetworkError.invalidURL
+        }
+        
+        let (data, _) = try await NetworkService.shared.requestWithCookie(url: url, method: "GET")
+        return try JSONDecoder().decode(CloudDiskResponse.self, from: data)
     }
 }
 
@@ -389,16 +681,17 @@ class AppleMusicTokenManager {
             return token
         }
 
-        // 如果连续失败次数过多，暂时停止尝试（5分钟后可重试）
+        // 如果连续失败次数过多，暂时停止尝试（指数退避）
         if failureCount >= maxFailureCount {
+            let backoffSeconds = min(300.0, pow(2.0, Double(failureCount - maxFailureCount)) * 60)
             if let lastFailure = lastFailureTime,
-               Date().timeIntervalSince(lastFailure) < 300 {
+               Date().timeIntervalSince(lastFailure) < backoffSeconds {
                 #if DEBUG
-                print(" Apple Music Token 获取暂停（连续失败\(failureCount)次）")
+                print(" Apple Music Token 获取暂停（连续失败\(failureCount)次，等待\(Int(backoffSeconds))秒）")
                 #endif
                 return nil
             } else {
-                // 超过5分钟，重置计数器
+                // 超过退避时间，重置计数器
                 failureCount = 0
                 lastFailureTime = nil
             }
@@ -440,7 +733,12 @@ class AppleMusicTokenManager {
             #if DEBUG
             print(" 正在获取 Apple Music Token...")
             #endif
-            let (htmlData, _) = try await session.data(from: browseUrl)
+            
+            // 创建带 User-Agent 的请求
+            var browseRequest = URLRequest(url: browseUrl)
+            browseRequest.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", forHTTPHeaderField: "User-Agent")
+            
+            let (htmlData, _) = try await session.data(for: browseRequest)
             guard let html = String(data: htmlData, encoding: .utf8) else {
                 return nil
             }
@@ -450,6 +748,9 @@ class AppleMusicTokenManager {
             guard let jsRegex = try? NSRegularExpression(pattern: jsPattern),
                   let jsMatch = jsRegex.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
                   let jsRange = Range(jsMatch.range, in: html) else {
+                #if DEBUG
+                print(" 未找到 JS 文件路径")
+                #endif
                 return nil
             }
 
@@ -460,7 +761,10 @@ class AppleMusicTokenManager {
                 return nil
             }
 
-            let (jsData, _) = try await session.data(from: jsURL)
+            var jsRequest = URLRequest(url: jsURL)
+            jsRequest.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36", forHTTPHeaderField: "User-Agent")
+            
+            let (jsData, _) = try await session.data(for: jsRequest)
             guard let jsContent = String(data: jsData, encoding: .utf8) else {
                 return nil
             }
@@ -470,6 +774,9 @@ class AppleMusicTokenManager {
             guard let tokenRegex = try? NSRegularExpression(pattern: tokenPattern),
                   let tokenMatch = tokenRegex.firstMatch(in: jsContent, range: NSRange(jsContent.startIndex..., in: jsContent)),
                   let tokenRange = Range(tokenMatch.range, in: jsContent) else {
+                #if DEBUG
+                print(" 未找到 Token")
+                #endif
                 return nil
             }
 

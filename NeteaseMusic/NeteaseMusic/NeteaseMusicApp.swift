@@ -12,6 +12,9 @@ struct NeteaseMusicApp: App {
         Self.startWebViewWarmup()
         // 预热 Apple Music Token（后台获取，避免首次加载动态封面时等待）
         AppleMusicTokenManager.shared.warmUp()
+        // 请求通知权限并记录打开时间
+        NotificationService.shared.requestAuthorization()
+        NotificationService.shared.recordAppOpen()
     }
 
     @StateObject private var themeManager = ThemeManager.shared
@@ -38,12 +41,20 @@ struct AppRootView: View {
     @StateObject private var authViewModel = AuthViewModel()
     @State private var showSplash = true
     
+    // 颜倒世界主题强制使用深色模式，否则文字会看不见
+    private var effectiveColorScheme: ColorScheme? {
+        if themeManager.themeStyle == .strangerThings {
+            return .dark
+        }
+        return themeManager.appearanceMode.colorScheme
+    }
+    
     var body: some View {
         ZStack {
             MainTabView()
                 .environmentObject(authViewModel)
-                .preferredColorScheme(themeManager.appearanceMode.colorScheme)
-                .id(themeManager.appearanceMode)
+                .preferredColorScheme(effectiveColorScheme)
+                .id("\(themeManager.appearanceMode)-\(themeManager.themeStyle)")  // 响应主题和外观变化
             
             if showSplash {
                 SplashView()
@@ -68,11 +79,16 @@ struct SplashView: View {
 
     var body: some View {
         ZStack {
-            // 简洁背景
+            // 背景图 + 渐变遮罩
+            Image("SplashBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+
             LinearGradient(
                 colors: [
-                    Color(red: 0.1, green: 0.1, blue: 0.15),
-                    Color(red: 0.05, green: 0.05, blue: 0.1)
+                    Color.black.opacity(0.2),
+                    Color.black.opacity(0.6)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing

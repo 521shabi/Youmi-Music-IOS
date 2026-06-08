@@ -23,8 +23,42 @@ enum SearchType: String, CaseIterable {
     }
 }
 
+// MARK: - 音乐分类数据（静态缓存，避免每次渲染重建）
+private enum MusicCategoryData {
+    static let standard: [MusicCategory] = [
+        MusicCategory(title: "C-Pop", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
+        MusicCategory(title: "空间音频", gradientColors: [Color(red: 0.8, green: 0.3, blue: 0.3), Color(red: 0.9, green: 0.4, blue: 0.4)]),
+        MusicCategory(title: "国语流行", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
+        MusicCategory(title: "DJ 混音精选", gradientColors: [Color(red: 0.8, green: 0.3, blue: 0.3), Color(red: 0.9, green: 0.4, blue: 0.4)]),
+        MusicCategory(title: "月度音乐回忆", gradientColors: [Color(red: 1.0, green: 0.8, blue: 0.4), Color(red: 0.6, green: 0.8, blue: 0.9)]),
+        MusicCategory(title: "排行榜", gradientColors: [Color(red: 0.6, green: 0.65, blue: 0.4), Color(red: 0.65, green: 0.7, blue: 0.45)]),
+        MusicCategory(title: "爵士乐", gradientColors: [Color(red: 0.4, green: 0.6, blue: 0.7), Color(red: 0.5, green: 0.7, blue: 0.8)]),
+        MusicCategory(title: "创作与制作", gradientColors: [Color(red: 0.6, green: 0.65, blue: 0.4), Color(red: 0.65, green: 0.7, blue: 0.45)]),
+        MusicCategory(title: "国际流行", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
+        MusicCategory(title: "粤语流行", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
+        MusicCategory(title: "嘻哈/说唱", gradientColors: [Color(red: 0.4, green: 0.5, blue: 0.8), Color(red: 0.5, green: 0.6, blue: 0.9)]),
+        MusicCategory(title: "古典音乐", gradientColors: [Color(red: 0.6, green: 0.4, blue: 0.7), Color(red: 0.7, green: 0.5, blue: 0.8)])
+    ]
+
+    static let strangerThings: [MusicCategory] = [
+        MusicCategory(title: "C-Pop", gradientColors: [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.1, blue: 0.2)]),
+        MusicCategory(title: "空间音频", gradientColors: [Color(red: 0.2, green: 0.6, blue: 1.0), Color(red: 0.1, green: 0.4, blue: 0.8)]),
+        MusicCategory(title: "国语流行", gradientColors: [Color(red: 0.8, green: 0.2, blue: 0.8), Color(red: 0.6, green: 0.1, blue: 0.6)]),
+        MusicCategory(title: "DJ 混音精选", gradientColors: [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.2, green: 0.6, blue: 1.0)]),
+        MusicCategory(title: "月度音乐回忆", gradientColors: [Color(red: 0.8, green: 0.2, blue: 0.8), Color(red: 1.0, green: 0.2, blue: 0.3)]),
+        MusicCategory(title: "排行榜", gradientColors: [Color(red: 0.2, green: 0.6, blue: 1.0), Color(red: 0.8, green: 0.2, blue: 0.8)]),
+        MusicCategory(title: "爵士乐", gradientColors: [Color(red: 0.2, green: 0.6, blue: 1.0), Color(red: 0.1, green: 0.4, blue: 0.8)]),
+        MusicCategory(title: "创作与制作", gradientColors: [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.1, blue: 0.2)]),
+        MusicCategory(title: "国际流行", gradientColors: [Color(red: 0.8, green: 0.2, blue: 0.8), Color(red: 0.6, green: 0.1, blue: 0.6)]),
+        MusicCategory(title: "粤语流行", gradientColors: [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.2, blue: 0.8)]),
+        MusicCategory(title: "嘻哈/说唱", gradientColors: [Color(red: 0.2, green: 0.6, blue: 1.0), Color(red: 1.0, green: 0.2, blue: 0.3)]),
+        MusicCategory(title: "古典音乐", gradientColors: [Color(red: 0.8, green: 0.2, blue: 0.8), Color(red: 0.2, green: 0.6, blue: 1.0)])
+    ]
+}
+
 // MARK: - Apple Music 液态玻璃风格搜索页
 struct SearchView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var searchResults: [Track] = []
     @State private var artistResults: [SearchArtistResult] = []
     @State private var albumResults: [SearchAlbumResult] = []
@@ -55,21 +89,10 @@ struct SearchView: View {
     private let musicService = MusicService.shared
     private let historyKey = "SearchHistory"
     
-    // 音乐分类数据
-    private let musicCategories: [MusicCategory] = [
-        MusicCategory(title: "C-Pop", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
-        MusicCategory(title: "空间音频", gradientColors: [Color(red: 0.8, green: 0.3, blue: 0.3), Color(red: 0.9, green: 0.4, blue: 0.4)]),
-        MusicCategory(title: "国语流行", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
-        MusicCategory(title: "DJ 混音精选", gradientColors: [Color(red: 0.8, green: 0.3, blue: 0.3), Color(red: 0.9, green: 0.4, blue: 0.4)]),
-        MusicCategory(title: "月度音乐回忆", gradientColors: [Color(red: 1.0, green: 0.8, blue: 0.4), Color(red: 0.6, green: 0.8, blue: 0.9)]),
-        MusicCategory(title: "排行榜", gradientColors: [Color(red: 0.6, green: 0.65, blue: 0.4), Color(red: 0.65, green: 0.7, blue: 0.45)]),
-        MusicCategory(title: "爵士乐", gradientColors: [Color(red: 0.4, green: 0.6, blue: 0.7), Color(red: 0.5, green: 0.7, blue: 0.8)]),
-        MusicCategory(title: "创作与制作", gradientColors: [Color(red: 0.6, green: 0.65, blue: 0.4), Color(red: 0.65, green: 0.7, blue: 0.45)]),
-        MusicCategory(title: "国际流行", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
-        MusicCategory(title: "粤语流行", gradientColors: [Color(red: 0.9, green: 0.5, blue: 0.6), Color(red: 0.95, green: 0.6, blue: 0.7)]),
-        MusicCategory(title: "嘻哈/说唱", gradientColors: [Color(red: 0.4, green: 0.5, blue: 0.8), Color(red: 0.5, green: 0.6, blue: 0.9)]),
-        MusicCategory(title: "古典音乐", gradientColors: [Color(red: 0.6, green: 0.4, blue: 0.7), Color(red: 0.7, green: 0.5, blue: 0.8)])
-    ]
+    // 音乐分类数据（使用静态缓存）
+    private var musicCategories: [MusicCategory] {
+        themeManager.isStrangerTheme ? MusicCategoryData.strangerThings : MusicCategoryData.standard
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -138,7 +161,9 @@ struct SearchView: View {
         do {
             hotSearches = try await musicService.getHotSearch()
         } catch {
+            #if DEBUG
             print("Load hot search error: \(error)")
+            #endif
         }
     }
     
@@ -161,7 +186,11 @@ struct SearchView: View {
         hasMoreArtists = true
         hasMoreAlbums = true
         
-        // 并行搜索三种类型
+        await performNeteaseSearch(keyword: keyword)
+    }
+    
+    // 网易云搜索
+    private func performNeteaseSearch(keyword: String) async {
         async let songsTask = searchSongs(keyword: keyword, offset: 0)
         async let artistsTask = musicService.searchArtists(keyword: keyword, limit: 20, offset: 0)
         async let albumsTask = musicService.searchAlbums(keyword: keyword, limit: 20, offset: 0)
@@ -175,7 +204,6 @@ struct SearchView: View {
                 albumResults = albums
                 isSearching = false
                 
-                // 如果歌曲为空但有歌手，默认切换到歌手页
                 if songs.isEmpty && !artists.isEmpty {
                     selectedType = .artist
                 } else if songs.isEmpty && artists.isEmpty && !albums.isEmpty {
@@ -185,7 +213,9 @@ struct SearchView: View {
                 }
             }
         } catch {
-            print("Search error: \(error)")
+            #if DEBUG
+            print("Netease search error: \(error)")
+            #endif
             await MainActor.run {
                 isSearching = false
             }
@@ -275,14 +305,8 @@ struct SearchView: View {
     private var searchResultsView: some View {
         VStack(spacing: 0) {
             if isSearching {
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .scaleEffect(1.2)
-                    Text("搜索中...")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxHeight: .infinity)
+                TrackListSkeletonView(count: 10)
+                    .padding(.top, 20)
             } else {
                 // 分类标签
                 searchTypePicker
@@ -467,6 +491,100 @@ struct SearchView: View {
     private var musicCategoriesView: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
+                // 搜索历史
+                if !searchHistory.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            HStack(spacing: 6) {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.secondary)
+                                Text("搜索历史")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundColor(.primary)
+                            }
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                HapticFeedback.light()
+                                clearSearchHistory()
+                            }) {
+                                Image(systemName: "trash")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(searchHistory, id: \.self) { keyword in
+                                    Button(action: {
+                                        HapticFeedback.light()
+                                        Task { await performSearch(keyword: keyword) }
+                                    }) {
+                                        LiquidGlassTag(text: keyword)
+                                    }
+                                    .buttonStyle(LiquidGlassButtonStyle())
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                    }
+                }
+                
+                // 热搜榜
+                if !hotSearches.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            HStack(spacing: 6) {
+                                Image(systemName: "flame.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundStyle(
+                                        LinearGradient(colors: [.red, .orange], startPoint: .top, endPoint: .bottom)
+                                    )
+                                Text("热搜榜")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundColor(.primary)
+                            }
+                            
+                            Spacer()
+                            
+                            Text("实时更新")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(
+                                    Capsule()
+                                        .fill(Color(.systemGray6))
+                                )
+                        }
+                        .padding(.horizontal, 20)
+                        
+                        LiquidGlassSection {
+                            LazyVStack(spacing: 0) {
+                                ForEach(hotSearches.indices, id: \.self) { index in
+                                    Button(action: {
+                                        HapticFeedback.light()
+                                        Task { await performSearch(keyword: hotSearches[index].searchWord) }
+                                    }) {
+                                        LiquidGlassHotSearchRow(index: index + 1, item: hotSearches[index])
+                                    }
+                                    .buttonStyle(.plain)
+                                    
+                                    if index < hotSearches.count - 1 {
+                                        Divider().padding(.leading, 50)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        }
+                        .padding(.horizontal, 16)
+                    }
+                }
+                
                 // 快乐启蒙
                 if !recommendPlaylists.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
@@ -602,7 +720,9 @@ struct SearchView: View {
                 newAlbums = albums
             }
         } catch {
+            #if DEBUG
             print("加载音乐推荐失败: \(error)")
+            #endif
         }
     }
     
@@ -625,6 +745,11 @@ struct SearchView: View {
 // MARK: - 歌手搜索结果行
 struct SearchArtistRow: View {
     let artist: SearchArtistResult
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var placeholderBackground: Color { isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : Color(.systemGray5) }
     
     var body: some View {
         HStack(spacing: 14) {
@@ -636,21 +761,21 @@ struct SearchArtistRow: View {
                         .aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Circle()
-                        .fill(Color(.systemGray5))
+                        .fill(placeholderBackground)
                         .overlay(
                             Image(systemName: "person.fill")
-                                .foregroundColor(.gray)
+                                .foregroundColor(secondaryTextColor)
                         )
                 }
                 .frame(width: 56, height: 56)
                 .clipShape(Circle())
             } else {
                 Circle()
-                    .fill(Color(.systemGray5))
+                    .fill(placeholderBackground)
                     .frame(width: 56, height: 56)
                     .overlay(
                         Image(systemName: "person.fill")
-                            .foregroundColor(.gray)
+                            .foregroundColor(secondaryTextColor)
                     )
             }
             
@@ -658,20 +783,20 @@ struct SearchArtistRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(artist.name)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(textColor)
                     .lineLimit(1)
                 
                 HStack(spacing: 8) {
                     if let alias = artist.aliasText {
                         Text(alias)
                             .font(.system(size: 13))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                             .lineLimit(1)
                     }
                     if let albumSize = artist.albumSize, albumSize > 0 {
                         Text("专辑:\(albumSize)")
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                 }
             }
@@ -680,7 +805,7 @@ struct SearchArtistRow: View {
             
             Image(systemName: "chevron.right")
                 .font(.system(size: 13))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -691,6 +816,11 @@ struct SearchArtistRow: View {
 // MARK: - 专辑搜索结果行
 struct SearchAlbumRow: View {
     let album: SearchAlbumResult
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var placeholderBackground: Color { isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : Color(.systemGray5) }
     
     var body: some View {
         HStack(spacing: 14) {
@@ -702,21 +832,21 @@ struct SearchAlbumRow: View {
                         .aspectRatio(contentMode: .fill)
                 } placeholder: {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(.systemGray5))
+                        .fill(placeholderBackground)
                         .overlay(
                             Image(systemName: "square.stack")
-                                .foregroundColor(.gray)
+                                .foregroundColor(secondaryTextColor)
                         )
                 }
                 .frame(width: 56, height: 56)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray5))
+                    .fill(placeholderBackground)
                     .frame(width: 56, height: 56)
                     .overlay(
                         Image(systemName: "square.stack")
-                            .foregroundColor(.gray)
+                            .foregroundColor(secondaryTextColor)
                     )
             }
             
@@ -724,19 +854,19 @@ struct SearchAlbumRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(album.name)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(textColor)
                     .lineLimit(1)
                 
                 HStack(spacing: 8) {
                     Text(album.artistName)
                         .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                         .lineLimit(1)
                     
                     if !album.publishYear.isEmpty {
                         Text(album.publishYear)
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                 }
             }
@@ -745,7 +875,7 @@ struct SearchAlbumRow: View {
             
             Image(systemName: "chevron.right")
                 .font(.system(size: 13))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -753,7 +883,7 @@ struct SearchAlbumRow: View {
     }
 }
 
-// MARK: - 液态玻璃搜索栏组件（性能优化版）
+// MARK: - 液态玻璃搜索栏组件（性能优化版 + 搜索建议）
 struct LiquidGlassSearchBarView: View {
     @Binding var shouldFocus: Bool
     @Binding var hasSearched: Bool
@@ -761,8 +891,13 @@ struct LiquidGlassSearchBarView: View {
     let onClear: () -> Void
 
     @State private var searchText = ""
+    @State private var suggestions: SearchSuggestResult?
+    @State private var showSuggestions = false
+    @State private var suggestTask: Task<Void, Never>?
     @FocusState private var textFieldFocused: Bool
     @Environment(\.colorScheme) var colorScheme
+
+    private let musicService = MusicService.shared
 
     // 预计算背景色，避免运行时计算
     private var fieldBackground: Color {
@@ -780,69 +915,255 @@ struct LiquidGlassSearchBarView: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            // 简化的搜索框 - 减少图层
-            HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(textFieldFocused ? .pink : .secondary)
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                // 简化的搜索框 - 减少图层
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(textFieldFocused ? .pink : .secondary)
 
-                TextField("搜索歌曲、歌手、专辑", text: $searchText)
-                    .font(.system(size: 16))
-                    .focused($textFieldFocused)
-                    .submitLabel(.search)
-                    .onSubmit {
-                        guard !searchText.isEmpty else { return }
-                        onSearch(searchText)
-                        textFieldFocused = false
+                    TextField("搜索歌曲、歌手、专辑", text: $searchText)
+                        .font(.system(size: 16))
+                        .focused($textFieldFocused)
+                        .submitLabel(.search)
+                        .onSubmit {
+                            guard !searchText.isEmpty else { return }
+                            showSuggestions = false
+                            onSearch(searchText)
+                            textFieldFocused = false
+                        }
+                        .onChangeCompat(of: searchText) { _, newValue in
+                            fetchSuggestions(for: newValue)
+                        }
+
+                    if !searchText.isEmpty {
+                        Button(action: {
+                            searchText = ""
+                            suggestions = nil
+                            showSuggestions = false
+                            onClear()
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(.plain)
                     }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(fieldBackground)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(borderColor, lineWidth: textFieldFocused ? 1.5 : 1)
+                )
+                .shadow(color: .black.opacity(colorScheme == .dark ? 0.15 : 0.06), radius: 8, x: 0, y: 4)
 
-                if !searchText.isEmpty {
-                    Button(action: {
+                if showCancelButton {
+                    Button("取消") {
                         searchText = ""
+                        textFieldFocused = false
+                        suggestions = nil
+                        showSuggestions = false
                         onClear()
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 16))
-                            .foregroundColor(.secondary)
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(
+                        LinearGradient(colors: [.pink, .red], startPoint: .leading, endPoint: .trailing)
+                    )
+                    .transition(.opacity.combined(with: .move(edge: .trailing)))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .animation(.easeInOut(duration: 0.2), value: showCancelButton)
+            .onChangeCompat(of: shouldFocus) { _, newValue in
+                if newValue {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        textFieldFocused = true
+                        shouldFocus = false
+                    }
+                }
+            }
+            
+            // 搜索建议下拉
+            if showSuggestions, let suggest = suggestions, !hasSearched {
+                searchSuggestionsView(suggest)
+            }
+        }
+    }
+    
+    // MARK: - 搜索建议视图
+    private func searchSuggestionsView(_ suggest: SearchSuggestResult) -> some View {
+        VStack(spacing: 0) {
+            // 歌曲建议
+            if let songs = suggest.songs, !songs.isEmpty {
+                suggestSectionHeader(icon: "music.note", title: "歌曲")
+                ForEach(songs.prefix(4)) { song in
+                    Button {
+                        selectSuggestion(song.name)
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "music.note")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 2) {
+                                highlightedText(song.name, keyword: searchText)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .lineLimit(1)
+                                Text(song.artistName)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(fieldBackground)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(borderColor, lineWidth: textFieldFocused ? 1.5 : 1)
-            )
-            .shadow(color: .black.opacity(colorScheme == .dark ? 0.15 : 0.06), radius: 8, x: 0, y: 4)
-
-            if showCancelButton {
-                Button("取消") {
-                    searchText = ""
-                    textFieldFocused = false
-                    onClear()
+            
+            // 歌手建议
+            if let artists = suggest.artists, !artists.isEmpty {
+                suggestSectionHeader(icon: "person", title: "歌手")
+                ForEach(artists.prefix(3)) { artist in
+                    Button {
+                        selectSuggestion(artist.name)
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "person")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                                .frame(width: 20)
+                            highlightedText(artist.name, keyword: searchText)
+                                .font(.system(size: 14, weight: .medium))
+                                .lineLimit(1)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                 }
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(
-                    LinearGradient(colors: [.pink, .red], startPoint: .leading, endPoint: .trailing)
-                )
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+            }
+            
+            // 专辑建议
+            if let albums = suggest.albums, !albums.isEmpty {
+                suggestSectionHeader(icon: "square.stack", title: "专辑")
+                ForEach(albums.prefix(3)) { album in
+                    Button {
+                        selectSuggestion(album.name)
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "square.stack")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 2) {
+                                highlightedText(album.name, keyword: searchText)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .lineLimit(1)
+                                if let artist = album.artist {
+                                    Text(artist.name)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                }
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(colorScheme == .dark ? Color(.systemGray6) : .white)
+                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+        )
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .animation(.easeInOut(duration: 0.2), value: showCancelButton)
-        .onChange(of: shouldFocus) { _, newValue in
-            if newValue {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    textFieldFocused = true
-                    shouldFocus = false
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+    
+    private func suggestSectionHeader(icon: String, title: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .semibold))
+            Text(title)
+                .font(.system(size: 12, weight: .semibold))
+        }
+        .foregroundColor(.secondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 4)
+    }
+    
+    /// 高亮匹配文字
+    private func highlightedText(_ text: String, keyword: String) -> Text {
+        guard !keyword.isEmpty else { return Text(text).foregroundColor(.primary) }
+        
+        let lowText = text.lowercased()
+        let lowKey = keyword.lowercased()
+        
+        if let range = lowText.range(of: lowKey) {
+            let before = String(text[text.startIndex..<range.lowerBound])
+            let match = String(text[range])
+            let after = String(text[range.upperBound...])
+            return Text(before).foregroundColor(.primary) +
+                   Text(match).foregroundColor(.pink) +
+                   Text(after).foregroundColor(.primary)
+        }
+        return Text(text).foregroundColor(.primary)
+    }
+    
+    private func selectSuggestion(_ keyword: String) {
+        searchText = keyword
+        showSuggestions = false
+        onSearch(keyword)
+        textFieldFocused = false
+    }
+    
+    // MARK: - 搜索建议请求（防抖）
+    private func fetchSuggestions(for keyword: String) {
+        suggestTask?.cancel()
+        
+        guard !keyword.isEmpty, keyword.count >= 1 else {
+            suggestions = nil
+            showSuggestions = false
+            return
+        }
+        
+        suggestTask = Task {
+            // 300ms 防抖
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            guard !Task.isCancelled else { return }
+            
+            do {
+                let result = try await musicService.getSearchSuggest(keyword: keyword)
+                guard !Task.isCancelled else { return }
+                await MainActor.run {
+                    suggestions = result
+                    let hasSongs = !(result?.songs?.isEmpty ?? true)
+                    let hasArtists = !(result?.artists?.isEmpty ?? true)
+                    let hasAlbums = !(result?.albums?.isEmpty ?? true)
+                    showSuggestions = hasSongs || hasArtists || hasAlbums
                 }
+            } catch {
+                // 静默失败，不影响用户体验
             }
         }
     }
@@ -1260,7 +1581,7 @@ struct CategoryCard: View {
     let category: MusicCategory
     
     private var cardHeight: CGFloat {
-        (UIScreen.main.bounds.width - 44) / 2 * 0.75 // 卡片高度是宽度的 75%
+        min((UIScreen.main.bounds.width - 44) / 2 * 0.75, 200)
     }
     
     var body: some View {

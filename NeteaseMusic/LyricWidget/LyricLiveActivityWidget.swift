@@ -1,6 +1,7 @@
 import ActivityKit
 import WidgetKit
 import SwiftUI
+import AVKit
 
 /// 歌词 Live Activity Widget - 灵动岛歌词显示
 struct LyricLiveActivityWidget: Widget {

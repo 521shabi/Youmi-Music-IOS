@@ -6,7 +6,8 @@ struct ArtistDetailView: View {
     let artistName: String
     
     @Environment(\.dismiss) var dismiss
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @EnvironmentObject var themeManager: ThemeManager
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @State private var artist: ArtistDetail?
     @State private var topSongs: [Track] = []
     @State private var albums: [AlbumDetail] = []
@@ -17,6 +18,14 @@ struct ArtistDetailView: View {
     @State private var isSearching = false
     
     private let musicService = MusicService.shared
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
+    private var backgroundColor: Color { isStrangerTheme ? Color(red: 0.05, green: 0.02, blue: 0.08) : Color(.systemBackground) }
+    private var cardBackground: Color { isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.secondarySystemBackground) }
     
     // 过滤后的歌曲列表
     private var filteredSongs: [Track] {
@@ -68,7 +77,7 @@ struct ArtistDetailView: View {
                     .padding(.bottom, 120)
                     .background(
                         RoundedRectangle(cornerRadius: 24)
-                            .fill(Color(.systemBackground))
+                            .fill(backgroundColor)
                     )
                 }
             }
@@ -77,18 +86,34 @@ struct ArtistDetailView: View {
                 scrollOffset = value
             }
             
-            // 顶部导航栏
-            VStack {
-                navigationBar
-                Spacer()
-            }
-            
             // 加载中
             if isLoading {
                 loadingOverlay
             }
         }
-        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(scrollOffset < -150 ? .visible : .hidden, for: .navigationBar)
+        .toolbarBackground(backgroundColor.opacity(0.95), for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Color.black.opacity(0.3))
+                        .clipShape(Circle())
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text(artist?.name ?? artistName)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(textColor)
+                    .opacity(scrollOffset < -150 ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.2), value: scrollOffset < -150)
+            }
+        }
         .ignoresSafeArea()
         .enableSwipeBack()
         .task {
@@ -138,42 +163,6 @@ struct ArtistDetailView: View {
         .ignoresSafeArea()
     }
     
-    // MARK: - 顶部导航栏
-    private var navigationBar: some View {
-        HStack {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 36, height: 36)
-                    .background(Color.black.opacity(0.3))
-                    .clipShape(Circle())
-            }
-            
-            Spacer()
-            
-            // 标题（滚动后显示）
-            if scrollOffset < -150 {
-                Text(artist?.name ?? artistName)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.primary)
-                    .transition(.opacity)
-            }
-            
-            Spacer()
-            
-            // 占位
-            Color.clear.frame(width: 36, height: 36)
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 54)
-        .background(
-            scrollOffset < -150 ?
-            Color(.systemBackground).opacity(0.95) :
-            Color.clear
-        )
-        .animation(.easeInOut(duration: 0.2), value: scrollOffset < -150)
-    }
     
     // MARK: - 歌手信息区域
     private var artistInfoSection: some View {
@@ -181,7 +170,7 @@ struct ArtistDetailView: View {
             // 名字
             Text(artist?.name ?? artistName)
                 .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
             
             // 统计信息
             HStack(spacing: 32) {
@@ -200,7 +189,7 @@ struct ArtistDetailView: View {
             if let desc = artist?.briefDesc, !desc.isEmpty {
                 Text(desc)
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .lineLimit(3)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
@@ -222,13 +211,15 @@ struct ArtistDetailView: View {
                     .padding(.vertical, 14)
                     .background(
                         LinearGradient(
-                            colors: [.pink, .purple],
+                            colors: isStrangerTheme 
+                                ? [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.1, blue: 0.2)]
+                                : [.pink, .purple],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
                     )
                     .clipShape(Capsule())
-                    .shadow(color: .pink.opacity(0.4), radius: 12, x: 0, y: 6)
+                    .shadow(color: isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3).opacity(0.4) : .pink.opacity(0.4), radius: 12, x: 0, y: 6)
                 }
                 .padding(.top, 8)
             }
@@ -241,10 +232,10 @@ struct ArtistDetailView: View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
             Text(label)
                 .font(.system(size: 12))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
     }
     
@@ -259,7 +250,7 @@ struct ArtistDetailView: View {
                         .foregroundColor(.orange)
                     Text("热门歌曲")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                 }
                 
                 Spacer()
@@ -275,14 +266,14 @@ struct ArtistDetailView: View {
                 }) {
                     Image(systemName: isSearching ? "xmark.circle.fill" : "magnifyingglass")
                         .font(.system(size: 16))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                 }
                 
                 if topSongs.count > 5 && !isSearching {
                     Button(action: { showAllSongs.toggle() }) {
                         Text(showAllSongs ? "收起" : "全部")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                 }
             }
@@ -292,18 +283,19 @@ struct ArtistDetailView: View {
             if isSearching {
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                     TextField("搜索歌曲", text: $searchText)
                         .textFieldStyle(.plain)
+                        .foregroundColor(textColor)
                     if !searchText.isEmpty {
                         Button(action: { searchText = "" }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         }
                     }
                 }
                 .padding(10)
-                .background(Color(.secondarySystemBackground))
+                .background(cardBackground)
                 .cornerRadius(10)
                 .padding(.horizontal, 20)
                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -316,10 +308,10 @@ struct ArtistDetailView: View {
                     VStack(spacing: 8) {
                         Image(systemName: "music.note")
                             .font(.system(size: 30))
-                            .foregroundColor(.secondary.opacity(0.5))
+                            .foregroundColor(secondaryTextColor.opacity(0.5))
                         Text("未找到 \"\(searchText)\"")
                             .font(.system(size: 14))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                     .padding(.vertical, 30)
                     Spacer()
@@ -333,7 +325,8 @@ struct ArtistDetailView: View {
                         ArtistTrackRow(
                             track: track,
                             index: originalIndex + 1,
-                            isPlaying: audioPlayer.currentTrack?.id == track.id
+                            isPlaying: audioPlayer.currentTrack?.id == track.id,
+                            isStrangerTheme: isStrangerTheme
                         )
                         .onTapGesture {
                             audioPlayer.setPlaylist(topSongs, startAt: originalIndex)
@@ -345,7 +338,7 @@ struct ArtistDetailView: View {
                         }
                     }
                 }
-                .background(Color(.secondarySystemBackground))
+                .background(cardBackground)
                 .cornerRadius(16)
                 .padding(.horizontal, 16)
             }
@@ -360,13 +353,24 @@ struct ArtistDetailView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "square.stack")
                         .font(.system(size: 16))
-                        .foregroundColor(.purple)
+                        .foregroundColor(isStrangerTheme ? Color(red: 0.2, green: 0.6, blue: 1.0) : .purple)
                     Text("专辑")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                 }
                 
                 Spacer()
+
+                NavigationLink(destination: ArtistAlbumsView(artistId: artistId, artistName: artistName)) {
+                    HStack(spacing: 4) {
+                        Text("全部")
+                            .font(.system(size: 13, weight: .medium))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .foregroundColor(secondaryTextColor)
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 20)
             
@@ -375,7 +379,7 @@ struct ArtistDetailView: View {
                 HStack(spacing: 16) {
                     ForEach(albums) { album in
                         NavigationLink(destination: AlbumDetailView(albumId: album.id, albumName: album.name)) {
-                            ArtistAlbumCard(album: album)
+                            ArtistAlbumCard(album: album, isStrangerTheme: isStrangerTheme)
                         }
                         .buttonStyle(ScaleButtonStyle())
                     }
@@ -388,13 +392,14 @@ struct ArtistDetailView: View {
     // MARK: - 加载中遮罩
     private var loadingOverlay: some View {
         ZStack {
-            Color(.systemBackground).opacity(0.8)
+            backgroundColor.opacity(0.8)
             VStack(spacing: 16) {
                 ProgressView()
                     .scaleEffect(1.2)
+                    .tint(isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : nil)
                 Text("加载中...")
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
         }
         .ignoresSafeArea()
@@ -416,7 +421,9 @@ struct ArtistDetailView: View {
                 isLoading = false
             }
         } catch {
+            #if DEBUG
             print("Load artist data error: \(error)")
+            #endif
             await MainActor.run {
                 isLoading = false
             }
@@ -437,6 +444,11 @@ struct ArtistTrackRow: View {
     let track: Track
     let index: Int
     let isPlaying: Bool
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
     
     var body: some View {
         HStack(spacing: 12) {
@@ -445,11 +457,11 @@ struct ArtistTrackRow: View {
                 if isPlaying {
                     Image(systemName: "waveform")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.red)
+                        .foregroundColor(accentColor)
                 } else {
                     Text("\(index)")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(index <= 3 ? .orange : .secondary)
+                        .foregroundColor(index <= 3 ? .orange : secondaryTextColor)
                 }
             }
             .frame(width: 28)
@@ -472,12 +484,12 @@ struct ArtistTrackRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(track.name)
                     .font(.system(size: 15, weight: isPlaying ? .semibold : .regular))
-                    .foregroundColor(isPlaying ? .red : .primary)
+                    .foregroundColor(isPlaying ? accentColor : textColor)
                     .lineLimit(1)
                 
                 Text(track.albumName)
                     .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .lineLimit(1)
             }
             
@@ -487,7 +499,7 @@ struct ArtistTrackRow: View {
             Button(action: {}) {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .frame(width: 32, height: 32)
             }
         }
@@ -500,6 +512,10 @@ struct ArtistTrackRow: View {
 // MARK: - 歌手专辑卡片
 struct ArtistAlbumCard: View {
     let album: AlbumDetail
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -525,14 +541,150 @@ struct ArtistAlbumCard: View {
             // 专辑名
             Text(album.name)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
                 .lineLimit(2)
                 .frame(width: 140, alignment: .leading)
             
             // 发行时间
             Text(album.publishTimeText)
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
+        }
+    }
+}
+
+// MARK: - 歌手全部专辑
+struct ArtistAlbumsView: View {
+    let artistId: Int
+    let artistName: String
+
+    @EnvironmentObject var themeManager: ThemeManager
+    @State private var albums: [AlbumDetail] = []
+    @State private var searchText = ""
+    @State private var isLoading = true
+    @State private var isLoadingMore = false
+    @State private var hasMore = true
+    @State private var offset = 0
+
+    private let pageSize = 30
+    private let musicService = MusicService.shared
+
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var backgroundColor: Color { isStrangerTheme ? Color(red: 0.05, green: 0.02, blue: 0.08) : Color(.systemBackground) }
+    private var cardBackground: Color { isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.secondarySystemBackground) }
+    private var filteredAlbums: [AlbumDetail] {
+        let keyword = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !keyword.isEmpty else { return albums }
+        return albums.filter { $0.name.localizedCaseInsensitiveContains(keyword) }
+    }
+
+    var body: some View {
+        ZStack {
+            backgroundColor.ignoresSafeArea()
+
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(filteredAlbums) { album in
+                        NavigationLink(destination: AlbumDetailView(albumId: album.id, albumName: album.name)) {
+                            albumRow(album)
+                        }
+                        .buttonStyle(ScaleButtonStyle())
+                        .onAppear {
+                            if album.id == albums.last?.id {
+                                loadMoreIfNeeded()
+                            }
+                        }
+                    }
+
+                    if isLoadingMore && searchText.isEmpty {
+                        ProgressView()
+                            .padding(.vertical, 12)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+        }
+        .navigationTitle("\(artistName) · 专辑")
+        .navigationBarTitleDisplayMode(.inline)
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "搜索专辑")
+        .task {
+            await loadInitial()
+        }
+    }
+
+    @ViewBuilder
+    private func albumRow(_ album: AlbumDetail) -> some View {
+        HStack(spacing: 12) {
+            Group {
+                if let urlString = album.picUrl, let url = URL(string: urlString) {
+                    CachedAsyncImage(url: url) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color.gray.opacity(0.2)
+                    }
+                } else {
+                    Color.gray.opacity(0.2)
+                }
+            }
+            .frame(width: 56, height: 56)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(album.name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(textColor)
+                    .lineLimit(1)
+                Text(album.publishTimeText)
+                    .font(.system(size: 12))
+                    .foregroundColor(secondaryTextColor)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(cardBackground)
+        .cornerRadius(12)
+    }
+
+    private func loadInitial() async {
+        isLoading = true
+        offset = 0
+        do {
+            let result = try await musicService.getArtistAlbums(id: artistId, limit: pageSize, offset: offset)
+            await MainActor.run {
+                albums = result
+                isLoading = false
+                hasMore = result.count >= pageSize
+                offset += result.count
+            }
+        } catch {
+            await MainActor.run {
+                isLoading = false
+            }
+        }
+    }
+
+    private func loadMoreIfNeeded() {
+        guard !isLoadingMore, hasMore else { return }
+        isLoadingMore = true
+        Task {
+            do {
+                let result = try await musicService.getArtistAlbums(id: artistId, limit: pageSize, offset: offset)
+                await MainActor.run {
+                    albums.append(contentsOf: result)
+                    hasMore = result.count >= pageSize
+                    offset += result.count
+                    isLoadingMore = false
+                }
+            } catch {
+                await MainActor.run {
+                    isLoadingMore = false
+                }
+            }
         }
     }
 }

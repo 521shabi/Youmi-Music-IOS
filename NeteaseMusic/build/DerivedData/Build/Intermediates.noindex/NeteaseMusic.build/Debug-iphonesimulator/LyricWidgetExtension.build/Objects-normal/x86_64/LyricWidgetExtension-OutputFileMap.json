@@ -1,0 +1,49 @@
+{
+  "" : {
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetExtension-primary.dia",
+    "emit-module-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetExtension-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetExtension-primary-emit-module.dia",
+    "pch" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetExtension-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetExtension-primary.swiftdeps"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/LyricWidget/LyricActivityAttributes.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricActivityAttributes~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/LyricWidget/LyricHomeWidget.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricHomeWidget~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/LyricWidget/LyricLiveActivityWidget.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricLiveActivityWidget~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/LyricWidget/LyricWidgetBundle.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/LyricWidgetExtension.build/Objects-normal/x86_64/LyricWidgetBundle~partial.swiftmodule"
+  }
+}

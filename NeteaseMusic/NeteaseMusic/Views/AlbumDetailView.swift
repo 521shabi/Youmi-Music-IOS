@@ -6,7 +6,8 @@ struct AlbumDetailView: View {
     let albumName: String
     
     @Environment(\.dismiss) var dismiss
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @EnvironmentObject var themeManager: ThemeManager
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @State private var album: AlbumDetail?
     @State private var songs: [Track] = []
     @State private var isLoading = true
@@ -16,6 +17,14 @@ struct AlbumDetailView: View {
     @State private var isSearching = false
     
     private let musicService = MusicService.shared
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
+    private var backgroundColor: Color { isStrangerTheme ? Color(red: 0.05, green: 0.02, blue: 0.08) : Color(.systemBackground) }
+    private var cardBackground: Color { isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.secondarySystemBackground) }
     
     // 过滤后的歌曲列表
     private var filteredSongs: [Track] {
@@ -62,7 +71,7 @@ struct AlbumDetailView: View {
                     .padding(.bottom, 120)
                     .background(
                         RoundedRectangle(cornerRadius: 24)
-                            .fill(Color(.systemBackground))
+                            .fill(backgroundColor)
                     )
                 }
             }
@@ -71,18 +80,35 @@ struct AlbumDetailView: View {
                 scrollOffset = value
             }
             
-            // 顶部导航栏
-            VStack {
-                navigationBar
-                Spacer()
-            }
-            
             // 加载中
             if isLoading {
                 loadingOverlay
             }
         }
-        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(scrollOffset < -180 ? .visible : .hidden, for: .navigationBar)
+        .toolbarBackground(backgroundColor.opacity(0.95), for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Color.black.opacity(0.3))
+                        .clipShape(Circle())
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text(album?.name ?? albumName)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(textColor)
+                    .lineLimit(1)
+                    .opacity(scrollOffset < -180 ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.2), value: scrollOffset < -180)
+            }
+        }
         .ignoresSafeArea()
         .enableSwipeBack()
         .task {
@@ -97,47 +123,17 @@ struct AlbumDetailView: View {
     
     // MARK: - 背景视图
     private var backgroundView: some View {
-        Color(.systemBackground)
-            .ignoresSafeArea()
+        Group {
+            if isStrangerTheme {
+                StrangerThingsBackground()
+                    .environmentObject(themeManager)
+            } else {
+                Color(.systemBackground)
+            }
+        }
+        .ignoresSafeArea()
     }
     
-    // MARK: - 顶部导航栏
-    private var navigationBar: some View {
-        HStack {
-            Button(action: { dismiss() }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 36, height: 36)
-                    .background(Color.black.opacity(0.3))
-                    .clipShape(Circle())
-            }
-            
-            Spacer()
-            
-            // 标题（滚动后显示）
-            if scrollOffset < -180 {
-                Text(album?.name ?? albumName)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-                    .transition(.opacity)
-            }
-            
-            Spacer()
-            
-            // 占位
-            Color.clear.frame(width: 36, height: 36)
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 54)
-        .background(
-            scrollOffset < -180 ?
-            Color(.systemBackground).opacity(0.95) :
-            Color.clear
-        )
-        .animation(.easeInOut(duration: 0.2), value: scrollOffset < -180)
-    }
     
     // MARK: - 专辑信息区域
     private var albumInfoSection: some View {
@@ -164,7 +160,7 @@ struct AlbumDetailView: View {
             // 专辑名
             Text(album?.name ?? albumName)
                 .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
             
@@ -174,10 +170,10 @@ struct AlbumDetailView: View {
                     HStack(spacing: 4) {
                         Text(artistName)
                             .font(.system(size: 15))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                         Image(systemName: "chevron.right")
                             .font(.system(size: 11))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                 }
             }
@@ -188,13 +184,13 @@ struct AlbumDetailView: View {
                     if !album.publishTimeText.isEmpty {
                         Label(album.publishTimeText, systemImage: "calendar")
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                     
                     if let company = album.company, !company.isEmpty {
                         Label(company, systemImage: "building.2")
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                             .lineLimit(1)
                     }
                 }
@@ -235,7 +231,9 @@ struct AlbumDetailView: View {
                         .padding(.vertical, 14)
                         .background(
                             LinearGradient(
-                                colors: [.pink, .purple],
+                                colors: isStrangerTheme 
+                                    ? [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.1, blue: 0.2)]
+                                    : [.pink, .purple],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -254,10 +252,10 @@ struct AlbumDetailView: View {
                             Text("随机播放")
                                 .font(.system(size: 15, weight: .semibold))
                         }
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color(.secondarySystemBackground))
+                        .background(cardBackground)
                         .clipShape(Capsule())
                     }
                 }
@@ -287,10 +285,10 @@ struct AlbumDetailView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "music.note.list")
                         .font(.system(size: 16))
-                        .foregroundColor(.blue)
+                        .foregroundColor(isStrangerTheme ? Color(red: 0.2, green: 0.6, blue: 1.0) : .blue)
                     Text("全部歌曲")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(textColor)
                 }
                 
                 Spacer()
@@ -306,13 +304,13 @@ struct AlbumDetailView: View {
                 }) {
                     Image(systemName: isSearching ? "xmark.circle.fill" : "magnifyingglass")
                         .font(.system(size: 16))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                 }
                 
                 if !isSearching {
                     Text("\(songs.count) 首")
                         .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                 }
             }
             .padding(.horizontal, 20)
@@ -321,18 +319,19 @@ struct AlbumDetailView: View {
             if isSearching {
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                     TextField("搜索歌曲", text: $searchText)
                         .textFieldStyle(.plain)
+                        .foregroundColor(textColor)
                     if !searchText.isEmpty {
                         Button(action: { searchText = "" }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         }
                     }
                 }
                 .padding(10)
-                .background(Color(.tertiarySystemBackground))
+                .background(isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : Color(.tertiarySystemBackground))
                 .cornerRadius(10)
                 .padding(.horizontal, 20)
                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -345,10 +344,10 @@ struct AlbumDetailView: View {
                     VStack(spacing: 8) {
                         Image(systemName: "music.note")
                             .font(.system(size: 30))
-                            .foregroundColor(.secondary.opacity(0.5))
+                            .foregroundColor(secondaryTextColor.opacity(0.5))
                         Text("未找到 \"\(searchText)\"")
                             .font(.system(size: 14))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                     .padding(.vertical, 30)
                     Spacer()
@@ -362,7 +361,8 @@ struct AlbumDetailView: View {
                         AlbumTrackRow(
                             track: track,
                             index: originalIndex + 1,
-                            isPlaying: audioPlayer.currentTrack?.id == track.id
+                            isPlaying: audioPlayer.currentTrack?.id == track.id,
+                            isStrangerTheme: isStrangerTheme
                         )
                         .onTapGesture {
                             audioPlayer.setPlaylist(songs, startAt: originalIndex)
@@ -374,7 +374,7 @@ struct AlbumDetailView: View {
                         }
                     }
                 }
-                .background(Color(.secondarySystemBackground))
+                .background(cardBackground)
                 .cornerRadius(16)
                 .padding(.horizontal, 16)
             }
@@ -384,13 +384,14 @@ struct AlbumDetailView: View {
     // MARK: - 加载中遮罩
     private var loadingOverlay: some View {
         ZStack {
-            Color(.systemBackground).opacity(0.8)
+            backgroundColor.opacity(0.8)
             VStack(spacing: 16) {
                 ProgressView()
                     .scaleEffect(1.2)
+                    .tint(isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : nil)
                 Text("加载中...")
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
         }
         .ignoresSafeArea()
@@ -407,7 +408,9 @@ struct AlbumDetailView: View {
                 isLoading = false
             }
         } catch {
+            #if DEBUG
             print("Load album data error: \(error)")
+            #endif
             await MainActor.run {
                 isLoading = false
             }
@@ -428,6 +431,11 @@ struct AlbumTrackRow: View {
     let track: Track
     let index: Int
     let isPlaying: Bool
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
     
     var body: some View {
         HStack(spacing: 12) {
@@ -436,11 +444,11 @@ struct AlbumTrackRow: View {
                 if isPlaying {
                     Image(systemName: "waveform")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.red)
+                        .foregroundColor(accentColor)
                 } else {
                     Text("\(index)")
                         .font(.system(size: 14, weight: .medium, design: .monospaced))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                 }
             }
             .frame(width: 32)
@@ -449,12 +457,12 @@ struct AlbumTrackRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(track.name)
                     .font(.system(size: 15, weight: isPlaying ? .semibold : .regular))
-                    .foregroundColor(isPlaying ? .red : .primary)
+                    .foregroundColor(isPlaying ? accentColor : textColor)
                     .lineLimit(1)
                 
                 Text(track.artistName)
                     .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .lineLimit(1)
             }
             
@@ -463,13 +471,13 @@ struct AlbumTrackRow: View {
             // 时长
             Text(track.durationText)
                 .font(.system(size: 12, design: .monospaced))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
             
             // 更多
             Button(action: {}) {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .frame(width: 32, height: 32)
             }
         }

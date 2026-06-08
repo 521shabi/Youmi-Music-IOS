@@ -63,8 +63,8 @@ class MusicSourceConfig: ObservableObject {
         static let quality = "music_quality"
     }
     
-    // API 地址（新版 POST 接口）
-    let apiURL = "https://netease-url.preview.aliyun-zeabur.cn/song"
+    // 网易云 API 地址
+    let neteaseApiURL = "https://netease-url.preview.aliyun-zeabur.cn/song"
     
     /// API Key
     @Published var apiKey: String {
@@ -83,12 +83,17 @@ class MusicSourceConfig: ObservableObject {
     /// 音质变化回调
     var onQualityChanged: (() -> Void)?
     
-    /// 音质
+    /// 网易云音质
     @Published var quality: MusicQuality {
         didSet {
             userDefaults.set(quality.rawValue, forKey: Keys.quality)
             onQualityChanged?()
         }
+    }
+    
+    /// API URL
+    var apiURL: String {
+        return neteaseApiURL
     }
     
     private init() {
@@ -101,7 +106,7 @@ class MusicSourceConfig: ObservableObject {
         self.apiKey = userDefaults.string(forKey: Keys.apiKey) ?? defaultKey
         self.cookieBase64 = userDefaults.string(forKey: Keys.cookie) ?? defaultCookie
         
-        // 默认无损音质
+        // 默认网易云音质：无损
         if let qualityStr = userDefaults.string(forKey: Keys.quality),
            let quality = MusicQuality(rawValue: qualityStr) {
             self.quality = quality

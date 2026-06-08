@@ -1,10 +1,17 @@
 import SwiftUI
 
 struct FavoritesView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var localStorage = LocalStorageService.shared
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @State private var favorites: [Track] = []
     @State private var searchText = ""
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
     
     // 过滤后的歌曲列表
     private var filteredFavorites: [Track] {
@@ -27,6 +34,7 @@ struct FavoritesView: View {
                 trackList
             }
         }
+        .background(ThemedBackground().environmentObject(themeManager))
         .navigationTitle("我喜欢的音乐")
         .navigationBarTitleDisplayMode(.large)
         .searchable(text: $searchText, prompt: "搜索歌曲、歌手、专辑")
@@ -36,6 +44,7 @@ struct FavoritesView: View {
                     Button(action: playAll) {
                         Image(systemName: "play.fill")
                             .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(accentColor)
                     }
                 }
             }
@@ -52,22 +61,22 @@ struct FavoritesView: View {
             
             ZStack {
                 Circle()
-                    .fill(Color.red.opacity(0.1))
+                    .fill(accentColor.opacity(0.1))
                     .frame(width: 100, height: 100)
                 
                 Image(systemName: "heart")
                     .font(.system(size: 40, weight: .light))
-                    .foregroundColor(.red.opacity(0.6))
+                    .foregroundColor(accentColor.opacity(0.6))
             }
             
             VStack(spacing: 8) {
                 Text("暂无收藏")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(textColor)
                 
                 Text("快去发现喜欢的音乐吧")
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
             
             Spacer()
@@ -83,7 +92,7 @@ struct FavoritesView: View {
                     HStack(spacing: 12) {
                         ZStack {
                             Circle()
-                                .fill(Color.red)
+                                .fill(accentColor)
                                 .frame(width: 40, height: 40)
                             
                             Image(systemName: "play.fill")
@@ -94,11 +103,11 @@ struct FavoritesView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("播放全部")
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(.primary)
+                                .foregroundColor(textColor)
                             
                             Text("\(favorites.count) 首歌曲")
                                 .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(secondaryTextColor)
                         }
                         
                         Spacer()
@@ -106,6 +115,7 @@ struct FavoritesView: View {
                     .padding(.vertical, 4)
                 }
                 .buttonStyle(.plain)
+                .listRowBackground(isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.systemBackground))
             }
             
             // 搜索结果为空
@@ -115,10 +125,10 @@ struct FavoritesView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 40))
-                            .foregroundColor(.secondary.opacity(0.5))
+                            .foregroundColor(secondaryTextColor.opacity(0.5))
                         Text("未找到 \"\(searchText)\"")
                             .font(.system(size: 15))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                     .padding(.vertical, 40)
                     Spacer()
@@ -133,15 +143,18 @@ struct FavoritesView: View {
                     track: track,
                     index: originalIndex + 1,
                     isPlaying: audioPlayer.currentTrack?.id == track.id,
+                    isStrangerTheme: isStrangerTheme,
                     onRemove: { removeFavorite(track) }
                 )
                 .contentShape(Rectangle())
                 .onTapGesture {
                     playTrack(at: originalIndex)
                 }
+                .listRowBackground(isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.systemBackground))
             }
         }
         .listStyle(.plain)
+        .scrollContentBackground(isStrangerTheme ? .hidden : .automatic)
     }
     
     // MARK: - 方法
@@ -172,14 +185,19 @@ struct FavoriteTrackRow: View {
     let track: Track
     let index: Int
     let isPlaying: Bool
+    var isStrangerTheme: Bool = false
     let onRemove: () -> Void
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
 
     var body: some View {
         HStack(spacing: 12) {
             // 序号
             Text("\(index)")
                 .font(.system(size: 14))
-                .foregroundColor(isPlaying ? .red : .secondary)
+                .foregroundColor(isPlaying ? accentColor : secondaryTextColor)
                 .frame(width: 24)
 
             // 封面
@@ -208,12 +226,12 @@ struct FavoriteTrackRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(track.name)
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(isPlaying ? .red : .primary)
+                    .foregroundColor(isPlaying ? accentColor : textColor)
                     .lineLimit(1)
 
                 Text(track.artistName)
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .lineLimit(1)
             }
 
@@ -223,7 +241,7 @@ struct FavoriteTrackRow: View {
             if track.dt != nil {
                 Text(track.durationText)
                     .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
         }
         .padding(.vertical, 4)

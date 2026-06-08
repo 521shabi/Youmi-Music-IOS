@@ -50,4 +50,18 @@ extension View {
     func enableSwipeBack() -> some View {
         modifier(SwipeBackModifier())
     }
+
+    /// iOS 16/17 兼容的 onChange，支持新旧两个值
+    @ViewBuilder
+    func onChangeCompat<V: Equatable>(of value: V, perform action: @escaping (_ oldValue: V, _ newValue: V) -> Void) -> some View {
+        if #available(iOS 17.0, *) {
+            self.onChange(of: value) { oldValue, newValue in
+                action(oldValue, newValue)
+            }
+        } else {
+            self.onChange(of: value) { [value] newValue in
+                action(value, newValue)
+            }
+        }
+    }
 }

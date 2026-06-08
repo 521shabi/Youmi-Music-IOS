@@ -8,13 +8,48 @@
 
 import Foundation
 
-// 注意：HLSVariant 结构体已在 PlayerView.swift 中定义
-// 为了避免冲突，这里不重复定义，直接使用全局的 HLSVariant
+// MARK: - HLS 变体数据结构
+struct HLSVariant {
+    let bandwidth: Int
+    let width: Int
+    let height: Int
+    let url: String
 
-// 为 HLSVariant 添加扩展，提供 aspectRatio 属性
-extension HLSVariant {
+    var pixelCount: Int { width * height }
+    var megabitsPerSecond: Int { bandwidth / 1_000_000 }
+
+    var description: String {
+        "\(width)x\(height)@\(megabitsPerSecond)Mbps"
+    }
+
     var aspectRatio: Double {
         Double(width) / Double(height)
+    }
+}
+
+// MARK: - HLS 变体缓存管理器（门面模式：委托给 DynamicCoverCache）
+class HLSVariantCache {
+    static let shared = HLSVariantCache()
+
+    private init() {}
+
+    func getVariant(for masterUrl: String) -> String? {
+        return DynamicCoverCache.shared.getVariantUrl(for: masterUrl)
+    }
+
+    func setVariant(_ variantUrl: String, for masterUrl: String) {
+        DynamicCoverCache.shared.cacheVariantUrl(variantUrl, for: masterUrl)
+    }
+
+    /// 预加载：获取并解析m3u8，缓存最佳变体URL
+    func preload(masterUrl: String) {
+        DynamicCoverCache.shared.preloadVariant(masterUrl: masterUrl)
+    }
+
+    func clear() {
+        #if DEBUG
+        print("🗑️ HLSVariantCache.clear() 调用（委托给 DynamicCoverCache）")
+        #endif
     }
 }
 
@@ -57,8 +92,8 @@ class HLSParser {
         return resolveUrl(selectedVariant.url, baseUrl: baseUrl)
     }
 
-    /// 解析master m3u8，提取所有变体信息
-    /// - Parameter text: m3u8文本内容
+    /// 解析 master m3u8，提取所有「可播放」变体信息
+    /// - Parameter text: m3u8 文本内容
     /// - Returns: 变体数组
     func parseVariants(from text: String) -> [HLSVariant] {
         let lines = text.components(separatedBy: "\n")
@@ -66,39 +101,27 @@ class HLSParser {
 
         for i in 0..<lines.count {
             let line = lines[i]
-            
-            // 支持两种格式：#EXT-X-STREAM-INF 和 #EXT-X-I-FRAME-STREAM-INF
-            if line.hasPrefix("#EXT-X-STREAM-INF:") {
-                guard i + 1 < lines.count else { continue }
-                let urlLine = lines[i + 1].trimmingCharacters(in: .whitespaces)
-                guard !urlLine.isEmpty && !urlLine.hasPrefix("#") else { continue }
 
-                // 提取带宽
-                guard let bandwidth = extractBandwidth(from: line) else { continue }
-                // 提取分辨率
-                guard let resolution = extractResolution(from: line) else { continue }
+            // 仅解析可播放的 #EXT-X-STREAM-INF。
+            // 注意：#EXT-X-I-FRAME-STREAM-INF 是 trick-play（仅关键帧）流，误选会导致播放像「一帧一帧」的幻灯片效果。
+            guard line.hasPrefix("#EXT-X-STREAM-INF:") else { continue }
 
-                let variant = HLSVariant(
-                    bandwidth: bandwidth,
-                    width: resolution.width,
-                    height: resolution.height,
-                    url: urlLine
-                )
-                variants.append(variant)
-            } else if line.hasPrefix("#EXT-X-I-FRAME-STREAM-INF:") {
-                // I-FRAME 流：URI 在同一行
-                guard let bandwidth = extractBandwidth(from: line),
-                      let resolution = extractResolution(from: line),
-                      let uri = extractURI(from: line) else { continue }
-                
-                let variant = HLSVariant(
-                    bandwidth: bandwidth,
-                    width: resolution.width,
-                    height: resolution.height,
-                    url: uri
-                )
-                variants.append(variant)
-            }
+            guard i + 1 < lines.count else { continue }
+            let urlLine = lines[i + 1].trimmingCharacters(in: .whitespaces)
+            guard !urlLine.isEmpty && !urlLine.hasPrefix("#") else { continue }
+
+            // 提取带宽
+            guard let bandwidth = extractBandwidth(from: line) else { continue }
+            // 提取分辨率
+            guard let resolution = extractResolution(from: line) else { continue }
+
+            let variant = HLSVariant(
+                bandwidth: bandwidth,
+                width: resolution.width,
+                height: resolution.height,
+                url: urlLine
+            )
+            variants.append(variant)
         }
 
         return variants
@@ -168,18 +191,6 @@ class HLSParser {
 
         return (width: width, height: height)
     }
-    
-    /// 从 I-FRAME 行中提取 URI
-    private func extractURI(from line: String) -> String? {
-        guard let match = line.range(of: "URI=\"([^\"]+)\"", options: .regularExpression) else {
-            return nil
-        }
-        let uriStr = String(line[match])
-        // 移除 URI=" 和 结尾的 "
-        let cleanUri = uriStr.replacingOccurrences(of: "URI=\"", with: "").replacingOccurrences(of: "\"", with: "")
-        return cleanUri
-    }
-
     /// 根据策略选择最佳变体
     private func selectBestVariant(
         from variants: [HLSVariant],

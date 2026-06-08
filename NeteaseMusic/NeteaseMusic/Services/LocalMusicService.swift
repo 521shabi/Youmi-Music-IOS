@@ -4,16 +4,17 @@ import UIKit
 import UniformTypeIdentifiers
 
 // MARK: - 本地音乐服务
+@MainActor
 class LocalMusicService: ObservableObject {
     static let shared = LocalMusicService()
-    
+
     private let localTracksKey = "local_music_tracks"
     private let localMusicDirectory = "LocalMusic"
-    
+
     @Published var localTracks: [LocalTrack] = []
     @Published var isImporting = false
     @Published var importProgress: Double = 0
-    
+
     private init() {
         loadLocalTracks()
         createLocalMusicDirectoryIfNeeded()
@@ -317,6 +318,145 @@ class LocalMusicService: ObservableObject {
         return resizedImage?.jpegData(compressionQuality: 0.8)
     }
     
+    // MARK: - 下载歌曲保存
+    
+    /// 保存下载的歌曲到本地音乐库
+    /// - Parameters:
+    ///   - tempFileURL: 临时文件URL
+    ///   - track: 原始 Track 信息
+    ///   - fileExtension: 文件扩展名
+    ///   - coverData: 封面图片数据
+    func saveDownloadedTrack(
+        tempFileURL: URL,
+        track: Track,
+        fileExtension: String,
+        coverData: Data?
+    ) async throws -> LocalTrack {
+        // 生成文件名: 歌手 - 歌名.ext
+        let safeArtist = track.artistName.replacingOccurrences(of: "/", with: "_")
+        let safeName = track.name.replacingOccurrences(of: "/", with: "_")
+        let fileName = "\(safeArtist) - \(safeName).\(fileExtension)"
+        
+        let destinationURL = localMusicDirectoryURL.appendingPathComponent(fileName)
+        let finalURL = getUniqueFileURL(for: destinationURL)
+        
+        // 移动文件到本地音乐目录
+        do {
+            if FileManager.default.fileExists(atPath: finalURL.path) {
+                try FileManager.default.removeItem(at: finalURL)
+            }
+            try FileManager.default.moveItem(at: tempFileURL, to: finalURL)
+        } catch {
+            throw LocalMusicError.copyFailed(error.localizedDescription)
+        }
+        
+        // 获取文件大小
+        var fileSize: Int64 = 0
+        if let attrs = try? FileManager.default.attributesOfItem(atPath: finalURL.path),
+           let size = attrs[.size] as? Int64 {
+            fileSize = size
+        }
+        
+        // 压缩封面图片
+        var artworkData: Data? = coverData
+        if let data = coverData, data.count > 500_000 {
+            artworkData = compressArtwork(data: data, maxSize: 300)
+        }
+        
+        // 创建 LocalTrack
+        let localTrack = LocalTrack(
+            fileName: finalURL.lastPathComponent,
+            fileURL: finalURL,
+            title: track.name,
+            artist: track.artistName,
+            album: track.albumName,
+            duration: track.durationSeconds,
+            fileSize: fileSize,
+            format: fileExtension,
+            bitrate: nil,
+            sampleRate: nil,
+            artworkData: artworkData,
+            embeddedLyrics: nil,
+            addedDate: Date(),
+            sourceTrackId: track.id,
+            sourceCoverUrl: track.coverUrl
+        )
+        
+        // 添加到列表
+        await MainActor.run {
+            localTracks.insert(localTrack, at: 0)
+            saveLocalTracks()
+        }
+        
+        #if DEBUG
+        print("✅ 下载保存成功: \(localTrack.displayTitle)")
+        #endif
+        
+        return localTrack
+    }
+    
+    // MARK: - 歌词侧载（.lrc）
+    
+    /// 查找与音频同名的 .lrc/.txt 歌词文件
+    func findSidecarLyrics(for track: LocalTrack) -> String? {
+        let base = track.fileURL.deletingPathExtension()
+        let candidates = [base.appendingPathExtension("lrc"), base.appendingPathExtension("txt")]
+        for url in candidates {
+            if FileManager.default.fileExists(atPath: url.path),
+               let data = try? Data(contentsOf: url),
+               let text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .utf16) {
+                return text
+            }
+        }
+        return nil
+    }
+    
+    /// 将歌词以 .lrc 侧载文件的形式保存到同目录
+    @discardableResult
+    func saveSidecarLyrics(for track: LocalTrack, lrcContent: String) -> URL? {
+        let lrcURL = track.fileURL.deletingPathExtension().appendingPathExtension("lrc")
+        do {
+            try lrcContent.data(using: .utf8)?.write(to: lrcURL, options: [.atomic])
+            #if DEBUG
+            print("✅ 已保存侧载歌词: \(lrcURL.lastPathComponent)")
+            #endif
+            return lrcURL
+        } catch {
+            #if DEBUG
+            print("⚠️ 保存侧载歌词失败: \(error.localizedDescription)")
+            #endif
+            return nil
+        }
+    }
+    
+    /// 更新内存中的本地曲目歌词并落盘列表
+    func updateLocalTrackLyrics(trackId: UUID, lyrics: String) {
+        if let idx = localTracks.firstIndex(where: { $0.id == trackId }) {
+            var t = localTracks[idx]
+            // 重新构造以更新 embeddedLyrics
+            let updated = LocalTrack(
+                id: t.id,
+                fileName: t.fileName,
+                fileURL: t.fileURL,
+                title: t.title,
+                artist: t.artist,
+                album: t.album,
+                duration: t.duration,
+                fileSize: t.fileSize,
+                format: t.format,
+                bitrate: t.bitrate,
+                sampleRate: t.sampleRate,
+                artworkData: t.artworkData,
+                embeddedLyrics: lyrics,
+                addedDate: t.addedDate,
+                sourceTrackId: t.sourceTrackId,
+                sourceCoverUrl: t.sourceCoverUrl
+            )
+            localTracks[idx] = updated
+            saveLocalTracks()
+        }
+    }
+    
     // MARK: - 歌曲管理
     
     /// 删除本地歌曲
@@ -445,8 +585,75 @@ class LocalMusicService: ObservableObject {
         return AudioFormat.supportedExtensions.contains(ext)
     }
     
+    // MARK: - 分享功能
+
+    /// 分享本地歌曲文件
+    func shareTrack(_ track: LocalTrack, from viewController: UIViewController? = nil) {
+        let fileURL = track.fileURL
+
+        // 确保文件存在
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            #if DEBUG
+            print("❌ 分享失败：文件不存在")
+            #endif
+            return
+        }
+
+        let activityVC = UIActivityViewController(
+            activityItems: [fileURL],
+            applicationActivities: nil
+        )
+
+        // 获取当前视图控制器
+        if let vc = viewController ?? UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow })?
+            .rootViewController {
+
+            // iPad 需要设置 popover
+            if let popover = activityVC.popoverPresentationController {
+                popover.sourceView = vc.view
+                popover.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+
+            vc.present(activityVC, animated: true)
+        }
+    }
+
+    /// 批量分享歌曲
+    func shareTracks(_ tracks: [LocalTrack], from viewController: UIViewController? = nil) {
+        let fileURLs = tracks.compactMap { track -> URL? in
+            guard FileManager.default.fileExists(atPath: track.fileURL.path) else { return nil }
+            return track.fileURL
+        }
+
+        guard !fileURLs.isEmpty else { return }
+
+        let activityVC = UIActivityViewController(
+            activityItems: fileURLs,
+            applicationActivities: nil
+        )
+
+        if let vc = viewController ?? UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow })?
+            .rootViewController {
+
+            if let popover = activityVC.popoverPresentationController {
+                popover.sourceView = vc.view
+                popover.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+
+            vc.present(activityVC, animated: true)
+        }
+    }
+
     // MARK: - 支持的文件类型（用于文件选择器）
-    
+
     var supportedContentTypes: [UTType] {
         [
             .mp3,

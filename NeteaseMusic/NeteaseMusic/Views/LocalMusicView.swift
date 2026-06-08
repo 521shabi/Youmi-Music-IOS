@@ -3,14 +3,21 @@ import UniformTypeIdentifiers
 
 // MARK: - 本地音乐视图
 struct LocalMusicView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var localMusicService = LocalMusicService.shared
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @State private var showingFilePicker = false
     @State private var showingDeleteAlert = false
     @State private var trackToDelete: LocalTrack?
     @State private var isRefreshing = false
     @State private var sortOrder: SortOrder = .dateAdded
     @Environment(\.colorScheme) var colorScheme
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .green }
     
     enum SortOrder: String, CaseIterable {
         case dateAdded = "添加时间"
@@ -54,7 +61,7 @@ struct LocalMusicView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 120)
         }
-        .background(LiquidGlassBackground(colors: [.green.opacity(0.08), .blue.opacity(0.06), .purple.opacity(0.04)]))
+        .background(ThemedBackground().environmentObject(themeManager))
         .navigationTitle("本地歌曲")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -126,22 +133,23 @@ struct LocalMusicView: View {
             HStack {
                 ProgressView()
                     .scaleEffect(0.8)
+                    .tint(isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : nil)
                 Text("正在导入...")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                 Spacer()
                 Text("\(Int(localMusicService.importProgress * 100))%")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
             
             ProgressView(value: localMusicService.importProgress)
-                .tint(.green)
+                .tint(accentColor)
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(.ultraThinMaterial)
+                .fill(isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.secondarySystemBackground))
         )
     }
     
@@ -150,15 +158,15 @@ struct LocalMusicView: View {
         VStack(spacing: 20) {
             Image(systemName: "music.note.house")
                 .font(.system(size: 60))
-                .foregroundColor(.secondary.opacity(0.5))
+                .foregroundColor(secondaryTextColor.opacity(0.5))
             
             Text("暂无本地歌曲")
                 .font(.headline)
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
             
             Text("点击下方按钮从「文件」App 导入音乐")
                 .font(.subheadline)
-                .foregroundColor(.secondary.opacity(0.8))
+                .foregroundColor(secondaryTextColor.opacity(0.8))
                 .multilineTextAlignment(.center)
             
             Button(action: { showingFilePicker = true }) {
@@ -171,7 +179,13 @@ struct LocalMusicView: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
                 .background(
-                    LinearGradient(colors: [.green, .green.opacity(0.8)], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(
+                        colors: isStrangerTheme 
+                            ? [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.1, blue: 0.2)]
+                            : [.green, .green.opacity(0.8)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
                 )
                 .cornerRadius(25)
             }
@@ -180,10 +194,10 @@ struct LocalMusicView: View {
             VStack(spacing: 4) {
                 Text("支持的格式")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                 Text("MP3 • M4A • FLAC • WAV • AIFF • OGG")
                     .font(.caption2)
-                    .foregroundColor(.secondary.opacity(0.7))
+                    .foregroundColor(secondaryTextColor.opacity(0.7))
             }
             .padding(.top, 16)
         }
@@ -205,7 +219,13 @@ struct LocalMusicView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(
-                    LinearGradient(colors: [.green, .green.opacity(0.8)], startPoint: .leading, endPoint: .trailing)
+                    LinearGradient(
+                        colors: isStrangerTheme 
+                            ? [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.8, green: 0.1, blue: 0.2)]
+                            : [.green, .green.opacity(0.8)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
                 )
                 .cornerRadius(20)
             }
@@ -230,12 +250,12 @@ struct LocalMusicView: View {
                     Text(sortOrder.rawValue)
                 }
                 .font(.system(size: 13))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+                        .fill(isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : (colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05)))
                 )
             }
         }
@@ -249,10 +269,14 @@ struct LocalMusicView: View {
                     track: track,
                     index: index + 1,
                     isPlaying: audioPlayer.currentLocalTrack?.id == track.id,
+                    isStrangerTheme: isStrangerTheme,
                     onTap: { playTrack(track, index: index) },
                     onDelete: {
                         trackToDelete = track
                         showingDeleteAlert = true
+                    },
+                    onShare: {
+                        localMusicService.shareTrack(track)
                     }
                 )
                 
@@ -264,14 +288,18 @@ struct LocalMusicView: View {
         }
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(colorScheme == .dark ? Color.white.opacity(0.08) : Color.white.opacity(0.6))
+                .fill(isStrangerTheme 
+                    ? Color(red: 0.08, green: 0.04, blue: 0.12)
+                    : (colorScheme == .dark ? Color.white.opacity(0.08) : Color.white.opacity(0.6)))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(
                             LinearGradient(
-                                colors: colorScheme == .dark
-                                    ? [.white.opacity(0.2), .clear]
-                                    : [.white.opacity(0.8), .clear],
+                                colors: isStrangerTheme
+                                    ? [Color(red: 1.0, green: 0.2, blue: 0.3).opacity(0.3), Color(red: 0.2, green: 0.6, blue: 1.0).opacity(0.2)]
+                                    : (colorScheme == .dark
+                                        ? [.white.opacity(0.2), .clear]
+                                        : [.white.opacity(0.8), .clear]),
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
@@ -384,9 +412,15 @@ struct LocalTrackRow: View {
     let track: LocalTrack
     let index: Int
     let isPlaying: Bool
+    var isStrangerTheme: Bool = false
     let onTap: () -> Void
     let onDelete: () -> Void
+    let onShare: () -> Void
     @Environment(\.colorScheme) var colorScheme
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .green }
     
     var body: some View {
         Button(action: onTap) {
@@ -394,7 +428,7 @@ struct LocalTrackRow: View {
                 // 序号
                 Text("\(index)")
                     .font(.system(size: 14))
-                    .foregroundColor(isPlaying ? .green : .secondary)
+                    .foregroundColor(isPlaying ? accentColor : secondaryTextColor)
                     .frame(width: 28)
                 
                 // 封面
@@ -409,7 +443,9 @@ struct LocalTrackRow: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(
                                 LinearGradient(
-                                    colors: [.green.opacity(0.3), .blue.opacity(0.3)],
+                                    colors: isStrangerTheme 
+                                        ? [Color(red: 1.0, green: 0.2, blue: 0.3).opacity(0.3), Color(red: 0.2, green: 0.6, blue: 1.0).opacity(0.3)]
+                                        : [.green.opacity(0.3), .blue.opacity(0.3)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
@@ -427,7 +463,7 @@ struct LocalTrackRow: View {
                     HStack(spacing: 6) {
                         Text(track.displayTitle)
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(isPlaying ? .green : .primary)
+                            .foregroundColor(isPlaying ? accentColor : textColor)
                             .lineLimit(1)
                         
                         // 格式标签
@@ -457,13 +493,13 @@ struct LocalTrackRow: View {
                     
                     HStack(spacing: 4) {
                         Text(track.artistName)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                         
                         Text("•")
-                            .foregroundColor(.secondary.opacity(0.5))
+                            .foregroundColor(secondaryTextColor.opacity(0.5))
                         
                         Text(track.durationText)
-                            .foregroundColor(.secondary.opacity(0.7))
+                            .foregroundColor(secondaryTextColor.opacity(0.7))
                     }
                     .font(.caption)
                     .lineLimit(1)
@@ -473,10 +509,16 @@ struct LocalTrackRow: View {
                 
                 // 播放动画
                 if isPlaying {
-                    Image(systemName: "waveform")
-                        .font(.system(size: 14))
-                        .foregroundColor(.green)
-                        .symbolEffect(.variableColor.iterative)
+                    if #available(iOS 17.0, *) {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 14))
+                            .foregroundColor(accentColor)
+                            .symbolEffect(.variableColor.iterative)
+                    } else {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 14))
+                            .foregroundColor(accentColor)
+                    }
                 }
                 
                 // 更多按钮
@@ -484,16 +526,20 @@ struct LocalTrackRow: View {
                     Button(action: onTap) {
                         Label("播放", systemImage: "play.fill")
                     }
-                    
+
+                    Button(action: onShare) {
+                        Label("分享", systemImage: "square.and.arrow.up")
+                    }
+
                     Divider()
-                    
+
                     Button(role: .destructive, action: onDelete) {
                         Label("删除", systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 16))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                         .frame(width: 32, height: 32)
                 }
             }

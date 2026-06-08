@@ -145,6 +145,7 @@ class LyricActivityManager: ObservableObject {
 }
 
 // MARK: - 压缩专辑封面工具
+@available(iOS 16.2, *)
 extension LyricActivityManager {
     /// 压缩图片为适合 Live Activity 的大小
     static func compressAlbumArt(_ image: UIImage, maxSize: CGSize = CGSize(width: 100, height: 100)) -> Data? {

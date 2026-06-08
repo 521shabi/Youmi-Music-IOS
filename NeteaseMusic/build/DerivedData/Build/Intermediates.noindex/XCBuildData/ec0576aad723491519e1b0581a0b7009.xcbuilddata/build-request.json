@@ -1,0 +1,63 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "b96258d45465259163decf8e21b3f3063815d165a964d8977462b1a0bd1d258c"
+    }
+  ],
+  "containerPath" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "undefined_arch",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : true,
+      "platform" : "iphonesimulator",
+      "sdk" : "iphonesimulator26.2",
+      "sdkVariant" : "iphonesimulator",
+      "supportedArchitectures" : [
+        "i386",
+        "x86_64"
+      ],
+      "targetArchitecture" : "undefined_arch"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Products",
+      "derivedDataPath" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Debug",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+          "CODE_SIGNING_ALLOWED" : "NO",
+          "SDKROOT" : "iphonesimulator26.2"
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

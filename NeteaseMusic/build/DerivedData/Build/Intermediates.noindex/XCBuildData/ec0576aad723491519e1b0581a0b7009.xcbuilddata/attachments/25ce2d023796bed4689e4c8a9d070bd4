@@ -1,0 +1,709 @@
+{
+  "" : {
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusic-primary.dia",
+    "emit-module-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusic-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusic-primary-emit-module.dia",
+    "pch" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusic-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusic-primary.swiftdeps"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Extensions/SwipeBackModifier.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SwipeBackModifier~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Models/LocalTrack.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalTrack~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Models/PlaylistModels.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistModels~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Models/UserModels.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserModels~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/NeteaseMusicApp.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NeteaseMusicApp~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/APICache.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APICache~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/APIConfig.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/APIConfig~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/AppleMusicService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/AudioPlayer.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AudioPlayer~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/AuthService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/CacheManager.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CacheManager~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/CarPlaySceneDelegate.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CarPlaySceneDelegate~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/DynamicCoverCache.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DynamicCoverCache~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/HLSParser.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HLSParser~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/ImageCache.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ImageCache~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/LocalMusicService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/LocalStorageService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalStorageService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/LyricActivityManager.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LyricActivityManager~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/MusicService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/MusicSourceConfig.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MusicSourceConfig~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/NetworkService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NetworkService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/NotificationService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NotificationService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/SleepTimerManager.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerManager~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/SongCacheService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongCacheService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/SongDownloadService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SongDownloadService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/ThemeManager.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ThemeManager~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/UserService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/UserService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Services/WidgetDataService.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/WidgetDataService~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/ViewModels/AuthViewModel.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AuthViewModel~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/AlbumDetailView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AlbumDetailView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/AppleMusicView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/AppleMusicView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/ArtistDetailView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ArtistDetailView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/CloudDiskView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CloudDiskView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/CommentView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CommentView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/CoverFlow3DView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/CoverFlow3DView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/DiscoverView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DiscoverView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/DownloadCenterView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/DownloadCenterView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/FavoritesView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FavoritesView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/FeaturedArtistsView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/FeaturedArtistsView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/HeartbeatModeView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/HeartbeatModeView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/KaraokeLyricView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/KaraokeLyricView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/LibraryView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LibraryView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/LiquidGlassComponents.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LiquidGlassComponents~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/LocalMusicView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LocalMusicView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/LoginView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/LoginView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/MainTabView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MainTabView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/MiniPlayerView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MiniPlayerView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/MoodRecommendView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/MoodRecommendView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/NewDiscoveryView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/NewDiscoveryView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/PersonalFMView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PersonalFMView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/PlayHistoryView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayHistoryView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/Player/PlayerControlButton.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerControlButton~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/Player/PlayerDynamicCoverView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerDynamicCoverView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/Player/PlayerLikeView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerLikeView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/Player/PlayerPlaylistView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerPlaylistView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/Player/PlayerQualityView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerQualityView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/Player/PlayerShareView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerShareView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/PlayerView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlayerView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/PlaylistDetailView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistDetailView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/PlaylistSquareView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/PlaylistSquareView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/ProfileCardView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ProfileCardView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/RadarPlaylistView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/RadarPlaylistView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/SearchContentView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchContentView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/SearchView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SearchView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/SettingsView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SettingsView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/SkeletonShimmer.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SkeletonShimmer~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/SleepTimerView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/SleepTimerView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/StrangerThingsComponents.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/StrangerThingsComponents~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/NeteaseMusic/Views/ToplistView.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/ToplistView~partial.swiftmodule"
+  },
+  "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/shijiexuanzenanti/Desktop/IOS我的项目/iosyoumi/NeteaseMusic/build/DerivedData/Build/Intermediates.noindex/NeteaseMusic.build/Debug-iphonesimulator/NeteaseMusic.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

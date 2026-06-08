@@ -38,6 +38,12 @@ struct PlaylistDetailResponse: Codable {
     let playlist: PlaylistDetail?
 }
 
+// MARK: - 歌单所有歌曲响应
+struct PlaylistAllTracksResponse: Codable {
+    let code: Int
+    let songs: [Track]?
+}
+
 // MARK: - 歌单详情
 struct PlaylistDetail: Codable, Identifiable {
     let id: Int
@@ -77,6 +83,10 @@ struct Track: Codable, Identifiable {
         }
         return ar?.map { $0.name }.joined(separator: "/") ?? "未知歌手"
     }
+
+    var primaryArtistId: Int? {
+        artists?.first?.id ?? ar?.first?.id
+    }
     
     var albumName: String {
         // 优先使用album，其次al
@@ -101,6 +111,25 @@ struct Track: Codable, Identifiable {
     var hasMV: Bool {
         let mvId = mvid ?? mv ?? 0
         return mvId > 0
+    }
+    
+    /// 时长（秒）
+    var durationSeconds: Double {
+        guard let dur = duration ?? dt else { return 0 }
+        return Double(dur) / 1000.0
+    }
+    
+    init(id: Int, name: String, ar: [Artist]? = nil, al: Album? = nil, artists: [Artist]? = nil, album: Album? = nil, dt: Int? = nil, duration: Int? = nil, mv: Int? = nil, mvid: Int? = nil) {
+        self.id = id
+        self.name = name
+        self.ar = ar
+        self.al = al
+        self.artists = artists
+        self.album = album
+        self.dt = dt
+        self.duration = duration
+        self.mv = mv
+        self.mvid = mvid
     }
 }
 
@@ -188,19 +217,29 @@ struct SearchSong: Codable, Identifiable {
         return String(format: "%d:%02d", min, sec)
     }
     
-    // 转换为Track
-    func toTrack() -> Track {
-        Track(
+    init(id: Int, name: String, artists: [SearchArtist]? = nil, album: SearchAlbum? = nil, duration: Int? = nil) {
+        self.id = id
+        self.name = name
+        self.artists = artists
+        self.album = album
+        self.duration = duration
+    }
+    
+    // 转换为Track（可传入外部封面URL覆盖）
+    func toTrack(withCoverUrl overrideCoverUrl: String? = nil) -> Track {
+        let finalCoverUrl = overrideCoverUrl ?? album?.coverUrl
+
+        return Track(
             id: id,
             name: name,
             ar: artists?.map { Artist(id: $0.id, name: $0.name) },
-            al: album != nil ? Album(id: album!.id, name: album!.name, picUrl: album!.coverUrl) : nil,
-            artists: nil,  // SearchSong使用ar字段
-            album: nil,    // SearchSong使用al字段
+            al: album.map { Album(id: $0.id, name: $0.name, picUrl: finalCoverUrl) },
+            artists: nil,
+            album: nil,
             dt: duration,
-            duration: nil, // SearchSong使用dt字段
+            duration: nil,
             mv: nil,
-            mvid: nil      // SearchSong没有MV信息
+            mvid: nil
         )
     }
 }
@@ -217,7 +256,7 @@ struct SearchAlbum: Codable {
     let blurPicUrl: String?    // 备用封面
     let picId: Int?            // 封面ID
     let pic: Int?              // 备用封面ID
-    
+
     // 获取封面URL，优先使用picUrl，其次blurPicUrl
     var coverUrl: String? {
         picUrl ?? blurPicUrl
@@ -386,7 +425,7 @@ struct PersonalizedSong: Codable, Identifiable {
             id: id,
             name: name,
             ar: song?.artists,
-            al: song?.album != nil ? Album(id: song!.album!.id, name: song!.album!.name, picUrl: song!.album!.picUrl) : nil,
+            al: song?.album.map { Album(id: $0.id, name: $0.name, picUrl: $0.picUrl) },
             artists: nil,
             album: nil,
             dt: song?.duration,
@@ -619,16 +658,47 @@ struct CommentResponse: Codable {
     let comments: [Comment]?
 }
 
+// MARK: - 新版评论响应
+
+struct CommentNewResponse: Codable {
+    let code: Int
+    let data: CommentNewData?
+}
+
+struct CommentNewData: Codable {
+    let commentsTitle: String?
+    let comments: [Comment]?
+    let totalCount: Int?
+    let hasMore: Bool?
+    let cursor: String?
+    let sortType: Int?
+}
+
+// MARK: - 热门评论响应
+
+struct HotCommentResponse: Codable {
+    let code: Int
+    let total: Int?
+    let hasMore: Bool?
+    let hotComments: [Comment]?
+}
+
 struct Comment: Codable, Identifiable {
     let commentId: Int
     let content: String
     let time: Int               // 时间戳(ms)
     let likedCount: Int?
+    let replyCount: Int?        // 回复数量
     let user: CommentUser
     let beReplied: [ReplyComment]?
     let ipLocation: IPLocation?
     
     var id: Int { commentId }
+    
+    // 是否有回复
+    var hasReplies: Bool {
+        return (replyCount ?? 0) > 0 || (beReplied?.isEmpty == false)
+    }
     
     var timeText: String {
         let date = Date(timeIntervalSince1970: Double(time) / 1000)
@@ -668,10 +738,72 @@ struct CommentUser: Codable {
 struct ReplyComment: Codable {
     let content: String
     let user: CommentUser
+    let beRepliedUser: CommentUser?  // 被回复的用户
 }
 
 struct IPLocation: Codable {
     let location: String?
+}
+
+// MARK: - 楼层回复响应
+
+struct CommentFloorResponse: Codable {
+    let code: Int
+    let data: CommentFloorData?
+}
+
+struct CommentFloorData: Codable {
+    let comments: [FloorComment]?
+    let totalCount: Int?
+    let hasMore: Bool?
+    let time: Int?  // 用于分页
+}
+
+struct FloorComment: Codable, Identifiable {
+    let commentId: Int
+    let content: String
+    let time: Int
+    let likedCount: Int?
+    let user: CommentUser
+    let beRepliedUser: CommentUser?  // 被回复的用户
+    let ipLocation: IPLocation?
+    
+    var id: Int { commentId }
+    
+    var timeText: String {
+        let date = Date(timeIntervalSince1970: Double(time) / 1000)
+        let now = Date()
+        let diff = now.timeIntervalSince(date)
+        
+        if diff < 60 {
+            return "刚刚"
+        } else if diff < 3600 {
+            return "\(Int(diff / 60))分钟前"
+        } else if diff < 86400 {
+            return "\(Int(diff / 3600))小时前"
+        } else if diff < 86400 * 30 {
+            return "\(Int(diff / 86400))天前"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            return formatter.string(from: date)
+        }
+    }
+}
+
+// MARK: - 发送评论响应
+
+struct SendCommentResponse: Codable {
+    let code: Int
+    let comment: Comment?
+    let message: String?
+}
+
+// MARK: - 基础响应
+
+struct BaseResponse: Codable {
+    let code: Int
+    let message: String?
 }
 
 // MARK: - 歌手详情响应
@@ -934,11 +1066,11 @@ struct YrcLine: Identifiable {
             let content = String(trimmed[contentRange])
             
             // 解析逐字: (开始时间,时长,0)字
+            let lineStartSec = lineStartMs / 1000.0
             let words = parseWords(content)
-            
+
             if !words.isEmpty {
                 // 查找对应的翻译
-                let lineStartSec = lineStartMs / 1000.0
                 var trans: String?
                 for (time, text) in translationDict {
                     if abs(time - lineStartSec) < 0.5 {
@@ -962,27 +1094,27 @@ struct YrcLine: Identifiable {
     /// 解析逐字内容
     private static func parseWords(_ content: String) -> [YrcWord] {
         var words: [YrcWord] = []
-        
+
         // 匹配 (startTime,duration,0)text 格式
         let wordPattern = #"\((\d+),(\d+),\d+\)([^(]*)"#
         guard let wordRegex = try? NSRegularExpression(pattern: wordPattern) else {
             return []
         }
-        
+
         let range = NSRange(content.startIndex..., in: content)
         let matches = wordRegex.matches(in: content, range: range)
-        
+
         for match in matches {
             guard let startRange = Range(match.range(at: 1), in: content),
                   let durationRange = Range(match.range(at: 2), in: content),
                   let textRange = Range(match.range(at: 3), in: content) else {
                 continue
             }
-            
+
             let startMs = Double(content[startRange]) ?? 0
             let durationMs = Double(content[durationRange]) ?? 0
             let text = String(content[textRange])
-            
+
             if !text.isEmpty {
                 words.append(YrcWord(
                     startTime: startMs / 1000.0,
@@ -991,7 +1123,7 @@ struct YrcLine: Identifiable {
                 ))
             }
         }
-        
+
         return words
     }
     
@@ -1036,4 +1168,198 @@ struct YrcLine: Identifiable {
         
         return lines
     }
+}
+
+
+// MARK: - 心动模式响应
+
+struct HeartbeatModeResponse: Codable {
+    let code: Int
+    let data: [HeartbeatSong]?
+}
+
+struct HeartbeatSong: Codable, Identifiable {
+    let id: Int
+    let songInfo: HeartbeatSongInfo?
+    let recommended: Bool?
+    
+    // 转换为Track
+    func toTrack() -> Track? {
+        guard let info = songInfo else { return nil }
+        return Track(
+            id: info.id,
+            name: info.name,
+            ar: info.ar,
+            al: info.al,
+            artists: nil,
+            album: nil,
+            dt: info.dt,
+            duration: nil,
+            mv: info.mv,
+            mvid: nil
+        )
+    }
+}
+
+struct HeartbeatSongInfo: Codable {
+    let id: Int
+    let name: String
+    let ar: [Artist]?
+    let al: Album?
+    let dt: Int?
+    let mv: Int?
+}
+
+// MARK: - 雷达歌单响应
+
+struct RadarPlaylistResponse: Codable {
+    let code: Int
+    let data: RadarPlaylistData?
+}
+
+struct RadarPlaylistData: Codable {
+    let blocks: [RadarBlock]?
+}
+
+struct RadarBlock: Codable {
+    let blockCode: String?
+    let creatives: [RadarCreative]?
+}
+
+struct RadarCreative: Codable {
+    let creativeId: String?
+    let resources: [RadarResource]?
+}
+
+struct RadarResource: Codable {
+    let resourceId: String?
+    let resourceType: String?
+    let resourceExtInfo: RadarResourceExtInfo?
+}
+
+struct RadarResourceExtInfo: Codable {
+    let playCount: Int?
+    let highQuality: Bool?
+    let specialType: Int?
+    let songData: RadarSongData?
+}
+
+struct RadarSongData: Codable {
+    let id: Int?
+    let name: String?
+    let ar: [Artist]?
+    let al: Album?
+    let dt: Int?
+    
+    func toTrack() -> Track? {
+        guard let id = id, let name = name else { return nil }
+        return Track(
+            id: id,
+            name: name,
+            ar: ar,
+            al: al,
+            artists: nil,
+            album: nil,
+            dt: dt,
+            duration: nil,
+            mv: nil,
+            mvid: nil
+        )
+    }
+}
+
+// MARK: - 每日推荐歌曲响应
+
+struct DailyRecommendSongsResponse: Codable {
+    let code: Int
+    let data: DailyRecommendData?
+}
+
+struct DailyRecommendData: Codable {
+    let dailySongs: [Track]?
+}
+
+// MARK: - 私人FM响应
+
+struct PersonalFMResponse: Codable {
+    let code: Int
+    let data: [FMTrack]?
+}
+
+struct FMTrack: Codable {
+    let id: Int
+    let name: String
+    let artists: [Artist]?
+    let album: Album?
+    let duration: Int?
+    let mvid: Int?
+    
+    func toTrack() -> Track {
+        Track(
+            id: id,
+            name: name,
+            ar: nil,
+            al: nil,
+            artists: artists,
+            album: album,
+            dt: nil,
+            duration: duration,
+            mv: nil,
+            mvid: mvid
+        )
+    }
+}
+
+// MARK: - FM垃圾桶响应
+
+struct FMTrashResponse: Codable {
+    let code: Int
+}
+
+// MARK: - 搜索建议响应
+
+struct SearchSuggestResponse: Codable {
+    let code: Int
+    let result: SearchSuggestResult?
+}
+
+struct SearchSuggestResult: Codable {
+    let songs: [SuggestSong]?
+    let artists: [SuggestArtist]?
+    let albums: [SuggestAlbum]?
+    let order: [String]?
+}
+
+struct SuggestSong: Codable, Identifiable {
+    let id: Int
+    let name: String
+    let artists: [SuggestArtistBrief]?
+    let album: SuggestAlbumBrief?
+    
+    var artistName: String {
+        artists?.map { $0.name }.joined(separator: "/") ?? "未知歌手"
+    }
+}
+
+struct SuggestArtist: Codable, Identifiable {
+    let id: Int
+    let name: String
+    let picUrl: String?
+}
+
+struct SuggestAlbum: Codable, Identifiable {
+    let id: Int
+    let name: String
+    let artist: SuggestArtistBrief?
+    let picUrl: String?
+}
+
+struct SuggestArtistBrief: Codable {
+    let id: Int
+    let name: String
+}
+
+struct SuggestAlbumBrief: Codable {
+    let id: Int
+    let name: String
 }

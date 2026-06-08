@@ -4,9 +4,17 @@ import SwiftUI
 struct PlaylistSquareView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var themeManager: ThemeManager
     
     // 上次所在 Tab 索引（用于显示对应图标）
     var previousTabIndex: Int = 0
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
+    private var backgroundColor: Color { isStrangerTheme ? Color(red: 0.05, green: 0.02, blue: 0.08) : Color(.systemGroupedBackground) }
     
     // Tab 图标配置
     private static let tabIcons = ["house.fill", "square.grid.2x2", "person.fill", "gearshape.fill"]
@@ -59,7 +67,7 @@ struct PlaylistSquareView: View {
             // 底部搜索栏
             bottomSearchBar
         }
-        .background(Color(.systemGroupedBackground))
+        .background(backgroundColor)
         .navigationBarHidden(true)
     }
     
@@ -67,8 +75,7 @@ struct PlaylistSquareView: View {
     private var categoriesContent: some View {
         ScrollView(showsIndicators: false) {
             LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: 12),
-                GridItem(.flexible(), spacing: 12)
+                GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 12)
             ], spacing: 12) {
                 ForEach(playlistCategories) { category in
                     NavigationLink {
@@ -91,9 +98,10 @@ struct PlaylistSquareView: View {
                 Spacer()
                 ProgressView()
                     .scaleEffect(1.2)
+                    .tint(isStrangerTheme ? accentColor : nil)
                 Text("搜索中...")
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .padding(.top, 12)
                 Spacer()
             } else {
@@ -128,13 +136,13 @@ struct PlaylistSquareView: View {
                             if count > 0 {
                                 Text("\(count)")
                                     .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(secondaryTextColor)
                             }
                         }
-                        .foregroundColor(selectedSearchType == type ? .primary : .secondary)
+                        .foregroundColor(selectedSearchType == type ? textColor : secondaryTextColor)
                         
                         Rectangle()
-                            .fill(selectedSearchType == type ? Color.red : Color.clear)
+                            .fill(selectedSearchType == type ? accentColor : Color.clear)
                             .frame(height: 2)
                             .cornerRadius(1)
                     }
@@ -144,7 +152,7 @@ struct PlaylistSquareView: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
-        .background(Color(.systemBackground))
+        .background(isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.systemBackground))
     }
     
     // MARK: - 歌曲结果列表
@@ -156,7 +164,7 @@ struct PlaylistSquareView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(Array(searchResults.enumerated()), id: \.element.id) { index, track in
-                            SearchTrackRow(track: track, isPlaying: AudioPlayer.shared.currentTrack?.id == track.id)
+                            SearchTrackRow(track: track, isPlaying: AudioPlayer.shared.currentTrack?.id == track.id, isStrangerTheme: isStrangerTheme)
                                 .onTapGesture {
                                     AudioPlayer.shared.setPlaylist(searchResults, startAt: index)
                                 }
@@ -191,7 +199,7 @@ struct PlaylistSquareView: View {
                             NavigationLink {
                                 ArtistDetailView(artistId: artist.id, artistName: artist.name)
                             } label: {
-                                SearchArtistRow(artist: artist)
+                                SearchArtistRow(artist: artist, isStrangerTheme: isStrangerTheme)
                             }
                             .onAppear {
                                 if index == artistResults.count - 3 && hasMoreArtists {
@@ -224,7 +232,7 @@ struct PlaylistSquareView: View {
                             NavigationLink {
                                 AlbumDetailView(albumId: album.id, albumName: album.name)
                             } label: {
-                                SearchAlbumRow(album: album)
+                                SearchAlbumRow(album: album, isStrangerTheme: isStrangerTheme)
                             }
                             .onAppear {
                                 if index == albumResults.count - 3 && hasMoreAlbums {
@@ -255,24 +263,25 @@ struct PlaylistSquareView: View {
             } label: {
                 ZStack {
                     Circle()
-                        .fill(colorScheme == .dark ? Color(white: 0.2) : Color(white: 0.95))
+                        .fill(isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : (colorScheme == .dark ? Color(white: 0.2) : Color(white: 0.95)))
                     
                     Image(systemName: Self.tabIcons[previousTabIndex])
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.red)
+                        .foregroundColor(accentColor)
                 }
                 .frame(width: 48, height: 48)
-                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                .shadow(color: isStrangerTheme ? accentColor.opacity(0.2) : .black.opacity(0.1), radius: 8, x: 0, y: 4)
             }
             
             // 搜索框
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                 
                 TextField("艺人、歌曲、歌词以及更多内容", text: $searchText)
                     .font(.system(size: 16))
+                    .foregroundColor(textColor)
                     .focused($isSearchFieldFocused)
                     .submitLabel(.search)
                     .onSubmit {
@@ -289,7 +298,7 @@ struct PlaylistSquareView: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 16))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                 }
             }
@@ -297,13 +306,13 @@ struct PlaylistSquareView: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(colorScheme == .dark ? Color(white: 0.18) : Color(white: 0.96))
+                    .fill(isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : (colorScheme == .dark ? Color(white: 0.18) : Color(white: 0.96)))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05), lineWidth: 1)
+                    .stroke(isStrangerTheme ? accentColor.opacity(0.3) : (colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05)), lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
+            .shadow(color: isStrangerTheme ? accentColor.opacity(0.1) : .black.opacity(0.08), radius: 8, x: 0, y: 4)
             
             // 麦克风按钮
             Button {
@@ -312,22 +321,30 @@ struct PlaylistSquareView: View {
             } label: {
                 ZStack {
                     Circle()
-                        .fill(colorScheme == .dark ? Color(white: 0.2) : Color(white: 0.95))
+                        .fill(isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : (colorScheme == .dark ? Color(white: 0.2) : Color(white: 0.95)))
                     
                     Image(systemName: "mic.fill")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(isStrangerTheme ? accentColor : .primary)
                 }
                 .frame(width: 48, height: 48)
-                .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                .shadow(color: isStrangerTheme ? accentColor.opacity(0.2) : .black.opacity(0.1), radius: 8, x: 0, y: 4)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
+            Group {
+                if isStrangerTheme {
+                    Rectangle()
+                        .fill(Color(red: 0.05, green: 0.02, blue: 0.08).opacity(0.95))
+                        .ignoresSafeArea()
+                } else {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .ignoresSafeArea()
+                }
+            }
         )
     }
     
@@ -336,10 +353,10 @@ struct PlaylistSquareView: View {
         VStack(spacing: 16) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 48, weight: .light))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
             Text(text)
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -349,13 +366,15 @@ struct PlaylistSquareView: View {
             if isLoading {
                 HStack {
                     Spacer()
-                    ProgressView().padding()
+                    ProgressView()
+                        .tint(isStrangerTheme ? accentColor : nil)
+                        .padding()
                     Spacer()
                 }
             } else if !hasMore {
                 Text("已加载全部")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .frame(maxWidth: .infinity)
                     .padding()
             }
@@ -404,7 +423,9 @@ struct PlaylistSquareView: View {
                 }
             }
         } catch {
+            #if DEBUG
             print("搜索出错: \(error)")
+            #endif
             await MainActor.run { isSearching = false }
         }
     }
@@ -493,7 +514,7 @@ struct PlaylistCategoryCard: View {
     let category: PlaylistCategoryItem
     
     private var cardHeight: CGFloat {
-        (UIScreen.main.bounds.width - 44) / 2 * 0.6
+        min((UIScreen.main.bounds.width - 44) / 2 * 0.6, 180)
     }
     
     var body: some View {
@@ -519,6 +540,7 @@ struct PlaylistCategoryCard: View {
 struct CategoryPlaylistListView: View {
     let category: String
     let title: String
+    @EnvironmentObject var themeManager: ThemeManager
     
     @State private var playlists: [RecommendPlaylist] = []
     @State private var isLoading = true
@@ -528,16 +550,21 @@ struct CategoryPlaylistListView: View {
     private let musicService = MusicService.shared
     private let limit = 30
     
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.themeStyle == .strangerThings }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
+    private var backgroundColor: Color { isStrangerTheme ? Color(red: 0.05, green: 0.02, blue: 0.08) : Color(.systemGroupedBackground) }
+    
     var body: some View {
         Group {
             if isLoading && playlists.isEmpty {
                 ProgressView()
+                    .tint(isStrangerTheme ? accentColor : nil)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView(showsIndicators: false) {
                     LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 14),
-                        GridItem(.flexible(), spacing: 14)
+                        GridItem(.adaptive(minimum: 160, maximum: 220), spacing: 14)
                     ], spacing: 20) {
                         ForEach(playlists) { playlist in
                             NavigationLink {
@@ -547,7 +574,7 @@ struct CategoryPlaylistListView: View {
                                     coverUrl: playlist.coverUrl
                                 )
                             } label: {
-                                CategoryPlaylistCard(playlist: playlist)
+                                CategoryPlaylistCard(playlist: playlist, isStrangerTheme: isStrangerTheme)
                             }
                             .buttonStyle(PlainButtonStyle())
                             .onAppear {
@@ -561,7 +588,9 @@ struct CategoryPlaylistListView: View {
                     .padding(.bottom, 100)
                     
                     if isLoadingMore {
-                        ProgressView().padding(.bottom, 20)
+                        ProgressView()
+                            .tint(isStrangerTheme ? accentColor : nil)
+                            .padding(.bottom, 20)
                     }
                 }
                 .refreshable {
@@ -570,6 +599,7 @@ struct CategoryPlaylistListView: View {
                 }
             }
         }
+        .background(backgroundColor)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.large)
         .task {
@@ -583,7 +613,9 @@ struct CategoryPlaylistListView: View {
             playlists = try await musicService.getHotPlaylist(cat: category, limit: limit, offset: 0)
             offset = limit
         } catch {
+            #if DEBUG
             print("加载歌单失败: \(error)")
+            #endif
         }
         isLoading = false
     }
@@ -596,7 +628,9 @@ struct CategoryPlaylistListView: View {
             playlists.append(contentsOf: more)
             offset += limit
         } catch {
+            #if DEBUG
             print("加载更多失败: \(error)")
+            #endif
         }
         isLoadingMore = false
     }
@@ -605,9 +639,13 @@ struct CategoryPlaylistListView: View {
 // MARK: - 分类歌单卡片
 struct CategoryPlaylistCard: View {
     let playlist: RecommendPlaylist
+    var isStrangerTheme: Bool = false
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var placeholderBackground: Color { isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : Color(.systemGray5) }
     
     private var imageSize: CGFloat {
-        (UIScreen.main.bounds.width - 46) / 2
+        min((UIScreen.main.bounds.width - 46) / 2, 220)
     }
     
     var body: some View {
@@ -617,10 +655,10 @@ struct CategoryPlaylistCard: View {
                     CachedAsyncImage(url: url, targetSize: CGSize(width: imageSize, height: imageSize)) { image in
                         image.resizable().aspectRatio(contentMode: .fill)
                     } placeholder: {
-                        Rectangle().fill(Color(.systemGray5))
+                        Rectangle().fill(placeholderBackground)
                     }
                 } else {
-                    Rectangle().fill(Color(.systemGray5))
+                    Rectangle().fill(placeholderBackground)
                 }
                 
                 if !playlist.playCountText.isEmpty {
@@ -638,11 +676,11 @@ struct CategoryPlaylistCard: View {
             }
             .frame(width: imageSize, height: imageSize)
             .clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: 5)
+            .shadow(color: isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3).opacity(0.2) : .black.opacity(0.12), radius: 10, x: 0, y: 5)
             
             Text(playlist.name)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.primary)
+                .foregroundColor(textColor)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
         }
@@ -653,7 +691,12 @@ struct CategoryPlaylistCard: View {
 struct SearchTrackRow: View {
     let track: Track
     let isPlaying: Bool
+    var isStrangerTheme: Bool = false
     @Environment(\.colorScheme) var colorScheme
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
     
     var body: some View {
         HStack(spacing: 12) {
@@ -683,12 +726,12 @@ struct SearchTrackRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(track.name)
                     .font(.system(size: 15, weight: isPlaying ? .semibold : .regular))
-                    .foregroundColor(isPlaying ? .red : .primary)
+                    .foregroundColor(isPlaying ? accentColor : textColor)
                     .lineLimit(1)
                 
                 Text("\(track.artistName) · \(track.albumName)")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
                     .lineLimit(1)
             }
             
@@ -696,7 +739,7 @@ struct SearchTrackRow: View {
             
             Image(systemName: "ellipsis")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.secondary)
+                .foregroundColor(secondaryTextColor)
                 .frame(width: 32, height: 32)
         }
         .padding(.horizontal, 16)
@@ -707,10 +750,10 @@ struct SearchTrackRow: View {
     private var coverPlaceholder: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(colorScheme == .dark ? Color(.systemGray6) : Color(.systemGray5))
+                .fill(isStrangerTheme ? Color(red: 0.1, green: 0.05, blue: 0.15) : (colorScheme == .dark ? Color(.systemGray6) : Color(.systemGray5)))
             Image(systemName: "music.note")
                 .font(.system(size: 18))
-                .foregroundColor(.secondary.opacity(0.5))
+                .foregroundColor(secondaryTextColor.opacity(0.5))
         }
     }
 }

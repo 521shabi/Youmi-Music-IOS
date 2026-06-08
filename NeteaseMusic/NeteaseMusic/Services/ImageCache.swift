@@ -5,24 +5,32 @@ import ImageIO
 // MARK: - 图片缓存管理器
 final class ImageCache {
     static let shared = ImageCache()
-    
+
     private let cache = NSCache<NSString, UIImage>()
     private let fileManager = FileManager.default
     private let cacheDirectory: URL
     private let ioQueue = DispatchQueue(label: "com.neteasemusic.imagecache", qos: .utility)
-    
+
+    // 磁盘缓存限制
+    private let maxDiskCacheSize: Int64 = 200 * 1024 * 1024  // 200MB
+    private let maxCacheAge: TimeInterval = 7 * 24 * 60 * 60  // 7天
+
     private init() {
-        // 设置内存缓存限制
-        cache.countLimit = 150
-        cache.totalCostLimit = 80 * 1024 * 1024  // 80MB
-        
+        // 根据设备内存动态设置缓存限制
+        let totalMemory = ProcessInfo.processInfo.physicalMemory
+        let memoryFraction = totalMemory / 8  // 使用 1/8 物理内存
+        let maxMemoryCache = min(memoryFraction, 100 * 1024 * 1024)  // 最多 100MB
+
+        cache.countLimit = totalMemory > 4 * 1024 * 1024 * 1024 ? 100 : 50  // 4GB 以上 100 张，否则 50 张
+        cache.totalCostLimit = Int(maxMemoryCache)
+
         // 设置磁盘缓存目录
         let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
         cacheDirectory = paths[0].appendingPathComponent("ImageCache")
-        
+
         // 创建缓存目录
         try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
-        
+
         // 监听内存警告
         NotificationCenter.default.addObserver(
             self,
@@ -30,6 +38,9 @@ final class ImageCache {
             name: UIApplication.didReceiveMemoryWarningNotification,
             object: nil
         )
+
+        // 启动时清理过期缓存
+        cleanExpiredDiskCache()
     }
     
     @objc private func handleMemoryWarning() {
@@ -61,7 +72,7 @@ final class ImageCache {
         guard let data = try? Data(contentsOf: filePath) else {
             return nil
         }
-        
+
         // 如果指定了目标尺寸，进行下采样
         let image: UIImage?
         if let size = targetSize {
@@ -69,12 +80,44 @@ final class ImageCache {
         } else {
             image = UIImage(data: data)
         }
-        
+
         // 同时加载到内存缓存
         if let img = image {
             saveToMemory(img, for: url, targetSize: targetSize)
         }
         return image
+    }
+
+    /// 异步从磁盘读取图片（避免阻塞主线程）
+    func getFromDiskAsync(_ url: URL, targetSize: CGSize? = nil) async -> UIImage? {
+        return await withCheckedContinuation { continuation in
+            ioQueue.async { [weak self] in
+                guard let self = self else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                let filePath = self.diskCachePath(for: url)
+                guard let data = try? Data(contentsOf: filePath) else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                // 如果指定了目标尺寸，进行下采样
+                let image: UIImage?
+                if let size = targetSize {
+                    image = self.downsample(data: data, to: size)
+                } else {
+                    image = UIImage(data: data)
+                }
+
+                // 同时加载到内存缓存
+                if let img = image {
+                    self.saveToMemory(img, for: url, targetSize: targetSize)
+                }
+                continuation.resume(returning: image)
+            }
+        }
     }
     
     func saveToDisk(_ data: Data, for url: URL) {
@@ -141,69 +184,202 @@ final class ImageCache {
         }
         return size
     }
+
+    // MARK: - 磁盘缓存清理（LRU 策略）
+    func cleanExpiredDiskCache() {
+        ioQueue.async { [weak self] in
+            guard let self = self else { return }
+
+            let resourceKeys: Set<URLResourceKey> = [.contentAccessDateKey, .fileSizeKey]
+            guard let files = try? self.fileManager.contentsOfDirectory(
+                at: self.cacheDirectory,
+                includingPropertiesForKeys: Array(resourceKeys)
+            ) else { return }
+
+            let expirationDate = Date().addingTimeInterval(-self.maxCacheAge)
+            var currentCacheSize: Int64 = 0
+            var filesToDelete: [URL] = []
+            var cachedFiles: [(url: URL, accessDate: Date, size: Int64)] = []
+
+            // 遍历文件，标记过期文件并计算总大小
+            for fileURL in files {
+                guard let resourceValues = try? fileURL.resourceValues(forKeys: resourceKeys) else {
+                    continue
+                }
+
+                let accessDate = resourceValues.contentAccessDate ?? Date.distantPast
+                let fileSize = Int64(resourceValues.fileSize ?? 0)
+
+                // 过期文件直接删除
+                if accessDate < expirationDate {
+                    filesToDelete.append(fileURL)
+                } else {
+                    cachedFiles.append((url: fileURL, accessDate: accessDate, size: fileSize))
+                    currentCacheSize += fileSize
+                }
+            }
+
+            // 删除过期文件
+            for fileURL in filesToDelete {
+                try? self.fileManager.removeItem(at: fileURL)
+            }
+
+            // 如果超出大小限制，按 LRU 删除最旧的文件
+            if currentCacheSize > self.maxDiskCacheSize {
+                // 按访问时间排序（最旧的在前）
+                let sortedFiles = cachedFiles.sorted { $0.accessDate < $1.accessDate }
+                var sizeToDelete = currentCacheSize - (self.maxDiskCacheSize / 2)  // 清理到 50%
+
+                for file in sortedFiles {
+                    if sizeToDelete <= 0 { break }
+                    try? self.fileManager.removeItem(at: file.url)
+                    sizeToDelete -= file.size
+                }
+            }
+
+            #if DEBUG
+            print("🗑️ 图片缓存清理完成，删除 \(filesToDelete.count) 个过期文件")
+            #endif
+        }
+    }
 }
 
 // MARK: - 缓存图片加载器
 final class CachedImageLoader: ObservableObject {
     @Published var image: UIImage?
     @Published var isLoading = false
-    
+    @Published var loadFailed = false  // 新增：标记加载失败
+
     private var cancellable: AnyCancellable?
     private let cache = ImageCache.shared
     private var targetSize: CGSize?
-    
+    private var currentURL: URL?
+    private var retryCount = 0
+    private let maxRetries = 2  // 减少重试次数
+    private var loadTask: Task<Void, Never>?
+
     func load(from url: URL, targetSize: CGSize? = nil) {
+        // 如果是同一个 URL，不重复加载
+        let sameRequest = isSameRequest(url: url, targetSize: targetSize)
+        if sameRequest && (image != nil || isLoading) {
+            return
+        }
+
+        // 先取消旧任务，避免旧请求回写覆盖新图片
+        loadTask?.cancel()
+        loadTask = nil
+
+        let requestChanged = !sameRequest
         self.targetSize = targetSize
-        
-        // 1. 先检查内存缓存
+        self.currentURL = url
+        self.retryCount = 0
+        self.loadFailed = false
+        if requestChanged {
+            self.image = nil
+            self.isLoading = false
+        }
+
+        // 1. 先检查内存缓存（同步）
         if let cached = cache.getFromMemory(url, targetSize: targetSize) {
             self.image = cached
             return
         }
-        
-        // 2. 检查磁盘缓存（在后台线程）
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+
+        // 2. 异步检查磁盘缓存和网络加载
+        loadTask = Task { [weak self] in
             guard let self = self else { return }
-            
-            if let cached = self.cache.getFromDisk(url, targetSize: targetSize) {
-                DispatchQueue.main.async {
+
+            // 检查磁盘缓存（异步读取，避免阻塞）
+            if let cached = await self.cache.getFromDiskAsync(url, targetSize: targetSize) {
+                if Task.isCancelled { return }
+                await MainActor.run {
+                    guard self.isSameRequest(url: url, targetSize: targetSize) else { return }
                     self.image = cached
+                    self.isLoading = false
                 }
                 return
             }
-            
+
             // 3. 网络加载
-            DispatchQueue.main.async {
+            await MainActor.run {
+                guard self.isSameRequest(url: url, targetSize: targetSize) else { return }
                 self.isLoading = true
             }
-            
-            self.cancellable = URLSession.shared.dataTaskPublisher(for: url)
-                .subscribe(on: DispatchQueue.global(qos: .userInitiated))
-                .map { [weak self] data, _ -> UIImage? in
-                    guard let self = self else { return nil }
-                    // 保存原始数据到磁盘
-                    self.cache.saveToDisk(data, for: url)
-                    // 下采样后返回
-                    if let size = self.targetSize {
-                        return self.cache.downsample(data: data, to: size)
-                    }
-                    return UIImage(data: data)
-                }
-                .replaceError(with: nil)
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] loadedImage in
-                    guard let self = self else { return }
-                    self.isLoading = false
-                    if let image = loadedImage {
-                        self.cache.saveToMemory(image, for: url, targetSize: self.targetSize)
-                        self.image = image
-                    }
-                }
+
+            await self.loadFromNetworkAsync(url: url, targetSize: targetSize)
         }
     }
-    
+
+    private func loadFromNetworkAsync(url: URL, targetSize: CGSize?) async {
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            // 检查任务是否被取消
+            if Task.isCancelled { return }
+            
+            // 保存原始数据到磁盘
+            cache.saveToDisk(data, for: url)
+            
+            // 下采样后返回
+            let loadedImage: UIImage?
+            if let size = targetSize {
+                loadedImage = cache.downsample(data: data, to: size)
+            } else {
+                loadedImage = UIImage(data: data)
+            }
+            
+            await MainActor.run { [weak self] in
+                guard let self = self else { return }
+                guard self.isSameRequest(url: url, targetSize: targetSize) else { return }
+                self.isLoading = false
+                if let image = loadedImage {
+                    self.cache.saveToMemory(image, for: url, targetSize: targetSize)
+                    self.image = image
+                } else {
+                    self.loadFailed = true
+                }
+            }
+        } catch {
+            if Task.isCancelled { return }
+            
+            // 重试逻辑
+            if retryCount < maxRetries {
+                retryCount += 1
+                let delay = pow(2.0, Double(retryCount - 1))
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                
+                if !Task.isCancelled {
+                    await loadFromNetworkAsync(url: url, targetSize: targetSize)
+                }
+            } else {
+                await MainActor.run { [weak self] in
+                    guard let self = self else { return }
+                    guard self.isSameRequest(url: url, targetSize: targetSize) else { return }
+                    self.isLoading = false
+                    self.loadFailed = true
+                }
+            }
+        }
+    }
+
     func cancel() {
+        loadTask?.cancel()
+        loadTask = nil
         cancellable?.cancel()
+        isLoading = false
+    }
+
+    func reset() {
+        cancel()
+        image = nil
+        loadFailed = false
+        targetSize = nil
+        currentURL = nil
+        retryCount = 0
+    }
+
+    private func isSameRequest(url: URL, targetSize: CGSize?) -> Bool {
+        currentURL == url && self.targetSize == targetSize
     }
 }
 
@@ -213,9 +389,9 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     let targetSize: CGSize?
     let content: (Image) -> Content
     let placeholder: () -> Placeholder
-    
+
     @StateObject private var loader = CachedImageLoader()
-    
+
     init(
         url: URL?,
         targetSize: CGSize? = nil,
@@ -227,22 +403,56 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
         self.content = content
         self.placeholder = placeholder
     }
-    
+
     var body: some View {
         Group {
             if let uiImage = loader.image {
                 content(Image(uiImage: uiImage))
+            } else if loader.loadFailed {
+                // 加载失败时显示默认封面图标
+                defaultCoverView
             } else {
                 placeholder()
             }
         }
-        .onAppear {
-            if let url = url {
-                loader.load(from: url, targetSize: targetSize)
-            }
+        .task(id: requestKey) {
+            reloadImage()
         }
         .onDisappear {
             loader.cancel()
+        }
+    }
+
+    private var requestKey: String {
+        let urlKey = url?.absoluteString ?? "nil"
+        let sizeKey: String
+        if let targetSize = targetSize {
+            sizeKey = "\(Int(targetSize.width))x\(Int(targetSize.height))"
+        } else {
+            sizeKey = "original"
+        }
+        return "\(urlKey)|\(sizeKey)"
+    }
+
+    private func reloadImage() {
+        if let url = url {
+            loader.load(from: url, targetSize: targetSize)
+        } else {
+            loader.reset()
+        }
+    }
+
+    // 默认封面视图（加载失败时显示）
+    private var defaultCoverView: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(.systemGray4), Color(.systemGray5)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            Image(systemName: "music.note")
+                .font(.system(size: 40))
+                .foregroundColor(.white.opacity(0.7))
         }
     }
 }

@@ -1,10 +1,17 @@
 import SwiftUI
 
 struct PlayHistoryView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var localStorage = LocalStorageService.shared
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @State private var history: [Track] = []
     @State private var showClearAlert = false
+    
+    // 主题相关
+    private var isStrangerTheme: Bool { themeManager.isStrangerTheme }
+    private var textColor: Color { themeManager.textColor }
+    private var secondaryTextColor: Color { themeManager.secondaryTextColor }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .orange }
     
     var body: some View {
         Group {
@@ -14,6 +21,7 @@ struct PlayHistoryView: View {
                 trackList
             }
         }
+        .background(ThemedBackground().environmentObject(themeManager))
         .navigationTitle("最近播放")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -54,22 +62,22 @@ struct PlayHistoryView: View {
             
             ZStack {
                 Circle()
-                    .fill(Color.orange.opacity(0.1))
+                    .fill(accentColor.opacity(0.1))
                     .frame(width: 100, height: 100)
                 
                 Image(systemName: "clock")
                     .font(.system(size: 40, weight: .light))
-                    .foregroundColor(.orange.opacity(0.6))
+                    .foregroundColor(accentColor.opacity(0.6))
             }
             
             VStack(spacing: 8) {
                 Text("暂无播放记录")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(textColor)
                 
                 Text("播放的歌曲会显示在这里")
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(secondaryTextColor)
             }
             
             Spacer()
@@ -84,7 +92,7 @@ struct PlayHistoryView: View {
                 HStack(spacing: 12) {
                     ZStack {
                         Circle()
-                            .fill(Color.orange)
+                            .fill(accentColor)
                             .frame(width: 40, height: 40)
                         
                         Image(systemName: "play.fill")
@@ -95,11 +103,11 @@ struct PlayHistoryView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("播放全部")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.primary)
+                            .foregroundColor(textColor)
                         
                         Text("\(history.count) 首歌曲")
                             .font(.system(size: 12))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(secondaryTextColor)
                     }
                     
                     Spacer()
@@ -107,6 +115,7 @@ struct PlayHistoryView: View {
                 .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
+            .listRowBackground(isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.systemBackground))
             
             // 歌曲列表
             ForEach(Array(history.enumerated()), id: \.element.id) { index, track in
@@ -114,13 +123,16 @@ struct PlayHistoryView: View {
                     track: track,
                     isPlaying: audioPlayer.currentTrack?.id == track.id,
                     isFavorite: localStorage.isFavorite(track.id),
+                    isStrangerTheme: isStrangerTheme,
                     onPlay: { playTrack(at: index) },
                     onToggleFavorite: { toggleFavorite(track) },
                     onRemove: { removeFromHistory(track) }
                 )
+                .listRowBackground(isStrangerTheme ? Color(red: 0.08, green: 0.04, blue: 0.12) : Color(.systemBackground))
             }
         }
         .listStyle(.plain)
+        .scrollContentBackground(isStrangerTheme ? .hidden : .automatic)
     }
     
     // MARK: - 方法
@@ -162,9 +174,14 @@ struct HistoryTrackRow: View {
     let track: Track
     let isPlaying: Bool
     let isFavorite: Bool
+    var isStrangerTheme: Bool = false
     let onPlay: () -> Void
     let onToggleFavorite: () -> Void
     let onRemove: () -> Void
+    
+    private var textColor: Color { isStrangerTheme ? .white : .primary }
+    private var secondaryTextColor: Color { isStrangerTheme ? .white.opacity(0.6) : .secondary }
+    private var accentColor: Color { isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .red }
     
     var body: some View {
         Button(action: onPlay) {
@@ -195,12 +212,12 @@ struct HistoryTrackRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(track.name)
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(isPlaying ? .red : .primary)
+                        .foregroundColor(isPlaying ? accentColor : textColor)
                         .lineLimit(1)
                     
                     Text(track.artistName)
                         .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                         .lineLimit(1)
                 }
                 
@@ -210,7 +227,7 @@ struct HistoryTrackRow: View {
                 if track.dt != nil {
                     Text(track.durationText)
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(secondaryTextColor)
                 }
             }
             .padding(.vertical, 4)
@@ -228,7 +245,7 @@ struct HistoryTrackRow: View {
                     systemImage: isFavorite ? "heart.slash" : "heart"
                 )
             }
-            .tint(isFavorite ? .gray : .red)
+            .tint(isFavorite ? .gray : accentColor)
         }
     }
 }

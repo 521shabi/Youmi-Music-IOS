@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'NeteaseMusic' in project 'NeteaseMusic'
+➜ Explicit dependency on target 'LyricWidgetExtension' in project 'NeteaseMusic'
+Target 'LyricWidgetExtension' in project 'NeteaseMusic' (no dependencies)

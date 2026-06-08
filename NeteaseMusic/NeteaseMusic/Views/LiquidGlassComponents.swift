@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - iOS 26 液态玻璃设计系统 (Apple Music 风格) - 增强版
+// MARK: - iOS 26 液态玻璃设计系统 - 原生 API 版本
 
-// MARK: - 液态玻璃主题配置（预计算颜色，避免运行时计算）
+// MARK: - 液态玻璃主题配置（用于 iOS 26 以下的回退）
 struct LiquidGlassTheme {
     // 深色模式
     static let darkBackground = Color(white: 0.12).opacity(0.88)
@@ -25,12 +25,151 @@ struct LiquidGlassTheme {
     static let lightShadowSecondary = Color.black.opacity(0.06)
 }
 
-// MARK: - 液态玻璃卡片（增强版）
+// MARK: - iOS 26 原生液态玻璃修饰符
+extension View {
+    /// 应用 iOS 26 原生液态玻璃效果（圆角矩形）
+    @ViewBuilder
+    func glassEffectRounded(cornerRadius: CGFloat = 20) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: cornerRadius))
+        } else {
+            self.background(LiquidGlassFallbackBackground(cornerRadius: cornerRadius))
+        }
+    }
+
+    /// 应用 iOS 26 原生液态玻璃效果（圆形）
+    @ViewBuilder
+    func glassEffectCircular() -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: Circle())
+        } else {
+            self.background(LiquidGlassFallbackCircleBackground())
+        }
+    }
+
+    /// 应用 iOS 26 原生液态玻璃效果（胶囊）
+    @ViewBuilder
+    func glassEffectCapsule() -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: Capsule())
+        } else {
+            self.background(LiquidGlassFallbackCapsuleBackground())
+        }
+    }
+}
+
+// MARK: - 回退背景（iOS 26 以下）
+private struct LiquidGlassFallbackBackground: View {
+    let cornerRadius: CGFloat
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(.ultraThinMaterial)
+
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.6),
+                            .clear
+                        ],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(
+                    LinearGradient(
+                        colors: colorScheme == .dark
+                            ? [Color.white.opacity(0.25), Color.white.opacity(0.05)]
+                            : [Color.white.opacity(0.8), Color.white.opacity(0.2)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        }
+    }
+}
+
+private struct LiquidGlassFallbackCircleBackground: View {
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(.ultraThinMaterial)
+
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.6),
+                            .clear
+                        ],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+
+            Circle()
+                .stroke(
+                    LinearGradient(
+                        colors: colorScheme == .dark
+                            ? [Color.white.opacity(0.25), Color.white.opacity(0.05)]
+                            : [Color.white.opacity(0.8), Color.white.opacity(0.2)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        }
+    }
+}
+
+private struct LiquidGlassFallbackCapsuleBackground: View {
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        ZStack {
+            Capsule()
+                .fill(.ultraThinMaterial)
+
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.6),
+                            .clear
+                        ],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        colors: colorScheme == .dark
+                            ? [Color.white.opacity(0.25), Color.white.opacity(0.05)]
+                            : [Color.white.opacity(0.8), Color.white.opacity(0.2)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        }
+    }
+}
+
+// MARK: - 液态玻璃卡片（iOS 26 原生版）
 struct LiquidGlassCard<Content: View>: View {
     let content: Content
     var cornerRadius: CGFloat = 20
     var padding: CGFloat = 16
-    @Environment(\.colorScheme) var colorScheme
 
     init(cornerRadius: CGFloat = 20, padding: CGFloat = 16, @ViewBuilder content: () -> Content) {
         self.cornerRadius = cornerRadius
@@ -41,59 +180,14 @@ struct LiquidGlassCard<Content: View>: View {
     var body: some View {
         content
             .padding(padding)
-            .background(
-                ZStack {
-                    // 层1: 主背景
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(colorScheme == .dark ? LiquidGlassTheme.darkBackground : LiquidGlassTheme.lightBackground)
-
-                    // 层2: 顶部高光渐变（模拟玻璃反射）
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .fill(
-                            LinearGradient(
-                                colors: colorScheme == .dark
-                                    ? [LiquidGlassTheme.darkHighlightTop, .clear, .clear]
-                                    : [LiquidGlassTheme.lightHighlightTop, .clear, .clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .mask(
-                            RoundedRectangle(cornerRadius: cornerRadius)
-                                .fill(LinearGradient(colors: [.white, .clear], startPoint: .top, endPoint: .center))
-                        )
-
-                    // 层3: 边缘高光描边
-                    RoundedRectangle(cornerRadius: cornerRadius)
-                        .stroke(
-                            LinearGradient(
-                                colors: colorScheme == .dark
-                                    ? [LiquidGlassTheme.darkHighlightTop, LiquidGlassTheme.darkHighlightBottom]
-                                    : [LiquidGlassTheme.lightHighlightTop, LiquidGlassTheme.lightHighlightBottom],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-
-                    // 层4: 内边框（增加玻璃边缘感）
-                    RoundedRectangle(cornerRadius: cornerRadius - 1)
-                        .stroke(colorScheme == .dark ? LiquidGlassTheme.darkBorder : LiquidGlassTheme.lightBorder, lineWidth: 0.5)
-                        .padding(1)
-                }
-                .compositingGroup()
-            )
-            // 分层阴影
-            .shadow(color: colorScheme == .dark ? LiquidGlassTheme.darkShadowPrimary : LiquidGlassTheme.lightShadowPrimary, radius: 20, x: 0, y: 10)
-            .shadow(color: colorScheme == .dark ? LiquidGlassTheme.darkShadowSecondary : LiquidGlassTheme.lightShadowSecondary, radius: 8, x: 0, y: 4)
+            .glassEffectRounded(cornerRadius: cornerRadius)
     }
 }
 
-// MARK: - 液态玻璃分组容器（增强版）
+// MARK: - 液态玻璃分组容器（iOS 26 原生版）
 struct LiquidGlassSection<Content: View>: View {
     let title: String?
     let content: Content
-    @Environment(\.colorScheme) var colorScheme
 
     init(title: String? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
@@ -110,43 +204,7 @@ struct LiquidGlassSection<Content: View>: View {
             }
 
             content
-                .background(
-                    ZStack {
-                        // 主背景
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(colorScheme == .dark ? LiquidGlassTheme.darkBackground : LiquidGlassTheme.lightBackground)
-
-                        // 顶部光泽
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        colorScheme == .dark ? Color.white.opacity(0.12) : Color.white.opacity(0.6),
-                                        .clear
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .center
-                                )
-                            )
-
-                        // 边缘高光
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(
-                                LinearGradient(
-                                    colors: colorScheme == .dark
-                                        ? [Color.white.opacity(0.2), Color.white.opacity(0.05)]
-                                        : [Color.white.opacity(0.8), Color.white.opacity(0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    }
-                    .compositingGroup()
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: colorScheme == .dark ? LiquidGlassTheme.darkShadowPrimary : LiquidGlassTheme.lightShadowPrimary, radius: 16, x: 0, y: 8)
-                .shadow(color: colorScheme == .dark ? LiquidGlassTheme.darkShadowSecondary : LiquidGlassTheme.lightShadowSecondary, radius: 6, x: 0, y: 3)
+                .glassEffectRounded(cornerRadius: 16)
                 .padding(.horizontal, 16)
         }
     }
@@ -198,16 +256,14 @@ struct LiquidGlassRow<Leading: View, Trailing: View>: View {
     }
 }
 
-// MARK: - 液态玻璃图标按钮（增强版）
+// MARK: - 液态玻璃图标按钮（iOS 26 原生版）
 struct LiquidGlassIconButton: View {
     let icon: String
     let color: Color
     var size: CGFloat = 44
     var iconSize: CGFloat = 20
     let action: () -> Void
-    @Environment(\.colorScheme) var colorScheme
 
-    // 缓存触觉反馈生成器
     private static let impactGenerator = UIImpactFeedbackGenerator(style: .light)
 
     var body: some View {
@@ -219,58 +275,18 @@ struct LiquidGlassIconButton: View {
                 .font(.system(size: iconSize, weight: .semibold))
                 .foregroundColor(color)
                 .frame(width: size, height: size)
-                .background(
-                    ZStack {
-                        // 主背景
-                        Circle()
-                            .fill(colorScheme == .dark ? LiquidGlassTheme.darkBackgroundSecondary : LiquidGlassTheme.lightBackgroundSecondary)
-
-                        // 颜色叠加
-                        Circle()
-                            .fill(color.opacity(colorScheme == .dark ? 0.18 : 0.12))
-
-                        // 顶部高光
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        colorScheme == .dark ? Color.white.opacity(0.2) : Color.white.opacity(0.7),
-                                        .clear
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .center
-                                )
-                            )
-
-                        // 边缘高光
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: colorScheme == .dark
-                                        ? [Color.white.opacity(0.25), Color.white.opacity(0.05)]
-                                        : [Color.white.opacity(0.9), Color.white.opacity(0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    }
-                    .compositingGroup()
-                )
+                .glassEffectCircular()
         }
         .buttonStyle(LiquidGlassButtonStyle())
-        .shadow(color: color.opacity(0.25), radius: 8, x: 0, y: 4)
-        .shadow(color: colorScheme == .dark ? LiquidGlassTheme.darkShadowSecondary : LiquidGlassTheme.lightShadowSecondary, radius: 4, x: 0, y: 2)
     }
 }
 
-// MARK: - 液态玻璃胶囊按钮（增强版）
+// MARK: - 液态玻璃胶囊按钮（iOS 26 原生版）
 struct LiquidGlassPillButton: View {
     let title: String
     var icon: String? = nil
     var gradient: [Color] = [.pink, .purple]
     let action: () -> Void
-    @Environment(\.colorScheme) var colorScheme
 
     private static let impactGenerator = UIImpactFeedbackGenerator(style: .light)
 
@@ -292,52 +308,16 @@ struct LiquidGlassPillButton: View {
             )
             .padding(.horizontal, 18)
             .padding(.vertical, 10)
-            .background(
-                ZStack {
-                    // 主背景
-                    Capsule()
-                        .fill(colorScheme == .dark ? LiquidGlassTheme.darkBackground : LiquidGlassTheme.lightBackground)
-
-                    // 顶部光泽
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    colorScheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.6),
-                                    .clear
-                                ],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        )
-
-                    // 边缘高光
-                    Capsule()
-                        .stroke(
-                            LinearGradient(
-                                colors: colorScheme == .dark
-                                    ? [Color.white.opacity(0.22), Color.white.opacity(0.05)]
-                                    : [Color.white.opacity(0.85), Color.white.opacity(0.2)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1
-                        )
-                }
-                .compositingGroup()
-            )
+            .glassEffectCapsule()
         }
         .buttonStyle(LiquidGlassButtonStyle())
-        .shadow(color: gradient.first?.opacity(0.2) ?? .clear, radius: 8, x: 0, y: 4)
-        .shadow(color: colorScheme == .dark ? LiquidGlassTheme.darkShadowSecondary : LiquidGlassTheme.lightShadowSecondary, radius: 4, x: 0, y: 2)
     }
 }
 
-// MARK: - 液态玻璃标签（增强版）
+// MARK: - 液态玻璃标签（iOS 26 原生版）
 struct LiquidGlassTag: View {
     let text: String
     var color: Color = .primary
-    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         Text(text)
@@ -345,48 +325,15 @@ struct LiquidGlassTag: View {
             .foregroundColor(color)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(
-                ZStack {
-                    Capsule()
-                        .fill(colorScheme == .dark ? LiquidGlassTheme.darkBackgroundSecondary : LiquidGlassTheme.lightBackgroundSecondary)
-
-                    // 顶部微光
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    colorScheme == .dark ? Color.white.opacity(0.1) : Color.white.opacity(0.5),
-                                    .clear
-                                ],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        )
-
-                    Capsule()
-                        .stroke(
-                            LinearGradient(
-                                colors: colorScheme == .dark
-                                    ? [Color.white.opacity(0.18), Color.white.opacity(0.04)]
-                                    : [Color.white.opacity(0.8), Color.white.opacity(0.15)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 0.8
-                        )
-                }
-                .compositingGroup()
-            )
-            .shadow(color: colorScheme == .dark ? LiquidGlassTheme.darkShadowSecondary : LiquidGlassTheme.lightShadowSecondary, radius: 6, x: 0, y: 3)
+            .glassEffectCapsule()
     }
 }
 
-// MARK: - 液态玻璃搜索框（增强版）
+// MARK: - 液态玻璃搜索框（iOS 26 原生版）
 struct LiquidGlassSearchField: View {
     @Binding var text: String
     var placeholder: String = "搜索"
     @FocusState private var isFocused: Bool
-    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         HStack(spacing: 10) {
@@ -408,43 +355,7 @@ struct LiquidGlassSearchField: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(
-            ZStack {
-                // 主背景
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(colorScheme == .dark ? LiquidGlassTheme.darkBackgroundSecondary : LiquidGlassTheme.lightBackgroundSecondary)
-
-                // 顶部光泽
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                colorScheme == .dark ? Color.white.opacity(0.08) : Color.white.opacity(0.5),
-                                .clear
-                            ],
-                            startPoint: .top,
-                            endPoint: .center
-                        )
-                    )
-
-                // 边缘高光/焦点状态
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(
-                        isFocused
-                            ? LinearGradient(colors: [.pink.opacity(0.6), .purple.opacity(0.4)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                            : LinearGradient(
-                                colors: colorScheme == .dark
-                                    ? [Color.white.opacity(0.15), Color.white.opacity(0.05)]
-                                    : [Color.white.opacity(0.7), Color.white.opacity(0.2)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                        lineWidth: isFocused ? 1.5 : 1
-                    )
-            }
-            .compositingGroup()
-        )
-        .shadow(color: isFocused ? Color.pink.opacity(0.2) : (colorScheme == .dark ? LiquidGlassTheme.darkShadowSecondary : LiquidGlassTheme.lightShadowSecondary), radius: isFocused ? 12 : 8, x: 0, y: isFocused ? 6 : 4)
+        .glassEffectRounded(cornerRadius: 14)
         .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }

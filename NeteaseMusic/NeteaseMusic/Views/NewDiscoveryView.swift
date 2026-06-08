@@ -2,36 +2,71 @@ import SwiftUI
 
 // MARK: - 新发现页面
 struct NewDiscoveryView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var personalizedSongs: [PersonalizedSong] = [] // 快乐启蒙（推荐新音乐）
     @State private var newSongs: [Track] = [] // 最新歌曲（新歌速递）
     @State private var newAlbums: [NewAlbum] = [] // 新近发布（新碑上架）
     @State private var isLoading = true
     @State private var loadingError: String?
     
+    private var isWideLayout: Bool {
+        horizontalSizeClass == .regular
+    }
+    
     private let musicService = MusicService.shared
     
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
-                // 快乐启蒙（推荐新音乐）
-                if !personalizedSongs.isEmpty {
-                    PersonalizedSongsSection(songs: personalizedSongs)
-                }
-                
-                // 最新歌曲
-                if !newSongs.isEmpty {
-                    NewSongsSection(songs: newSongs)
-                }
-                
-                // 新近发布（新碑上架）
-                if !newAlbums.isEmpty {
-                    NewAlbumsSection(albums: newAlbums)
+                if isLoading {
+                    // 骨架屏
+                    VStack(alignment: .leading, spacing: 24) {
+                        // 推荐新音乐骨架
+                        VStack(alignment: .leading, spacing: 12) {
+                            SkeletonBlock(width: 120, height: 22, cornerRadius: 4)
+                                .padding(.horizontal, 20)
+                            HorizontalCardSkeletonView(count: 4, cardWidth: 160)
+                        }
+                        
+                        // 最新歌曲骨架
+                        VStack(alignment: .leading, spacing: 12) {
+                            SkeletonBlock(width: 100, height: 22, cornerRadius: 4)
+                                .padding(.horizontal, 20)
+                            TrackListSkeletonView(count: 5)
+                        }
+                        
+                        // 新碟上架骨架
+                        VStack(alignment: .leading, spacing: 12) {
+                            SkeletonBlock(width: 100, height: 22, cornerRadius: 4)
+                                .padding(.horizontal, 20)
+                            HorizontalCardSkeletonView(count: 4, cardWidth: 160)
+                        }
+                    }
+                } else {
+                    // 快乐启蒙（推荐新音乐）
+                    if !personalizedSongs.isEmpty {
+                        PersonalizedSongsSection(songs: personalizedSongs)
+                            .staggeredEntrance(index: 0)
+                    }
+                    
+                    // 最新歌曲
+                    if !newSongs.isEmpty {
+                        NewSongsSection(songs: newSongs)
+                            .staggeredEntrance(index: 1)
+                    }
+                    
+                    // 新近发布（新碑上架）
+                    if !newAlbums.isEmpty {
+                        NewAlbumsSection(albums: newAlbums)
+                            .staggeredEntrance(index: 2)
+                    }
                 }
             }
             .padding(.top, 12)
             .padding(.bottom, 120)
         }
-        .background(LiquidGlassBackground())
+        .background(themedBackground)
         .navigationTitle("新发现")
         .navigationBarTitleDisplayMode(.large)
         .task {
@@ -42,6 +77,17 @@ struct NewDiscoveryView: View {
         }
     }
     
+    // MARK: - 主题背景
+    @ViewBuilder
+    private var themedBackground: some View {
+        switch themeManager.themeStyle {
+        case .standard:
+            LiquidGlassBackground()
+        case .strangerThings:
+            StrangerThingsBackground()
+        }
+    }
+    
     // MARK: - 加载音乐推荐
     private func loadMusicRecommendations() async {
         isLoading = true
@@ -49,19 +95,31 @@ struct NewDiscoveryView: View {
         
         do {
             // 加载推荐新音乐（快乐启蒙）
+            #if DEBUG
             print(" 开始加载推荐新音乐...")
+            #endif
             let personalized = try await musicService.getPersonalizedNewSong(limit: 12)
+            #if DEBUG
             print(" 推荐新音乐加载成功: \(personalized.count) 首")
-            
+            #endif
+
             // 加载最新歌曲（使用新歌速递 API）
+            #if DEBUG
             print(" 开始加载最新歌曲...")
+            #endif
             let songs = try await musicService.getTopSongs(type: 0)
+            #if DEBUG
             print(" 最新歌曲加载成功: \(songs.count) 首")
-            
+            #endif
+
             // 加载新碑上架（新近发布）
+            #if DEBUG
             print(" 开始加载新碑上架...")
+            #endif
             let albums = try await musicService.getNewAlbums(area: "ALL", limit: 10)
+            #if DEBUG
             print(" 新碑上架加载成功: \(albums.count) 张")
+            #endif
             
             await MainActor.run {
                 personalizedSongs = personalized
@@ -70,7 +128,9 @@ struct NewDiscoveryView: View {
                 isLoading = false
             }
         } catch {
+            #if DEBUG
             print(" 加载音乐推荐失败: \(error)")
+            #endif
             await MainActor.run {
                 loadingError = error.localizedDescription
                 isLoading = false
@@ -87,7 +147,7 @@ struct MusicRecommendCard: View {
     @Environment(\.colorScheme) var colorScheme
     
     private var cardWidth: CGFloat {
-        UIScreen.main.bounds.width * 0.4
+        min(UIScreen.main.bounds.width * 0.4, 180)
     }
     
     var body: some View {
@@ -146,7 +206,12 @@ struct MusicRecommendCard: View {
 // MARK: - 推荐新音乐区域（快乐启蒙）
 struct PersonalizedSongsSection: View {
     let songs: [PersonalizedSong]
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var navigateToList = false
+    
+    private var isWideLayout: Bool {
+        horizontalSizeClass == .regular
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -173,13 +238,26 @@ struct PersonalizedSongsSection: View {
                 .hidden()
             )
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+            if isWideLayout {
+                // iPad: 网格布局
+                let iPadColumns = [
+                    GridItem(.adaptive(minimum: 150, maximum: 180), spacing: 12)
+                ]
+                LazyVGrid(columns: iPadColumns, spacing: 16) {
                     ForEach(songs.prefix(12), id: \.id) { song in
                         PersonalizedSongCard(song: song, allSongs: songs)
                     }
                 }
                 .padding(.horizontal, 16)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 12) {
+                        ForEach(songs.prefix(12), id: \.id) { song in
+                            PersonalizedSongCard(song: song, allSongs: songs)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
             }
         }
     }
@@ -188,7 +266,12 @@ struct PersonalizedSongsSection: View {
 // MARK: - 新碟上架区域（新近发布）
 struct NewAlbumsSection: View {
     let albums: [NewAlbum]
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var navigateToList = false
+    
+    private var isWideLayout: Bool {
+        horizontalSizeClass == .regular
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -215,8 +298,12 @@ struct NewAlbumsSection: View {
                 .hidden()
             )
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+            if isWideLayout {
+                // iPad: 网格布局
+                let iPadColumns = [
+                    GridItem(.adaptive(minimum: 150, maximum: 180), spacing: 12)
+                ]
+                LazyVGrid(columns: iPadColumns, spacing: 16) {
                     ForEach(albums.prefix(10), id: \.id) { album in
                         NavigationLink(destination: AlbumDetailView(
                             albumId: album.id,
@@ -231,6 +318,24 @@ struct NewAlbumsSection: View {
                     }
                 }
                 .padding(.horizontal, 16)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 12) {
+                        ForEach(albums.prefix(10), id: \.id) { album in
+                            NavigationLink(destination: AlbumDetailView(
+                                albumId: album.id,
+                                albumName: album.name
+                            )) {
+                                MusicRecommendCard(
+                                    imageUrl: album.picUrl.flatMap { URL(string: $0) },
+                                    title: album.name,
+                                    subtitle: album.artistName
+                                )
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
             }
         }
     }
@@ -239,7 +344,12 @@ struct NewAlbumsSection: View {
 // MARK: - 最新歌曲区域（四行横向滚动）
 struct NewSongsSection: View {
     let songs: [Track]
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var navigateToList = false
+    
+    private var isWideLayout: Bool {
+        horizontalSizeClass == .regular
+    }
     
     // 每组4首歌曲
     private var songGroups: [[Track]] {
@@ -278,17 +388,36 @@ struct NewSongsSection: View {
                 .hidden()
             )
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    ForEach(Array(songGroups.enumerated()), id: \.offset) { groupIndex, group in
-                        NewSongColumn(
-                            tracks: group,
-                            playlist: songsArray,
-                            startIndex: groupIndex * 4
-                        )
+            if isWideLayout {
+                // iPad: 双列歌曲列表
+                let iPadColumns = [
+                    GridItem(.flexible(), spacing: 16),
+                    GridItem(.flexible(), spacing: 16)
+                ]
+                LazyVGrid(columns: iPadColumns, spacing: 0) {
+                    ForEach(Array(songsArray.prefix(20).enumerated()), id: \.element.id) { index, track in
+                        Button {
+                            HapticFeedback.light()
+                            AudioPlayer.shared.setPlaylist(songsArray, startAt: index)
+                        } label: {
+                            NewSongRow(track: track)
+                        }
                     }
                 }
                 .padding(.horizontal, 16)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 16) {
+                        ForEach(Array(songGroups.enumerated()), id: \.offset) { groupIndex, group in
+                            NewSongColumn(
+                                tracks: group,
+                                playlist: songsArray,
+                                startIndex: groupIndex * 4
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
             }
         }
     }
@@ -311,7 +440,7 @@ struct NewSongColumn: View {
                 }
             }
         }
-        .frame(width: UIScreen.main.bounds.width * 0.75)
+        .frame(width: min(UIScreen.main.bounds.width * 0.75, 380))
     }
 }
 

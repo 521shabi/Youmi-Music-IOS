@@ -3,61 +3,79 @@ import AVKit
 import AVFoundation
 import WebKit
 import MediaPlayer
+import Combine
 
-// MARK: - MPVolumeView 扩展（设置系统音量）
-extension MPVolumeView {
-    static func setVolume(_ volume: Float) {
-        let volumeView = MPVolumeView()
-        let slider = volumeView.subviews.first(where: { $0 is UISlider }) as? UISlider
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-            slider?.value = volume
+// MARK: - 系统音量观察器
+class VolumeObserver: ObservableObject {
+    @Published var volume: Float = AVAudioSession.sharedInstance().outputVolume
+
+    /// 是否正在拖动（拖动时暂停 KVO 更新，避免循环更新导致"蹦迪"）
+    var isDragging: Bool = false
+
+    private var audioSession = AVAudioSession.sharedInstance()
+    private var cancellable: AnyCancellable?
+
+    init() {
+        // 激活音频会话以便监听音量
+        try? audioSession.setActive(true)
+
+        // 使用 KVO 监听音量变化
+        cancellable = audioSession.publisher(for: \.outputVolume)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newVolume in
+                guard let self = self, !self.isDragging else { return }
+                self.volume = newVolume
+            }
+    }
+
+    deinit {
+        cancellable?.cancel()
+    }
+}
+
+struct SelectedArtist: Identifiable, Equatable, Hashable {
+    let id: Int
+    let name: String
+}
+
+// MARK: - 系统音量控制器（需要 MPVolumeView 在视图层级中）
+final class SystemVolumeController: ObservableObject {
+    private weak var volumeView: MPVolumeView?
+    private weak var slider: UISlider?
+
+    func attach(_ view: MPVolumeView) {
+        volumeView = view
+        if slider == nil {
+            slider = view.subviews.compactMap { $0 as? UISlider }.first
+        }
+    }
+
+    func setVolume(_ volume: Float) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if self.slider == nil, let view = self.volumeView {
+                self.attach(view)
+            }
+            self.slider?.value = volume
+            self.slider?.sendActions(for: .valueChanged)
         }
     }
 }
 
-// MARK: - HLS 变体数据结构
-struct HLSVariant {
-    let bandwidth: Int
-    let width: Int
-    let height: Int
-    let url: String
+struct HiddenSystemVolumeView: UIViewRepresentable {
+    let controller: SystemVolumeController
 
-    var pixelCount: Int { width * height }
-    var megabitsPerSecond: Int { bandwidth / 1_000_000 }
-
-    var description: String {
-        "\(width)x\(height)@\(megabitsPerSecond)Mbps"
-    }
-}
-
-
-// MARK: - HLS 变体缓存管理器（门面模式：委托给 DynamicCoverCache）
-class HLSVariantCache {
-    static let shared = HLSVariantCache()
-
-    private init() {}
-
-    // MARK: - Public API（保持原有接口不变）
-
-    func getVariant(for masterUrl: String) -> String? {
-        return DynamicCoverCache.shared.getVariantUrl(for: masterUrl)
+    func makeUIView(context: Context) -> MPVolumeView {
+        let view = MPVolumeView(frame: .zero)
+        view.showsVolumeSlider = true
+        view.isUserInteractionEnabled = false
+        view.alpha = 0.01
+        controller.attach(view)
+        return view
     }
 
-    func setVariant(_ variantUrl: String, for masterUrl: String) {
-        DynamicCoverCache.shared.cacheVariantUrl(variantUrl, for: masterUrl)
-    }
-
-    /// 预加载：获取并解析m3u8，缓存最佳变体URL
-    func preload(masterUrl: String) {
-        DynamicCoverCache.shared.preloadVariant(masterUrl: masterUrl)
-    }
-
-    func clear() {
-        // 注意：这只会清除变体缓存，不影响其他缓存
-        // DynamicCoverCache 没有单独清除变体的方法，这里保持兼容性
-        #if DEBUG
-        print(" HLSVariantCache.clear() 调用（委托给 DynamicCoverCache）")
-        #endif
+    func updateUIView(_ uiView: MPVolumeView, context: Context) {
+        controller.attach(uiView)
     }
 }
 
@@ -65,8 +83,10 @@ struct PlayerView: View {
     // 支持两种关闭方式：外部传入的回调 或 Environment dismiss
     var dismiss: (() -> Void)? = nil
     @Environment(\.dismiss) private var environmentDismiss
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @EnvironmentObject var themeManager: ThemeManager
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @State private var lyrics: [LyricLineWithTranslation] = []
+    @StateObject private var localMusicService = LocalMusicService.shared
     @State private var currentLyricIndex: Int = 0
     @State private var showLyrics = false
     @State private var isLoadingLyrics = false
@@ -77,6 +97,7 @@ struct PlayerView: View {
     @State private var yrcLines: [YrcLine] = []
     @State private var hasYrcLyric = false     // 是否有逐字歌词
     @State private var currentTime: Double = 0 // 当前播放时间（用于驱动逐字动画）
+    @State private var progressTime: Double = 0 // 进度条时间（高频更新）
 
     // 歌词滚动防抖优化
     @State private var lastLyricUpdateTime: Double = 0
@@ -94,16 +115,29 @@ struct PlayerView: View {
     @State private var showPlaylistSheet = false
     @State private var showCommentSheet = false  // 评论弹窗
     @State private var showLikeSheet = false     // 喜欢选项弹窗
-    @State private var currentVolume: Float = AVAudioSession.sharedInstance().outputVolume
+    @StateObject private var volumeObserver = VolumeObserver()
+    @StateObject private var systemVolumeController = SystemVolumeController()
+    @State private var selectedArtist: SelectedArtist?
 
     // 动态封面 - 使用 @State 触发视图更新
-    @State private var dynamicCoverPlayer: AVQueuePlayer?
-    @State private var playerLooper: AVPlayerLooper?
-    @State private var isDynamicCoverReady = false
     @State private var lastLoadedTrackId: Int? = nil
     @State private var dynamicCoverURL: URL? = nil  // 改为 @State，触发视图更新
 
     private let musicService = MusicService.shared
+    
+    // 主题颜色
+    private var isStrangerTheme: Bool {
+        themeManager.themeStyle == .strangerThings
+    }
+    
+    private var accentColor: Color {
+        isStrangerTheme ? Color(red: 1.0, green: 0.2, blue: 0.3) : .white
+    }
+    
+    // iPad 检测
+    private var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
     
     // 当前歌词文本
     private var currentLyricText: String {
@@ -139,77 +173,131 @@ struct PlayerView: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                // 层级 1: 全屏封面（从顶部开始铺满）
-                fullScreenArtwork(size: geo.size)
-                    .blur(radius: showLyrics ? 30 : 0)
-                    .animation(.easeInOut(duration: 0.3), value: showLyrics)
+        NavigationStack {
+            GeometryReader { geo in
+                ZStack {
+                    // 层级 1: 全屏封面（从顶部开始铺满）
+                    fullScreenArtwork(size: geo.size)
+                        .blur(radius: showLyrics ? 50 : 0)
+                        .scaleEffect(showLyrics ? 1.2 : 1.0)
+                        .animation(.easeInOut(duration: 0.4), value: showLyrics)
 
-                // 歌词模式下的暗色蒙版
-                if showLyrics {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                        .transition(.opacity)
-                }
-
-                // 层级 2: 底部渐变遮罩（只在下半部分）
-                VStack(spacing: 0) {
-                    Spacer()
-                    LinearGradient(
-                        stops: [
-                            .init(color: .clear, location: 0),
-                            .init(color: .black.opacity(0.4), location: 0.2),
-                            .init(color: .black.opacity(0.85), location: 0.6),
-                            .init(color: .black.opacity(0.95), location: 1)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: geo.size.height * 0.55)
-                }
-                .ignoresSafeArea()
-
-                // 层级 3: 内容
-                VStack(spacing: 0) {
-                    // 顶部栏
-                    topBar
-
-                    Spacer()
-
-                    // 歌词视图（覆盖在封面上）
+                    // 歌词模式下的暗色蒙版
                     if showLyrics {
-                        lyricsView
-                        Spacer()
+                        Color.black.opacity(0.55)
+                            .ignoresSafeArea()
+                            .transition(.opacity)
                     }
 
-                    // 底部控制区（带模糊背景）
-                    bottomControlsWithBlur(size: geo.size)
+                    // 层级 2: 底部渐变遮罩（只在下半部分）
+                    VStack(spacing: 0) {
+                        Spacer()
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0),
+                                .init(color: .black.opacity(0.4), location: 0.2),
+                                .init(color: .black.opacity(0.85), location: 0.6),
+                                .init(color: .black.opacity(0.95), location: 1)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: geo.size.height * 0.55)
+                    }
+                    .ignoresSafeArea()
+
+                    // 层级 3: 内容
+                    if isIPad && showLyrics {
+                        // iPad 全屏歌词模式（类似 Apple Music）
+                        iPadFullScreenLyricsView(size: geo.size)
+                    } else if showLyrics {
+                        // iPhone Apple Music 风格全屏歌词
+                        VStack(spacing: 0) {
+                            // 顶部：迷你封面 + 歌曲信息（Apple Music 风格）
+                            lyricsTopBar
+                            
+                            // 歌词占满中间区域
+                            lyricsView
+                                .layoutPriority(1)
+                            
+                            // 底部：紧凑控制区
+                            lyricsBottomControls
+                        }
+                    } else {
+                        // iPhone 非歌词模式 / iPad 非歌词模式
+                        VStack(spacing: 0) {
+                            topBar
+                            Spacer()
+                            bottomControlsWithBlur(size: geo.size)
+                        }
+                    }
+
+                    // 层级 4: DJ 过渡提示（顶部悬浮）
+                    DJTransitionOverlay()
+
+                    HiddenSystemVolumeView(controller: systemVolumeController)
+                        .frame(width: 1, height: 1)
+                        .allowsHitTesting(false)
                 }
             }
         }
         .ignoresSafeArea()
+        .navigationBarHidden(true)
+        .fullScreenCover(item: $selectedArtist) { artist in
+            NavigationStack {
+                ArtistDetailView(artistId: artist.id, artistName: artist.name)
+            }
+        }
         .onAppear {
             loadLyrics()
+            // 重置以允许重新加载（PlayerView 是新实例，@State 已重置）
             loadDynamicCover()
             startBackgroundAnimation()
             audioPlayer.onTimeUpdate = { [self] time in
-                if showLyrics || hasYrcLyric {
+                if abs(time - progressTime) >= 0.2 {
+                    progressTime = time
+                }
+                if showLyrics && hasYrcLyric {
+                    // 高频更新歌词时间，确保逐字动画流畅
                     currentTime = time
                 }
                 updateCurrentLyricIndex(time: time)
             }
+            // 歌词显示时提高时间更新频率到 ~30fps，确保逐字动画丝滑
+            audioPlayer.lyricsTimeUpdateInterval = 0.033
         }
-        .onChange(of: audioPlayer.currentTrack?.id) { _, _ in
+        .onChangeCompat(of: audioPlayer.currentTrack?.id) { _, _ in
+            lastLoadedTrackId = nil  // 切歌时重置
             loadLyrics()
             loadDynamicCover()
         }
+        .onReceive(audioPlayer.$currentTrack.dropFirst()) { newTrack in
+            // 双重保险：确保切歌时歌词和封面刷新
+            guard newTrack != nil else { return }
+            // 立即重置歌词时间，避免旧歌词残留
+            currentTime = 0
+            progressTime = 0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                if lastLoadedTrackId != newTrack?.id {
+                    lastLoadedTrackId = nil
+                    loadLyrics()
+                    loadDynamicCover()
+                }
+            }
+        }
         .onDisappear {
-            // 不清理动态封面，让它保持播放
             audioPlayer.onTimeUpdate = nil
-            // 注意：不在 onDisappear 中停止 Live Activity
-            // 因为用户可能只是关闭了播放器界面，但音乐仍在后台播放
-            // Live Activity 会在歌曲停止播放时由 AudioPlayer 管理
+            audioPlayer.lyricsTimeUpdateInterval = 0
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            // 从后台返回时恢复动态封面播放
+            resumeDynamicCoverPlayback()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            // App 激活时也尝试恢复播放
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                resumeDynamicCoverPlayback()
+            }
         }
         .gesture(
             DragGesture()
@@ -228,6 +316,28 @@ struct PlayerView: View {
                     }
                 }
         )
+        .sheet(isPresented: $showPlaylistSheet) {
+            PlaylistSheetView()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let track = audioPlayer.currentTrack {
+                ShareSheetView(track: track)
+            }
+        }
+        .sheet(isPresented: $showCommentSheet) {
+            if let track = audioPlayer.currentTrack {
+                CommentView(trackId: track.id, trackName: track.name)
+            }
+        }
+        .sheet(isPresented: $showLikeSheet) {
+            if let track = audioPlayer.currentTrack {
+                LikeOptionsSheet(track: track)
+                    .presentationDetents([.height(280)])
+                    .presentationDragIndicator(.visible)
+            }
+        }
     }
     
     // MARK: - 全屏封面（上部清晰 + 底部模糊无缝衔接）
@@ -254,6 +364,7 @@ struct PlayerView: View {
                 else if let coverUrl = audioPlayer.currentTrack?.coverUrl,
                    let url = URL(string: coverUrl) {
                     staticCoverWithBlur(url: url, screenWidth: screenWidth, screenHeight: screenHeight)
+                        .id(coverUrl)  // 强制切歌时刷新封面
                 } else {
                     gradientBackground
                 }
@@ -323,62 +434,60 @@ struct PlayerView: View {
     
     // MARK: - 静态封面（清晰+模糊无缝衔接）
     private func staticCoverWithBlur(url: URL, screenWidth: CGFloat, screenHeight: CGFloat) -> some View {
-        AsyncImage(url: url) { phase in
-            switch phase {
-            case .success(let image):
-                // 覆盖约 70% 屏幕高度（匹配 Apple Music）
-                let imageHeight = screenHeight * 0.70
-                
-                ZStack(alignment: .top) {
-                    // 层级 1: 全屏模糊背景
+        // 覆盖约 70% 屏幕高度（匹配 Apple Music）
+        let imageHeight = screenHeight * 0.70
+
+        return CachedAsyncImage(url: url, targetSize: CGSize(width: screenWidth, height: screenHeight)) { image in
+            ZStack(alignment: .top) {
+                // 层级 1: 全屏模糊背景
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: screenWidth, height: screenHeight)
+                    .blur(radius: 50)
+                    .clipped()
+
+                // 层级 2: 暗色渐变蒙版
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0),
+                        .init(color: .black.opacity(0.3), location: 0.5),
+                        .init(color: .black.opacity(0.7), location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                // 层级 3: 清晰封面
+                VStack(spacing: 0) {
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: screenWidth, height: screenHeight)
-                        .blur(radius: 50)
+                        .frame(width: screenWidth, height: imageHeight)
                         .clipped()
-                    
-                    // 层级 2: 暗色渐变蒙版
-                    LinearGradient(
-                        stops: [
-                            .init(color: .clear, location: 0),
-                            .init(color: .black.opacity(0.3), location: 0.5),
-                            .init(color: .black.opacity(0.7), location: 1)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    
-                    // 层级 3: 清晰封面
+                    Spacer(minLength: 0)
+                }
+                .frame(height: screenHeight)
+                .mask(
                     VStack(spacing: 0) {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: screenWidth, height: imageHeight)
-                            .clipped()
+                        // 封面区域完全不透明
+                        Rectangle()
+                            .fill(Color.white)
+                            .frame(height: imageHeight * 0.95)
+                        // 底部渐变透明
+                        LinearGradient(
+                            colors: [.white, .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: imageHeight * 0.05)
                         Spacer(minLength: 0)
                     }
-                    .frame(height: screenHeight)
-                    .mask(
-                        VStack(spacing: 0) {
-                            // 封面区域完全不透明
-                            Rectangle()
-                                .fill(Color.white)
-                                .frame(height: imageHeight * 0.95)
-                            // 底部渐变透明
-                            LinearGradient(
-                                colors: [.white, .clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .frame(height: imageHeight * 0.05)
-                            Spacer(minLength: 0)
-                        }
-                    )
-                }
-            default:
-                gradientBackground
+                )
             }
+        } placeholder: {
+            // 加载中显示渐变背景
+            gradientBackground
         }
     }
     
@@ -450,55 +559,73 @@ struct PlayerView: View {
     
     // MARK: - 底部控制区（带模糊背景）
     private func bottomControlsWithBlur(size: CGSize) -> some View {
-        VStack(spacing: 16) {
+        // iPad 适配：限制最大宽度，居中显示
+        let isIPad = UIDevice.current.userInterfaceIdiom == .pad
+        let maxWidth: CGFloat = isIPad ? 500 : .infinity
+        let horizontalPadding: CGFloat = isIPad ? 60 : 16
+
+        return VStack(spacing: isIPad ? 20 : 16) {
             // 当前歌词预览（非歌词模式时显示）
             if !showLyrics {
                 if hasYrcLyric, let currentLine = currentYrcLine {
-                    // 逐字变色预览
-                    KaraokePreviewView(line: currentLine, currentTime: currentTime)
+                    // 逐字变色预览 - 使用 audioPlayer.currentTime（低频更新）
+                    KaraokePreviewView(line: currentLine, currentTime: audioPlayer.currentTime)
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3), value: currentLyricIndex)
                 } else if !currentLyricText.isEmpty {
                     // 普通歌词预览
                     Text(currentLyricText)
-                        .font(.system(size: 15))
+                        .font(.system(size: isIPad ? 17 : 15))
                         .foregroundColor(.white.opacity(0.8))
                         .lineLimit(1)
-                        .padding(.horizontal, 40)
+                        .padding(.horizontal, horizontalPadding)
                         .transition(.opacity)
                         .animation(.easeInOut(duration: 0.3), value: currentLyricIndex)
                 }
             }
-            
-            // 歌曲信息
-            PlayerSongInfoView(
-                track: audioPlayer.currentTrack,
-                onShowLike: { showLikeSheet = true },
-                onShowShare: { showShareSheet = true }
-            )
-            
-            // 进度条
-            PlayerProgressView(
-                currentTime: audioPlayer.currentTime,
-                duration: audioPlayer.duration,
-                isDragging: $isDraggingProgress,
-                dragProgress: $dragProgress,
-                onSeek: { time in audioPlayer.seek(to: time) }
-            )
-            
+
+            // 歌曲信息 + 进度条 紧密排列
+            VStack(spacing: 12) {
+                // 歌曲信息
+                PlayerSongInfoView(
+                    track: audioPlayer.currentTrack,
+                    onShowLike: { showLikeSheet = true },
+                    onShowShare: { showShareSheet = true },
+                    onArtistTap: { artist in
+                        selectedArtist = SelectedArtist(id: artist.id, name: artist.name)
+                    }
+                )
+                .padding(.horizontal, horizontalPadding)
+
+                // 进度条
+                PlayerProgressView(
+                    currentTime: progressTime,
+                    duration: audioPlayer.duration,
+                    isDragging: $isDraggingProgress,
+                    dragProgress: $dragProgress,
+                    onSeek: { time in audioPlayer.seek(to: time) }
+                )
+                .padding(.horizontal, horizontalPadding)
+            }
+
             // 控制按钮
             PlayerControlsView(
                 isPlaying: audioPlayer.isPlaying,
                 isLoading: audioPlayer.isLoading,
+                isIPad: isIPad,
                 isPlayButtonPressed: $isPlayButtonPressed,
                 onPrevious: { audioPlayer.playPrevious() },
                 onPlayPause: { audioPlayer.togglePlayPause() },
                 onNext: { audioPlayer.playNext() }
             )
-            
+
             // 音量条
-            PlayerVolumeView(currentVolume: $currentVolume)
-            
+            PlayerVolumeView(
+                volumeObserver: volumeObserver,
+                systemVolumeController: systemVolumeController
+            )
+                .padding(.horizontal, horizontalPadding)
+
             // 底部操作栏
             PlayerBottomBarView(
                 showLyrics: showLyrics,
@@ -514,33 +641,247 @@ struct PlayerView: View {
                 onShowPlaylist: { showPlaylistSheet = true },
                 onTogglePlayMode: { audioPlayer.togglePlayMode() }
             )
+            // 注意：PlayerBottomBarView 内部已有 padding，这里不再重复添加
         }
-        .padding(.bottom, 50)
+        .fixedSize(horizontal: false, vertical: true)  // 防止垂直方向被拉伸
+        .frame(maxWidth: min(maxWidth, size.width))  // 限制宽度不超出屏幕
+        .frame(maxWidth: .infinity, alignment: .center)  // 居中显示
+        .padding(.bottom, isIPad ? 30 : 50)
         .offset(y: imageOffset.height * 0.2)
+    }
+    
+    // MARK: - iPad 全屏歌词模式
+    private func iPadFullScreenLyricsView(size: CGSize) -> some View {
+        let isLandscape = size.width > size.height
+
+        return Group {
+            if isLandscape {
+                // 横屏：左边封面+控件，右边歌词（Apple Music 风格）
+                HStack(spacing: 0) {
+                    // 左侧：封面 + 控件
+                    VStack(spacing: 20) {
+                        Spacer()
+
+                        // 封面
+                        if let coverUrl = audioPlayer.currentTrack?.coverUrl,
+                           let url = URL(string: coverUrl) {
+                            CachedAsyncImage(url: url, targetSize: CGSize(width: 280, height: 280)) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 280, height: 280)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .shadow(color: .black.opacity(0.4), radius: 20, x: 0, y: 10)
+                            } placeholder: {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white.opacity(0.1))
+                                    .frame(width: 280, height: 280)
+                            }
+                        }
+
+                        // 歌曲信息
+                        if let track = audioPlayer.currentTrack {
+                            VStack(spacing: 4) {
+                                Text(track.name)
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                                Text(track.artistName)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .lineLimit(1)
+                            }
+                        }
+
+                        // 进度条
+                        PlayerProgressView(
+                            currentTime: progressTime,
+                            duration: audioPlayer.duration,
+                            isDragging: $isDraggingProgress,
+                            dragProgress: $dragProgress,
+                            onSeek: { time in audioPlayer.seek(to: time) }
+                        )
+                        .padding(.horizontal, 20)
+
+                        // 播放控制
+                        HStack(spacing: 44) {
+                            Button(action: { audioPlayer.playPrevious() }) {
+                                Image(systemName: "backward.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(.white)
+                            }
+                            Button(action: { audioPlayer.togglePlayPause() }) {
+                                Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                                    .font(.system(size: 36))
+                                    .foregroundColor(.white)
+                            }
+                            Button(action: { audioPlayer.playNext() }) {
+                                Image(systemName: "forward.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(.white)
+                            }
+                        }
+
+                        // 音量条
+                        PlayerVolumeView(
+                            volumeObserver: volumeObserver,
+                            systemVolumeController: systemVolumeController
+                        )
+                        .padding(.horizontal, 20)
+
+                        // 底部操作栏
+                        HStack(spacing: 20) {
+                            Button(action: {
+                                withAnimation(.spring(response: 0.4)) { showLyrics.toggle() }
+                            }) {
+                                Image(systemName: "quote.bubble.fill")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.white)
+                            }
+                            Button(action: { showCommentSheet = true }) {
+                                Image(systemName: "bubble.right")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            Spacer()
+                            Button(action: { audioPlayer.togglePlayMode() }) {
+                                Image(systemName: audioPlayer.playMode.icon)
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            Button(action: { showPlaylistSheet = true }) {
+                                Image(systemName: "list.bullet")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                        }
+                        .padding(.horizontal, 20)
+
+                        Spacer()
+                    }
+                    .frame(width: size.width * 0.38)
+                    .padding(.horizontal, 30)
+
+                    // 右侧：全屏歌词
+                    lyricsView
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .overlay(alignment: .topLeading) {
+                    Button(action: { dismissPlayer() }) {
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                    }
+                    .padding(.leading, 16)
+                    .padding(.top, 20)
+                }
+            } else {
+                // 竖屏：歌词全屏 + 底部迷你控件浮动
+                ZStack(alignment: .bottom) {
+                    lyricsView
+
+                    VStack(spacing: 14) {
+                        PlayerProgressView(
+                            currentTime: progressTime,
+                            duration: audioPlayer.duration,
+                            isDragging: $isDraggingProgress,
+                            dragProgress: $dragProgress,
+                            onSeek: { time in audioPlayer.seek(to: time) }
+                        )
+                        HStack(spacing: 40) {
+                            Button(action: { audioPlayer.playPrevious() }) {
+                                Image(systemName: "backward.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.white)
+                            }
+                            Button(action: { audioPlayer.togglePlayPause() }) {
+                                Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundColor(.white)
+                            }
+                            Button(action: { audioPlayer.playNext() }) {
+                                Image(systemName: "forward.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        HStack {
+                            if let track = audioPlayer.currentTrack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(track.name)
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .lineLimit(1)
+                                    Text(track.artistName)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.white.opacity(0.7))
+                                        .lineLimit(1)
+                                }
+                            }
+                            Spacer()
+                            Button(action: {
+                                withAnimation(.spring(response: 0.4)) { showLyrics.toggle() }
+                            }) {
+                                Image(systemName: "quote.bubble.fill")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.trailing, 16)
+                            Button(action: { showPlaylistSheet = true }) {
+                                Image(systemName: "list.bullet")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 60)
+                    .padding(.bottom, 30)
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                .init(color: .clear, location: 0),
+                                .init(color: .black.opacity(0.6), location: 0.3),
+                                .init(color: .black.opacity(0.8), location: 1)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 220)
+                        .frame(maxWidth: .infinity)
+                        .allowsHitTesting(false),
+                        alignment: .bottom
+                    )
+
+                    VStack {
+                        HStack {
+                            Button(action: { dismissPlayer() }) {
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 44, height: 44)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 20)
+                        Spacer()
+                    }
+                }
+            }
+        }
         .sheet(isPresented: $showPlaylistSheet) {
             PlaylistSheetView()
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
-        }
-        .sheet(isPresented: $showShareSheet) {
-            if let track = audioPlayer.currentTrack {
-                ShareSheetView(track: track)
-            }
         }
         .sheet(isPresented: $showCommentSheet) {
             if let track = audioPlayer.currentTrack {
                 CommentView(trackId: track.id, trackName: track.name)
             }
         }
-        .sheet(isPresented: $showLikeSheet) {
-            if let track = audioPlayer.currentTrack {
-                LikeOptionsSheet(track: track)
-                    .presentationDetents([.height(280)])
-                    .presentationDragIndicator(.visible)
-            }
-        }
     }
-    
+
     private var gradientBackground: some View {
         LinearGradient(
             colors: [Color.indigo, Color.purple, Color.black],
@@ -571,6 +912,173 @@ struct PlayerView: View {
         .padding(.horizontal, 16)
         .padding(.top, 54)
         .offset(y: imageOffset.height * 0.3)
+    }
+    
+    // MARK: - 歌词模式顶部栏（Apple Music 风格）
+    private var lyricsTopBar: some View {
+        VStack(spacing: 12) {
+            // 拖拽指示器 — 点击回到播放器界面
+            Button(action: {
+                withAnimation(.spring(response: 0.4)) {
+                    showLyrics = false
+                }
+            }) {
+                Capsule()
+                    .fill(.white.opacity(0.35))
+                    .frame(width: 36, height: 5)
+            }
+            .padding(.top, 10)
+            
+            HStack(spacing: 12) {
+                // 封面（Apple Music ~56pt）
+                if let coverUrl = audioPlayer.currentTrack?.coverUrl,
+                   let url = URL(string: coverUrl) {
+                    CachedAsyncImage(url: url, targetSize: CGSize(width: 120, height: 120)) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 56, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } placeholder: {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(.white.opacity(0.08))
+                            .frame(width: 56, height: 56)
+                    }
+                    .id(audioPlayer.currentTrack?.id)
+                }
+                
+                // 歌曲信息
+                if let track = audioPlayer.currentTrack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(track.name)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        Text(track.artistName)
+                            .font(.system(size: 13))
+                            .foregroundColor(.white.opacity(0.5))
+                            .lineLimit(1)
+                    }
+                }
+                
+                Spacer()
+                
+                // 收藏（无背景，纯图标）
+                Button(action: { showLikeSheet = true }) {
+                    Image(systemName: "star")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.5))
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(.white.opacity(0.1)))
+                }
+                
+                // 更多
+                Button(action: { showShareSheet = true }) {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.5))
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(.white.opacity(0.15)))
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .padding(.top, 44)
+    }
+    
+    // MARK: - 歌词模式底部控制区（Apple Music 风格）
+    private var lyricsBottomControls: some View {
+        VStack(spacing: 0) {
+            // 翻译 + 工具按钮行（Apple Music 歌词区域底部，左右分布）
+            HStack {
+                if hasTranslation {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3)) {
+                            showTranslation.toggle()
+                        }
+                    }) {
+                        Image(systemName: "character.bubble")
+                            .font(.system(size: 16))
+                            .foregroundColor(showTranslation ? .white : .white.opacity(0.45))
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(.white.opacity(showTranslation ? 0.18 : 0.08)))
+                    }
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
+            
+            // 进度条（Apple Music 细线风格）
+            PlayerProgressView(
+                currentTime: progressTime,
+                duration: audioPlayer.duration,
+                isDragging: $isDraggingProgress,
+                dragProgress: $dragProgress,
+                onSeek: { time in audioPlayer.seek(to: time) }
+            )
+            .padding(.horizontal, 20)
+            
+            // 播放控制（Apple Music 大按钮）
+            HStack(spacing: 56) {
+                Button(action: { audioPlayer.playPrevious() }) {
+                    Image(systemName: "backward.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.white)
+                }
+                Button(action: { audioPlayer.togglePlayPause() }) {
+                    Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 42))
+                        .foregroundColor(.white)
+                }
+                Button(action: { audioPlayer.playNext() }) {
+                    Image(systemName: "forward.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.white)
+                }
+            }
+            .padding(.top, 16)
+            .padding(.bottom, 16)
+            
+            // 音量条
+            PlayerVolumeView(
+                volumeObserver: volumeObserver,
+                systemVolumeController: systemVolumeController
+            )
+            .padding(.horizontal, 20)
+            .padding(.bottom, 14)
+            
+            // 底部操作栏（Apple Music：歌词气泡/AirPlay/播放列表）
+            HStack {
+                Button(action: { showCommentSheet = true }) {
+                    Image(systemName: "quote.bubble")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.4)) {
+                        showLyrics.toggle()
+                    }
+                }) {
+                    Image(systemName: "text.bubble.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                }
+                
+                Spacer()
+                
+                Button(action: { showPlaylistSheet = true }) {
+                    Image(systemName: "list.bullet")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white.opacity(0.55))
+                }
+            }
+            .padding(.horizontal, 48)
+        }
+        .padding(.bottom, 30)
     }
     
     // MARK: - 歌词视图
@@ -632,33 +1140,31 @@ struct PlayerView: View {
                 }
                 
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 24) {
+                    LazyVStack(alignment: .leading, spacing: 28) {
                         ForEach(Array(lyrics.enumerated()), id: \.element.id) { index, line in
                             let isCurrent = index == currentLyricIndex
                             let distance = abs(index - currentLyricIndex)
                             
-                            VStack(spacing: 8) {
-                                // 原文歌词
+                            VStack(alignment: .leading, spacing: 6) {
+                                // 原文歌词（Apple Music 风格：左对齐、大字、粗体）
                                 Text(line.text)
-                                    .font(.system(size: isCurrent ? 26 : 20, weight: isCurrent ? .bold : .medium))
-                                    .foregroundColor(isCurrent ? .white : .white.opacity(distance <= 1 ? 0.5 : 0.3))
-                                    .multilineTextAlignment(.center)
+                                    .font(.system(size: isCurrent ? 28 : 22, weight: .bold))
+                                    .foregroundColor(isCurrent ? .white : .white.opacity(distance <= 1 ? 0.4 : 0.2))
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
                                     .shadow(color: isCurrent ? .black.opacity(0.3) : .clear, radius: 8, x: 0, y: 2)
-                                    .blur(radius: distance > 4 ? 1.5 : 0)
                                 
                                 // 翻译歌词
                                 if showTranslation, let translation = line.translation {
                                     Text(translation)
                                         .font(.system(size: isCurrent ? 16 : 14, weight: .regular))
-                                        .foregroundColor(isCurrent ? .white.opacity(0.8) : .white.opacity(distance <= 1 ? 0.4 : 0.2))
-                                        .multilineTextAlignment(.center)
-                                        .blur(radius: distance > 4 ? 1.5 : 0)
+                                        .foregroundColor(isCurrent ? .white.opacity(0.7) : .white.opacity(distance <= 1 ? 0.3 : 0.15))
+                                        .multilineTextAlignment(.leading)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
-                            .scaleEffect(isCurrent ? 1.03 : 1.0)
                             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentLyricIndex)
                             .id(index)
-                            .padding(.horizontal, 8)
                             .onTapGesture {
                                 let impact = UIImpactFeedbackGenerator(style: .light)
                                 impact.impactOccurred()
@@ -681,11 +1187,9 @@ struct PlayerView: View {
                         endPoint: .bottom
                     )
                 )
-                .onChange(of: currentLyricIndex) { oldIndex, newIndex in
-                    // 性能优化：只有索引真正改变时才滚动
-                    guard oldIndex != newIndex else { return }
+                .onChangeCompat(of: currentLyricIndex) { _, newIndex in
                     withAnimation(.easeInOut(duration: 0.35)) {
-                        proxy.scrollTo(newIndex, anchor: .center)
+                        proxy.scrollTo(newIndex, anchor: .init(x: 0.5, y: 0.35))
                     }
                 }
             }
@@ -708,7 +1212,24 @@ struct PlayerView: View {
         let localTrack = audioPlayer.currentLocalTrack
         
         if isLocal, let track = localTrack {
-            // 使用本地内嵌歌词
+            // 优先读取侧载 .lrc
+            if let lrc = localMusicService.findSidecarLyrics(for: track), !lrc.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                let parsed = LyricLine.parse(lrc)
+                if parsed.isEmpty {
+                    lyrics = [LyricLineWithTranslation(time: 0, text: lrc, translation: nil)]
+                } else {
+                    lyrics = parsed.map { LyricLineWithTranslation(time: $0.time, text: $0.text, translation: nil) }
+                }
+                hasTranslation = false
+                hasYrcLyric = false
+                currentLyricIndex = 0
+                isLoadingLyrics = false
+                #if DEBUG
+                print("✅ 使用侧载歌词(.lrc): \(track.displayTitle)")
+                #endif
+                return
+            }
+            // 其次尝试内嵌歌词/或下载歌曲用 sourceTrackId 联网
             loadLocalLyrics(from: track)
             return
         }
@@ -730,9 +1251,8 @@ struct PlayerView: View {
                         yrcLines = YrcLine.parse(yrcString: yrcString, translation: result.translation)
                         hasYrcLyric = !yrcLines.isEmpty
                         hasTranslation = yrcLines.contains { $0.translation != nil }
-                        print(" 加载逐字歌词成功: \(yrcLines.count) 行")
                     }
-                    
+
                     // 同时解析普通歌词作为fallback
                     if !result.lyric.isEmpty {
                         lyrics = LyricLineWithTranslation.parse(lyric: result.lyric, translation: result.translation)
@@ -740,12 +1260,14 @@ struct PlayerView: View {
                             hasTranslation = lyrics.contains { $0.translation != nil }
                         }
                     }
-                    
+
                     currentLyricIndex = 0
                     isLoadingLyrics = false
                 }
             } catch {
+                #if DEBUG
                 print("Load lyric error: \(error)")
+                #endif
                 await MainActor.run {
                     isLoadingLyrics = false
                 }
@@ -753,26 +1275,80 @@ struct PlayerView: View {
         }
     }
     
-    /// 加载本地歌曲的内嵌歌词
+    /// 加载本地歌曲的歌词
     private func loadLocalLyrics(from localTrack: LocalTrack) {
+        // 如果是下载的歌曲，优先用 sourceTrackId 从网络获取歌词
+        if let sourceId = localTrack.sourceTrackId {
+            #if DEBUG
+            print("🎵 下载歌曲，使用 sourceTrackId 获取在线歌词: \(sourceId)")
+            #endif
+            
+            Task {
+                do {
+                    let result = try await musicService.getYrcLyric(id: sourceId)
+                    
+                    await MainActor.run {
+                        // 如果有逐字歌词
+                        if let yrcString = result.yrc, !yrcString.isEmpty {
+                            yrcLines = YrcLine.parse(yrcString: yrcString, translation: result.translation)
+                            hasYrcLyric = !yrcLines.isEmpty
+                            hasTranslation = yrcLines.contains { $0.translation != nil }
+                        }
+                        
+                        // 解析普通歌词
+                        if !result.lyric.isEmpty {
+                            lyrics = LyricLineWithTranslation.parse(lyric: result.lyric, translation: result.translation)
+                            if !hasYrcLyric {
+                                hasTranslation = lyrics.contains { $0.translation != nil }
+                            }
+                        }
+                        
+                        currentLyricIndex = 0
+                        isLoadingLyrics = false
+                        
+                        // 将普通歌词落盘为 .lrc 侧载，并更新内存模型，便于离线
+                        if !result.lyric.isEmpty {
+                            _ = localMusicService.saveSidecarLyrics(for: localTrack, lrcContent: result.lyric)
+                            localMusicService.updateLocalTrackLyrics(trackId: localTrack.id, lyrics: result.lyric)
+                        }
+                        
+                        #if DEBUG
+print("✅ 下载歌曲歌词加载成功并已缓存到本地: \(hasYrcLyric ? "逐字" : "普通") \(lyrics.count) 行")
+                        #endif
+                    }
+                } catch {
+                    #if DEBUG
+                    print("⚠️ 获取在线歌词失败，尝试使用内嵌歌词: \(error)")
+                    #endif
+                    // 失败时回退到内嵌歌词
+                    await MainActor.run {
+                        loadEmbeddedLyrics(from: localTrack)
+                    }
+                }
+            }
+            return
+        }
+        
+        // 非下载歌曲，使用内嵌歌词
+        loadEmbeddedLyrics(from: localTrack)
+    }
+    
+    /// 加载内嵌歌词
+    private func loadEmbeddedLyrics(from localTrack: LocalTrack) {
         guard let embeddedLyrics = localTrack.embeddedLyrics, !embeddedLyrics.isEmpty else {
-            // 没有内嵌歌词
             lyrics = []
             isLoadingLyrics = false
             #if DEBUG
-            print(" 本地歌曲无内嵌歌词: \(localTrack.displayTitle)")
+            print("🎵 本地歌曲无内嵌歌词: \(localTrack.displayTitle)")
             #endif
             return
         }
         
-        // 解析本地歌词（支持 LRC 格式）
         let parsedLines = LyricLine.parse(embeddedLyrics)
         
         if parsedLines.isEmpty {
-            // 无时间戳歌词，将整段文本作为单行歌词显示
             lyrics = [LyricLineWithTranslation(time: 0, text: embeddedLyrics, translation: nil)]
         } else {
-            // 转换为 LyricLineWithTranslation
             lyrics = parsedLines.map { line in
                 LyricLineWithTranslation(time: line.time, text: line.text, translation: nil)
             }
@@ -784,41 +1360,44 @@ struct PlayerView: View {
         isLoadingLyrics = false
         
         #if DEBUG
-        print("✅ 加载本地歌词成功: \(lyrics.count) 行")
+        print("✅ 加载内嵌歌词成功: \(lyrics.count) 行")
         #endif
     }
     
     // MARK: - 加载动态封面（优先使用预加载缓存，避免重复加载）
     private func loadDynamicCover() {
         guard let track = audioPlayer.currentTrack else { return }
+        
+        // 同一首歌不重复加载
+        if lastLoadedTrackId == track.id { return }
 
-        // 如果 AudioPlayer 已有该歌曲的动态封面缓存，直接标记为已加载并返回
-        // dynamicCoverURL 计算属性会自动从缓存获取 URL，无需再次设置
-        // 检查 AudioPlayer 缓存
-        if let cachedUrlString = audioPlayer.getDynamicCoverURL(for: track.id),
-           let cachedUrl = URL(string: cachedUrlString) {
-            if lastLoadedTrackId != track.id {
-                lastLoadedTrackId = track.id
-                dynamicCoverURL = cachedUrl  // 设置 URL 触发视图更新
-                #if DEBUG
-                print(" 使用已缓存的动态封面: \(track.name)")
-                #endif
+        // 优先使用已下载的本地 MP4 文件
+        if let localFileURL = DynamicCoverCache.shared.getLocalFile(for: track.id),
+           FileManager.default.fileExists(atPath: localFileURL.path) {
+            lastLoadedTrackId = track.id
+            // 清理旧的 HLS WebView（URL 不同时才需要）
+            if let oldUrl = dynamicCoverURL, oldUrl != localFileURL {
+                WebViewPool.shared.recycleWebView(for: oldUrl.absoluteString)
             }
+            dynamicCoverURL = localFileURL
             return
         }
 
-        // 清理旧的播放器
-        dynamicCoverPlayer?.pause()
-        dynamicCoverPlayer = nil
-        playerLooper = nil
-        isDynamicCoverReady = false
-        dynamicCoverURL = nil  // 清除旧的 URL
+        // 检查 AudioPlayer 缓存的远程 URL
+        if let cachedUrlString = audioPlayer.getDynamicCoverURL(for: track.id),
+           let cachedUrl = URL(string: cachedUrlString) {
+            lastLoadedTrackId = track.id
+            dynamicCoverURL = cachedUrl
+            return
+        }
 
-        // 没有缓存则异步加载
+        // 清理旧状态
+        dynamicCoverURL = nil
+
+        // 异步搜索
         let trackId = track.id
         let trackName = track.name
         let artistName = track.artistName
-
         Task {
             await searchAppleMusicAnimatedArtwork(
                 trackId: trackId,
@@ -831,30 +1410,19 @@ struct PlayerView: View {
     // MARK: - 搜索 Apple Music 动态封面
     private func searchAppleMusicAnimatedArtwork(trackId: Int, songName: String, artistName: String) async {
         do {
-            // 调用 Apple Music API 获取动态封面
             if let videoUrlString = try await musicService.getAppleMusicAnimatedCover(
                 songName: songName,
                 artistName: artistName
             ),
                let videoUrl = URL(string: videoUrlString) {
-                // 缓存到 AudioPlayer
                 audioPlayer.cacheDynamicCoverURL(videoUrlString, for: trackId)
-
+                HLSVariantCache.shared.preload(masterUrl: videoUrlString)
                 await MainActor.run {
                     lastLoadedTrackId = trackId
-                    dynamicCoverURL = videoUrl  // 设置 URL 触发视图更新
-                    setupDynamicCoverPlayer(url: videoUrl)
+                    dynamicCoverURL = videoUrl
                 }
-                #if DEBUG
-                print("Found animated cover: \(videoUrlString)")
-                #endif
             } else {
-                #if DEBUG
-                print("No animated cover found for: \(songName) - \(artistName)")
-                #endif
-                await MainActor.run {
-                    lastLoadedTrackId = trackId
-                }
+                await MainActor.run { lastLoadedTrackId = trackId }
             }
         } catch {
             #if DEBUG
@@ -863,68 +1431,67 @@ struct PlayerView: View {
         }
     }
     
-    // MARK: - 设置动态封面播放器（直接使用 WKWebView，避免 AVPlayer 在 SwiftUI 中的 XPC 问题）
-    private func setupDynamicCoverPlayer(url: URL) {
-        print(" Setting up dynamic cover with WKWebView: \(url)")
-
-        // 立即开始预加载（后台解析m3u8并缓存变体URL）
-        HLSVariantCache.shared.preload(masterUrl: url.absoluteString)
-
-        // 缓存到 AudioPlayer（如果还没缓存）
-        if let trackId = audioPlayer.currentTrack?.id {
-            audioPlayer.cacheDynamicCoverURL(url.absoluteString, for: trackId)
-        }
-
-        // 直接使用 WKWebView（跳过 AVPlayer，避免 FigPlayerError_ParamErr）
-        self.dynamicCoverPlayer = nil
-        self.playerLooper = nil
+    // MARK: - 恢复动态封面播放
+    private func resumeDynamicCoverPlayback() {
+        guard let url = dynamicCoverURL else { return }
+        WebViewPool.shared.resumePlayback(for: url.absoluteString)
     }
     
     // MARK: - 更新当前歌词索引（性能优化版）
     private func updateCurrentLyricIndex(time: Double) {
+        // 检测时间跳跃（seek 操作）
+        let timeDiff = abs(time - lastLyricUpdateTime)
+        let isSeek = timeDiff > 1.0 || audioPlayer.isSeeking
+
         // 性能优化：根据歌词类型使用不同的防抖策略
         if hasYrcLyric {
-            // 逐字歌词需要高频更新，但依然添加轻微防抖
-            guard abs(time - lastLyricUpdateTime) > 0.05 else { return }
+            // 逐字歌词需要高频更新，但依然添加轻微防抖（seek 时跳过防抖）
+            guard isSeek || timeDiff > 0.05 else { return }
             lastLyricUpdateTime = time
-            
-            // 优化：先检查当前索引是否仍然有效，避免不必要的遍历
-            if currentLyricIndex < yrcLines.count - 1 {
+
+            // 优化：先检查当前索引是否仍然有效，避免不必要的遍历（seek 时跳过此检查）
+            if !isSeek && currentLyricIndex < yrcLines.count - 1 {
                 let currentLine = yrcLines[currentLyricIndex]
                 let nextLine = yrcLines[currentLyricIndex + 1]
                 if time >= currentLine.startTime && time < nextLine.startTime {
                     return  // 当前索引仍然有效
                 }
             }
-            
+
             // 逐字歌词索引更新
             for (index, line) in yrcLines.enumerated().reversed() {
                 if time >= line.startTime {
                     if currentLyricIndex != index {
                         currentLyricIndex = index
+                        // 同步歌词到 Widget
+                        let nextLyric = index + 1 < yrcLines.count ? yrcLines[index + 1].text : ""
+                        audioPlayer.updateLyricsForWidget(currentLyric: line.text, nextLyric: nextLyric)
                     }
                     break
                 }
             }
         } else {
-            // 普通歌词模式下大幅降低更新频率（0.3秒）
-            guard abs(time - lastLyricUpdateTime) > 0.3 else { return }
+            // 普通歌词模式下大幅降低更新频率（0.3秒）（seek 时跳过防抖）
+            guard isSeek || timeDiff > 0.3 else { return }
             lastLyricUpdateTime = time
-            
-            // 优化：先检查当前索引是否仍然有效
-            if currentLyricIndex < lyrics.count - 1 {
+
+            // 优化：先检查当前索引是否仍然有效（seek 时跳过此检查）
+            if !isSeek && currentLyricIndex < lyrics.count - 1 {
                 let currentLine = lyrics[currentLyricIndex]
                 let nextLine = lyrics[currentLyricIndex + 1]
                 if time >= currentLine.time && time < nextLine.time {
                     return  // 当前索引仍然有效
                 }
             }
-            
+
             // 普通歌词索引更新
             for (index, line) in lyrics.enumerated().reversed() {
                 if time >= line.time {
                     if currentLyricIndex != index {
                         currentLyricIndex = index
+                        // 同步歌词到 Widget
+                        let nextLyric = index + 1 < lyrics.count ? lyrics[index + 1].text : ""
+                        audioPlayer.updateLyricsForWidget(currentLyric: line.text, nextLyric: nextLyric)
                     }
                     break
                 }
@@ -941,22 +1508,16 @@ struct PlayerView: View {
     }
 }
 
-// MARK: - WKWebView 缓存池（性能优化：按 URL 缓存正在播放的 WebView）
+// MARK: - WKWebView 缓存池
 final class WebViewPool {
     static let shared = WebViewPool()
 
-    // 预热专用 WebView（永久持有，防止 WebContent 进程退出）
     private var keepAliveWebView: WKWebView?
-    // 预热的空闲 WebView
-    private var idlePool: [WKWebView] = []
-    // 按 URL 缓存正在使用的 WebView（避免重复加载）
     private var activeWebViews: [String: WKWebView] = [:]
-    private let maxIdlePoolSize = 1
     private let queue = DispatchQueue(label: "webViewPool")
     private var isWarmedUp = false
 
     private init() {
-        // 监听内存警告
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleMemoryWarning),
@@ -965,18 +1526,13 @@ final class WebViewPool {
         )
     }
 
-    /// 预热 WebView（同步创建，确保 WebContent 进程尽早启动）
     func warmUp() {
         guard !isWarmedUp else { return }
         isWarmedUp = true
-
-        // 必须在主线程创建 WKWebView
         if Thread.isMainThread {
             createWarmupWebView()
         } else {
-            DispatchQueue.main.sync {
-                createWarmupWebView()
-            }
+            DispatchQueue.main.sync { createWarmupWebView() }
         }
     }
 
@@ -986,50 +1542,17 @@ final class WebViewPool {
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.isScrollEnabled = false
-
-        // 加载一个简单的视频页面来预热 GPU 进程
-        let html = """
-        <html>
-        <head><style>body{margin:0;background:black;}</style></head>
-        <body>
-        <video id="v" muted playsinline style="width:1px;height:1px;"></video>
-        <script>
-        // 创建一个小的 canvas 来预热 GPU
-        var c = document.createElement('canvas');
-        c.width = c.height = 1;
-        var ctx = c.getContext('2d');
-        ctx.fillRect(0,0,1,1);
-        </script>
-        </body>
-        </html>
-        """
-        webView.loadHTMLString(html, baseURL: nil)
-
-        // 永久持有这个 WebView，防止进程退出
+        webView.loadHTMLString("<html><body></body></html>", baseURL: nil)
         self.keepAliveWebView = webView
-
-        // 同时创建一个空闲的 WebView 放入池中
-        let poolWebView = WKWebView(frame: .zero, configuration: createWebViewConfiguration())
-        poolWebView.isOpaque = false
-        poolWebView.backgroundColor = .clear
-        poolWebView.scrollView.isScrollEnabled = false
-        poolWebView.scrollView.backgroundColor = .clear
-        poolWebView.scrollView.contentInsetAdjustmentBehavior = .never
-        poolWebView.scrollView.bounces = false
-
-        self.idlePool.append(poolWebView)
-
         #if DEBUG
-        print(" WebView 已预热（keepAlive + 1个空闲）")
+        print("🚀 WebView 已预热")
         #endif
     }
 
     @objc private func handleMemoryWarning() {
         queue.async { [weak self] in
-            self?.idlePool.removeAll()
-            // 注意：不清理 keepAliveWebView 和 activeWebViews
+            self?.activeWebViews.removeAll()
         }
-        print(" WebView 空闲池已清理（内存警告）")
     }
 
     private func createWebViewConfiguration() -> WKWebViewConfiguration {
@@ -1040,122 +1563,63 @@ final class WebViewPool {
         return config
     }
 
-    /// 获取指定 URL 的 WebView（优先返回已缓存的正在播放的 WebView）
-    func getWebView(for url: String, coordinator: DynamicCoverVideoView.Coordinator) -> (webView: WKWebView, isReused: Bool) {
-        // 检查是否有该 URL 的活跃 WebView
-        var existingWebView: WKWebView?
-        queue.sync {
-            existingWebView = activeWebViews[url]
-        }
-
-        if let webView = existingWebView {
-            #if DEBUG
-            print(" 复用已缓存的 WebView，恢复播放")
-            #endif
-            // 恢复视频播放（WebView 从视图层级移除后视频会暂停）
-            // 使用更可靠的方式恢复播放，处理视频可能未加载完成的情况
-            webView.evaluateJavaScript("""
-                (function() {
-                    var v = document.querySelector('video');
-                    if (v) {
-                        if (v.readyState >= 2) {
-                            v.play();
-                        } else {
-                            v.addEventListener('canplay', function once() {
-                                v.play();
-                                v.removeEventListener('canplay', once);
-                            });
-                            v.load();
-                        }
-                    }
-                })()
-            """, completionHandler: nil)
-            return (webView, true)
-        }
-
-        // 从空闲池获取或创建新的
-        var webView: WKWebView?
-        queue.sync {
-            if !idlePool.isEmpty {
-                webView = idlePool.removeLast()
-                #if DEBUG
-                print(" 从空闲池取出 WebView")
-                #endif
-            }
-        }
-
-        if let existingWebView = webView {
-            existingWebView.stopLoading()
-            existingWebView.navigationDelegate = coordinator
-            existingWebView.configuration.userContentController.removeAllScriptMessageHandlers()
-            existingWebView.configuration.userContentController.add(coordinator, name: "log")
-            existingWebView.configuration.userContentController.add(coordinator, name: "cache")
-
-            // 标记为活跃
-            queue.async { [weak self] in
-                self?.activeWebViews[url] = existingWebView
-            }
-            return (existingWebView, false)
-        }
-
-        // 创建新 WebView
-        #if DEBUG
-        print(" 创建新 WebView")
-        #endif
-
+    /// 获取或创建 WebView（不再复用旧的，避免竞态）
+    func getWebView(for url: String, coordinator: DynamicCoverVideoView.Coordinator) -> WKWebView {
         let config = createWebViewConfiguration()
         config.userContentController.add(coordinator, name: "log")
         config.userContentController.add(coordinator, name: "cache")
 
-        let newWebView = WKWebView(frame: .zero, configuration: config)
-        newWebView.navigationDelegate = coordinator
-        newWebView.isOpaque = false
-        newWebView.backgroundColor = .clear
-        newWebView.scrollView.isScrollEnabled = false
-        newWebView.scrollView.backgroundColor = .clear
-        newWebView.scrollView.contentInsetAdjustmentBehavior = .never
-        newWebView.scrollView.bounces = false
+        let webView = WKWebView(frame: .zero, configuration: config)
+        webView.navigationDelegate = coordinator
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.isScrollEnabled = false
+        webView.scrollView.backgroundColor = .clear
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.scrollView.bounces = false
 
-        // 标记为活跃
         queue.async { [weak self] in
-            self?.activeWebViews[url] = newWebView
+            self?.activeWebViews[url] = webView
         }
-
-        return (newWebView, false)
+        return webView
     }
 
-    /// 回收 WebView（从活跃列表移除，放入空闲池）
-    func recycleWebView(_ webView: WKWebView, url: String) {
+    /// 按 URL 回收
+    func recycleWebView(for url: String) {
         queue.async { [weak self] in
-            guard let self = self else { return }
-
-            // 从活跃列表移除
-            self.activeWebViews.removeValue(forKey: url)
-
-            // 如果空闲池未满，放入空闲池
-            if self.idlePool.count < self.maxIdlePoolSize {
-                webView.stopLoading()
-                webView.loadHTMLString("", baseURL: nil)
-                webView.configuration.userContentController.removeAllScriptMessageHandlers()
-                self.idlePool.append(webView)
-                #if DEBUG
-                print(" WebView 已回收到空闲池")
-                #endif
+            if let wv = self?.activeWebViews.removeValue(forKey: url) {
+                DispatchQueue.main.async {
+                    wv.stopLoading()
+                    wv.loadHTMLString("", baseURL: nil)
+                    wv.configuration.userContentController.removeAllScriptMessageHandlers()
+                }
             }
         }
     }
 
-    /// 清空缓存池
     func clearPool() {
         queue.async { [weak self] in
-            self?.idlePool.removeAll()
             self?.activeWebViews.removeAll()
-            // 注意：不清理 keepAliveWebView
+        }
+    }
+
+    /// 恢复播放
+    func resumePlayback(for url: String) {
+        var webView: WKWebView?
+        queue.sync { webView = activeWebViews[url] }
+        guard let wv = webView else { return }
+        DispatchQueue.main.async {
+            wv.evaluateJavaScript("""
+                (function() {
+                    var v = document.querySelector('video');
+                    if (v && v.paused) { v.muted = true; v.play().catch(function(){}); }
+                })()
+            """, completionHandler: nil)
         }
     }
 }
 
-// MARK: - 动态封面视频视图 (WKWebView 版本 - 按 URL 缓存复用)
+// MARK: - 动态封面视频视图
 struct DynamicCoverVideoView: UIViewRepresentable {
     let url: URL
 
@@ -1175,306 +1639,153 @@ struct DynamicCoverVideoView: UIViewRepresentable {
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             if message.name == "cache", let variantUrl = message.body as? String {
                 HLSVariantCache.shared.setVariant(variantUrl, for: masterUrl)
-            } else {
-                #if DEBUG
-                print(" JS: \(message.body)")
-                #endif
             }
-        }
-
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            #if DEBUG
-            print(" WKWebView didFinish navigation")
-            #endif
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
             #if DEBUG
-            print(" WKWebView navigation failed: \(error)")
+            print("⚠️ WKWebView navigation failed: \(error.localizedDescription)")
             #endif
         }
     }
 
-    // MARK: - Swift 预解析（同步版本，用于 makeUIView）
-    /// 尝试使用 Swift 同步解析 HLS master m3u8
-    /// 如果失败则返回 nil，让 JavaScript 作为回退
     private static func swiftPreParse(masterUrl: String) -> String? {
         guard let url = URL(string: masterUrl) else { return nil }
-
-        // 使用同步请求（带超时）
         let semaphore = DispatchSemaphore(value: 0)
         var resultVariant: String?
-
-        let task = URLSession.shared.dataTask(with: url) { data, _, error in
+        AppleMusicNetworkSession.shared.fetchData(from: url, maxRetries: 2) { data, _, error in
             defer { semaphore.signal() }
-
-            guard let data = data,
-                  let text = String(data: data, encoding: .utf8) else {
-                #if DEBUG
-                print(" Swift 预解析失败: \(error?.localizedDescription ?? "无数据")")
-                #endif
-                return
-            }
-
-            // 使用 HLSParser 解析
+            guard let data = data, let text = String(data: data, encoding: .utf8) else { return }
             if let variantUrl = HLSParser.shared.selectVariant(
-                from: text,
-                baseUrl: masterUrl,
-                strategy: .highestQuality(maxPixels: nil)
+                from: text, baseUrl: masterUrl,
+                strategy: .preferAspectRatio(width: 3, height: 4, maxPixels: 720 * 960)
             ) {
                 resultVariant = variantUrl
-                // 缓存结果
                 HLSVariantCache.shared.setVariant(variantUrl, for: masterUrl)
-                #if DEBUG
-                print(" Swift 预解析成功: \(variantUrl.suffix(50))")
-                #endif
             }
         }
-        task.resume()
-
-        // 等待最多 2 秒
-        let timeout = DispatchTime.now() + .seconds(2)
-        if semaphore.wait(timeout: timeout) == .timedOut {
-            task.cancel()
-            #if DEBUG
-            print("⏱️ Swift 预解析超时，回退到 JavaScript")
-            #endif
-            return nil
-        }
-
+        if semaphore.wait(timeout: .now() + .seconds(10)) == .timedOut { return nil }
         return resultVariant
     }
 
     func makeUIView(context: Context) -> WKWebView {
         let urlString = url.absoluteString
-
-        // 使用新的按 URL 缓存的 WebView 池
-        let (webView, isReused) = WebViewPool.shared.getWebView(for: urlString, coordinator: context.coordinator)
+        let webView = WebViewPool.shared.getWebView(for: urlString, coordinator: context.coordinator)
         context.coordinator.webView = webView
 
-        // 如果是复用的 WebView，已经在播放了，直接返回
-        if isReused {
-            #if DEBUG
-            print(" 复用已播放的 WebView，跳过重新加载")
-            #endif
+        if url.isFileURL {
+            let directory = url.deletingLastPathComponent()
+            let videoFileName = url.lastPathComponent
+            let htmlFile = directory.appendingPathComponent("_player_\(videoFileName).html")
+            let html = """
+            <!DOCTYPE html>
+            <html><head>
+            <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+            <style>*{margin:0;padding:0}html,body{width:100vw;height:100vh;background:transparent;overflow:hidden}
+            video{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;background:transparent}</style>
+            </head><body>
+            <video id="v" autoplay loop muted playsinline webkit-playsinline src="\(videoFileName)"></video>
+            <script>
+            const v=document.getElementById('v');v.muted=true;
+            v.play().catch(()=>{});
+            v.addEventListener('pause',()=>{if(!v.ended)setTimeout(()=>v.play().catch(()=>{}),200)});
+            </script></body></html>
+            """
+            try? html.write(to: htmlFile, atomically: true, encoding: .utf8)
+            webView.loadFileURL(htmlFile, allowingReadAccessTo: directory)
             return webView
         }
 
-        // 1. 先检查缓存
+        // 远程 HLS
         let cachedVariant = HLSVariantCache.shared.getVariant(for: urlString)
-
-        // 2. 如果没有缓存，尝试 Swift 预解析（在后台线程，避免阻塞主线程）
         if cachedVariant == nil {
-            // 注意：这里我们不能在主线程做同步网络请求
-            // 所以启动异步预解析，本次仍然使用 JavaScript 作为回退
             DispatchQueue.global(qos: .userInitiated).async {
                 _ = Self.swiftPreParse(masterUrl: urlString)
             }
-            #if DEBUG
-            print(" 启动 Swift 后台预解析，本次使用 JavaScript 回退")
-            #endif
         }
-
         let videoUrl = cachedVariant ?? urlString
         let hasCached = cachedVariant != nil
-
-        let html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            <style>
-                * { margin: 0; padding: 0; }
-                html, body {
-                    width: 100vw;
-                    height: 100vh;
-                    background: black;
-                    overflow: hidden;
-                }
-                #container {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100vw;
-                    height: 100vh;
-                    overflow: hidden;
-                }
-                video {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    object-position: center center;
-                }
-            </style>
-        </head>
-        <body>
-            <div id="container">
-                <video id="v" autoplay loop muted playsinline webkit-playsinline></video>
-            </div>
-            <script>
-                const v = document.getElementById('v');
-                const masterUrl = '\(url.absoluteString)';
-                const cachedUrl = \(hasCached ? "'\(videoUrl)'" : "null");
-                const log = msg => webkit.messageHandlers.log.postMessage(msg);
-                const cache = url => webkit.messageHandlers.cache.postMessage(url);
-                let retryCount = 0;
-                const maxRetries = 2;
-                let playAttempts = 0;
-                let isPlaying = false;
-
-                function tryPlay() {
-                    if (isPlaying) return;
-                    playAttempts++;
-                    log('尝试播放 #' + playAttempts);
-                    v.muted = true;
-
-                    const playPromise = v.play();
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            isPlaying = true;
-                            log('播放成功 ');
-                        }).catch(e => {
-                            log('播放失败: ' + e.message);
-                            if (playAttempts < 5) {
-                                setTimeout(tryPlay, 100);
-                            }
-                        });
-                    } else {
-                        isPlaying = true;
-                        log('播放已调用 (no promise)');
-                    }
-                }
-
-                v.addEventListener('loadstart', () => log('事件: loadstart'));
-                v.addEventListener('loadedmetadata', () => {
-                    log('事件: loadedmetadata, 时长=' + v.duration);
-                    setTimeout(tryPlay, 50);
-                });
-                v.addEventListener('canplay', () => {
-                    log('事件: canplay');
-                    tryPlay();
-                });
-                v.addEventListener('canplaythrough', () => {
-                    log('事件: canplaythrough');
-                    tryPlay();
-                });
-                v.addEventListener('playing', () => {
-                    isPlaying = true;
-                    log('事件: playing ');
-                });
-                v.addEventListener('pause', () => {
-                    log('事件: pause');
-                    if (!v.ended) {
-                        setTimeout(tryPlay, 100);
-                    }
-                });
-                v.addEventListener('waiting', () => log('事件: waiting'));
-                v.addEventListener('stalled', () => log('事件: stalled'));
-                v.addEventListener('timeupdate', function once() {
-                    log('事件: timeupdate, 时间=' + v.currentTime.toFixed(2));
-                    v.removeEventListener('timeupdate', once);
-                });
-                v.addEventListener('error', () => {
-                    const code = v.error ? v.error.code : 'null';
-                    log('错误: ' + code);
-                    if (cachedUrl && retryCount < maxRetries) {
-                        retryCount++;
-                        log(' 缓存失效，重新解析 (尝试 ' + retryCount + ')');
-                        loadFromMaster();
-                    }
-                });
-
-                async function loadFromMaster() {
-                    try {
-                        log('正在解析变体...');
-                        const resp = await fetch(masterUrl);
-                        const text = await resp.text();
-                        const lines = text.split('\\n');
-                        const variants = [];
-
-                        for (let i = 0; i < lines.length; i++) {
-                            if (lines[i].startsWith('#EXT-X-STREAM-INF:')) {
-                                const bw = lines[i].match(/BANDWIDTH=(\\d+)/);
-                                const res = lines[i].match(/RESOLUTION=(\\d+)x(\\d+)/);
-                                if (bw && res && lines[i+1]) {
-                                    variants.push({ bw: +bw[1], w: +res[1], h: +res[2], url: lines[i+1].trim() });
-                                }
-                            }
-                        }
-
-                        if (variants.length === 0) {
-                            log(' 未找到变体，使用主URL');
-                            v.src = masterUrl;
-                            v.load();
-                            tryPlay();
-                            return;
-                        }
-
-                        log('找到 ' + variants.length + ' 个变体');
-
-                        let best = variants.reduce((a, b) => {
-                            const aPixels = a.w * a.h;
-                            const bPixels = b.w * b.h;
-                            if (aPixels !== bPixels) return aPixels > bPixels ? a : b;
-                            return a.bw > b.bw ? a : b;
-                        });
-
-                        let url = best.url;
-                        if (!url.startsWith('http')) {
-                            url = masterUrl.substring(0, masterUrl.lastIndexOf('/') + 1) + url;
-                        }
-
-                        log(' ' + best.w + 'x' + best.h + ' @ ' + (best.bw/1000000).toFixed(1) + 'Mbps');
-
-                        cache(url);
-                        v.src = url;
-                        v.load();
-                        tryPlay();
-
-                    } catch (e) {
-                        log(' 解析失败: ' + e.message);
-                        v.src = masterUrl;
-                        v.load();
-                        tryPlay();
-                    }
-                }
-
-                async function loadVideo() {
-                    if (cachedUrl) {
-                        log(' 使用缓存: ' + cachedUrl.split('/').pop());
-                        v.src = cachedUrl;
-                        v.load();
-                        tryPlay();
-                        return;
-                    }
-                    await loadFromMaster();
-                }
-
-                loadVideo();
-            </script>
-        </body>
-        </html>
-        """
-
+        let html = Self.buildHLSHTML(masterUrl: url.absoluteString, videoUrl: videoUrl, hasCached: hasCached)
         webView.loadHTMLString(html, baseURL: URL(string: "https://music.apple.com"))
-        #if DEBUG
-        print(" WKWebView loading: \(hasCached ? "缓存" : "解析中")")
-        #endif
         return webView
     }
 
-    func updateUIView(_ uiView: WKWebView, context: Context) {}
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        uiView.evaluateJavaScript(
+            "(function(){var v=document.querySelector('video');if(v&&v.paused&&v.readyState>=2){v.muted=true;v.play().catch(function(){});}})();"
+        , completionHandler: nil)
+    }
 
-    // 视图移除时不回收，保持播放状态
     static func dismantleUIView(_ uiView: WKWebView, coordinator: Coordinator) {
-        // 不再立即回收，让 WebView 保持播放
-        // WebViewPool 会通过 URL 缓存它，下次打开时复用
-        #if DEBUG
-        print(" WebView 保持活跃（不回收）")
-        #endif
+        WebViewPool.shared.recycleWebView(for: coordinator.masterUrl)
+    }
+
+    // MARK: - HLS HTML
+    private static func buildHLSHTML(masterUrl: String, videoUrl: String, hasCached: Bool) -> String {
+        """
+        <!DOCTYPE html>
+        <html><head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+        <style>*{margin:0;padding:0}html,body{width:100vw;height:100vh;background:transparent;overflow:hidden}
+        #container{position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden}
+        video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;background:transparent}</style>
+        </head><body><div id="container">
+        <video id="v" autoplay loop muted playsinline webkit-playsinline preload="auto"></video>
+        </div><script>
+        const v=document.getElementById('v');
+        const masterUrl='\(masterUrl)';
+        const cachedUrl=\(hasCached ? "'\(videoUrl)'" : "null");
+        const cache=url=>webkit.messageHandlers.cache.postMessage(url);
+        let retryCount=0,isPlaying=false;
+
+        function tryPlay(){
+            if(isPlaying)return;
+            v.muted=true;
+            v.play().then(()=>{isPlaying=true}).catch(()=>{
+                if(!isPlaying)setTimeout(tryPlay,200);
+            });
+        }
+
+        v.addEventListener('loadedmetadata',()=>setTimeout(tryPlay,50));
+        v.addEventListener('canplay',tryPlay);
+        v.addEventListener('playing',()=>{isPlaying=true});
+        v.addEventListener('pause',()=>{if(!v.ended)setTimeout(tryPlay,200)});
+        v.addEventListener('stalled',()=>{
+            setTimeout(()=>{if(v.paused||v.readyState<3)tryPlay()},2000);
+        });
+        v.addEventListener('error',()=>{
+            if(retryCount<2){retryCount++;setTimeout(()=>{v.src=masterUrl;v.load();tryPlay()},retryCount*1000);}
+        });
+
+        (function loadVideo(){
+            if(cachedUrl){v.src=cachedUrl;v.load();tryPlay();return;}
+            v.src=masterUrl;v.load();
+            setTimeout(()=>{
+                if(v.readyState<2&&!isPlaying){
+                    fetch(masterUrl,{signal:AbortSignal.timeout(15000)}).then(r=>r.text()).then(text=>{
+                        const lines=text.split('\\n');const variants=[];
+                        for(let i=0;i<lines.length;i++){
+                            if(lines[i].startsWith('#EXT-X-STREAM-INF:')){
+                                const bw=lines[i].match(/BANDWIDTH=(\\d+)/);
+                                const res=lines[i].match(/RESOLUTION=(\\d+)x(\\d+)/);
+                                if(bw&&res&&lines[i+1])variants.push({bw:+bw[1],w:+res[1],h:+res[2],url:lines[i+1].trim()});
+                            }
+                        }
+                        if(!variants.length)return;
+                        const maxPx=720*960;
+                        const cands=variants.filter(x=>(x.w*x.h)<=maxPx);
+                        const pick=cands.length?cands:[variants.reduce((a,b)=>(a.w*a.h)<(b.w*b.h)?a:b)];
+                        let best=pick.reduce((a,b)=>(a.w*a.h)>(b.w*b.h)?a:b);
+                        let url=best.url;
+                        if(!url.startsWith('http'))url=masterUrl.substring(0,masterUrl.lastIndexOf('/')+1)+url;
+                        cache(url);v.src=url;v.load();tryPlay();
+                    }).catch(()=>{});
+                }
+            },10000);
+            tryPlay();
+        })();
+        </script></body></html>
+        """
     }
 }
 
@@ -1663,7 +1974,7 @@ struct PlayerControlButton: View {
 
 // MARK: - 播放列表弹窗
 struct PlaylistSheetView: View {
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -1930,15 +2241,27 @@ struct ActivityViewController: UIViewControllerRepresentable {
 // MARK: - AirPlay 按钮
 struct AirPlayButton: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
-        let routePickerView = AVRoutePickerView()
-        routePickerView.tintColor = UIColor.white.withAlphaComponent(0.6)
-        routePickerView.activeTintColor = UIColor.white
-        routePickerView.prioritizesVideoDevices = false
+        let containerView = UIView()
+        containerView.backgroundColor = .clear
         
-        // 设置背景透明
+        let routePickerView = AVRoutePickerView()
+        routePickerView.tintColor = UIColor.white.withAlphaComponent(0.8)
+        routePickerView.activeTintColor = UIColor.systemBlue
+        routePickerView.prioritizesVideoDevices = false
         routePickerView.backgroundColor = .clear
         
-        return routePickerView
+        // 设置约束让按钮居中且大小固定
+        routePickerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(routePickerView)
+        
+        NSLayoutConstraint.activate([
+            routePickerView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            routePickerView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            routePickerView.widthAnchor.constraint(equalToConstant: 24),
+            routePickerView.heightAnchor.constraint(equalToConstant: 24)
+        ])
+        
+        return containerView
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {}
@@ -1950,38 +2273,54 @@ struct PlayerSongInfoView: View {
     let track: Track?
     let onShowLike: () -> Void
     let onShowShare: () -> Void
-    
+    let onArtistTap: (Artist) -> Void
+
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 8) {
+            // 左侧占位（与右侧按钮宽度相同，保持标题居中）
+            Color.clear
+                .frame(width: 60)
+
+            // 中间：歌曲信息（居中显示）
+            VStack(spacing: 4) {
                 Text(track?.name ?? "")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white)
                     .lineLimit(1)
-                Text(track?.artistName ?? "")
-                    .font(.system(size: 15))
-                    .foregroundColor(.white.opacity(0.7))
-                    .lineLimit(1)
+                if let track = track, let artist = track.artists?.first ?? track.ar?.first {
+                    Button(action: { onArtistTap(artist) }) {
+                        Text(track.artistName)
+                            .font(.system(size: 15))
+                            .foregroundColor(.white.opacity(0.7))
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Text(track?.artistName ?? "")
+                        .font(.system(size: 15))
+                        .foregroundColor(.white.opacity(0.7))
+                        .lineLimit(1)
+                }
             }
-            
-            Spacer()
-            
-            // 喜欢按钮
-            Button(action: onShowLike) {
-                Image(systemName: "heart")
-                    .font(.system(size: 20))
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(8)
-            }
-            
-            Button(action: onShowShare) {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 20))
-                    .foregroundColor(.white.opacity(0.8))
-                    .padding(8)
+            .frame(maxWidth: .infinity)
+
+            // 右侧按钮
+            HStack(spacing: 0) {
+                Button(action: onShowLike) {
+                    Image(systemName: "heart")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(width: 30, height: 30)
+                }
+
+                Button(action: onShowShare) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 18))
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(width: 30, height: 30)
+                }
             }
         }
-        .padding(.horizontal, 40)
     }
 }
 
@@ -1991,11 +2330,11 @@ struct PlayerProgressView: View {
     @Binding var isDragging: Bool
     @Binding var dragProgress: Double
     let onSeek: (Double) -> Void
-    
+
     private var displayTime: Double {
         isDragging ? dragProgress : currentTime
     }
-    
+
     var body: some View {
         VStack(spacing: 8) {
             // 进度条
@@ -2005,12 +2344,12 @@ struct PlayerProgressView: View {
                     Capsule()
                         .fill(.white.opacity(0.3))
                         .frame(height: 4)
-                    
+
                     // 进度
                     Capsule()
                         .fill(.white)
                         .frame(width: geometry.size.width * CGFloat(displayTime / max(duration, 1)), height: 4)
-                    
+
                     // 滑块
                     Circle()
                         .fill(.white)
@@ -2032,7 +2371,7 @@ struct PlayerProgressView: View {
                 )
             }
             .frame(height: 12)
-            
+
             // 时间标签
             HStack {
                 Text(formatTime(displayTime))
@@ -2044,9 +2383,8 @@ struct PlayerProgressView: View {
                     .foregroundColor(.white.opacity(0.7))
             }
         }
-        .padding(.horizontal, 40)
     }
-    
+
     private func formatTime(_ time: Double) -> String {
         let minutes = Int(time) / 60
         let seconds = Int(time) % 60
@@ -2057,33 +2395,34 @@ struct PlayerProgressView: View {
 struct PlayerControlsView: View {
     let isPlaying: Bool
     let isLoading: Bool
+    var isIPad: Bool = false
     @Binding var isPlayButtonPressed: Bool
     let onPrevious: () -> Void
     let onPlayPause: () -> Void
     let onNext: () -> Void
-    
+
     var body: some View {
-        HStack(spacing: 50) {
+        HStack(spacing: isIPad ? 60 : 50) {
             // 上一首
             Button(action: onPrevious) {
                 Image(systemName: "backward.fill")
-                    .font(.system(size: 32))
+                    .font(.system(size: isIPad ? 36 : 32))
                     .foregroundColor(.white)
             }
-            
+
             // 播放/暂停
             Button(action: onPlayPause) {
                 ZStack {
                     Circle()
                         .fill(.white.opacity(0.2))
-                        .frame(width: 72, height: 72)
-                    
+                        .frame(width: isIPad ? 80 : 72, height: isIPad ? 80 : 72)
+
                     if isLoading {
                         ProgressView()
                             .tint(.white)
                     } else {
                         Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                            .font(.system(size: 28))
+                            .font(.system(size: isIPad ? 32 : 28))
                             .foregroundColor(.white)
                     }
                 }
@@ -2094,11 +2433,11 @@ struct PlayerControlsView: View {
                     .onChanged { _ in isPlayButtonPressed = true }
                     .onEnded { _ in isPlayButtonPressed = false }
             )
-            
+
             // 下一首
             Button(action: onNext) {
                 Image(systemName: "forward.fill")
-                    .font(.system(size: 32))
+                    .font(.system(size: isIPad ? 36 : 32))
                     .foregroundColor(.white)
             }
         }
@@ -2106,25 +2445,40 @@ struct PlayerControlsView: View {
 }
 
 struct PlayerVolumeView: View {
-    @Binding var currentVolume: Float
-    
+    @ObservedObject var volumeObserver: VolumeObserver
+    let systemVolumeController: SystemVolumeController
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "speaker.fill")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.7))
-            
-            Slider(value: $currentVolume, in: 0...1)
-                .tint(.white)
-                .onChange(of: currentVolume) { _, newValue in
-                    MPVolumeView.setVolume(newValue)
+
+            Slider(
+                value: $volumeObserver.volume,
+                in: 0...1,
+                onEditingChanged: { editing in
+                    if editing {
+                        volumeObserver.isDragging = true
+                    } else {
+                        // 延迟恢复，确保系统音量更新完成
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            volumeObserver.isDragging = false
+                        }
+                    }
                 }
-            
+            )
+                .tint(.white)
+                .onChangeCompat(of: volumeObserver.volume) { _, newValue in
+                    if volumeObserver.isDragging {
+                        systemVolumeController.setVolume(newValue)
+                    }
+                }
+
             Image(systemName: "speaker.wave.3.fill")
                 .font(.system(size: 14))
                 .foregroundColor(.white.opacity(0.7))
         }
-        .padding(.horizontal, 40)
     }
 }
 
@@ -2139,6 +2493,11 @@ struct PlayerBottomBarView: View {
     let onTogglePlayMode: () -> Void
     
     @State private var showQualityPicker = false
+    @State private var showDownloadCenter = false
+    @State private var showSleepTimer = false
+    @StateObject private var downloadService = SongDownloadService.shared
+    @StateObject private var localMusicService = LocalMusicService.shared
+    @StateObject private var sleepTimer = SleepTimerManager.shared
     
     // 将API返回的level转为显示名称
     private func qualityDisplayName(_ level: String) -> String {
@@ -2173,8 +2532,20 @@ struct PlayerBottomBarView: View {
         return "\(actualName)(\(requestedQuality))"
     }
     
+    // 检查当前歌曲是否已下载
+    private var isCurrentTrackDownloaded: Bool {
+        guard let track = audioPlayer.currentTrack else { return false }
+        return localMusicService.localTracks.contains { $0.sourceTrackId == track.id }
+    }
+    
+    // 当前歌曲下载状态
+    private var currentDownloadStatus: DownloadStatus {
+        guard let track = audioPlayer.currentTrack else { return .idle }
+        return downloadService.getStatus(trackId: track.id)
+    }
+    
     var body: some View {
-        HStack(spacing: 32) {
+        HStack(spacing: 16) {
             // 歌词按钮
             Button(action: onToggleLyrics) {
                 Image(systemName: showLyrics ? "text.bubble.fill" : "text.bubble")
@@ -2184,25 +2555,50 @@ struct PlayerBottomBarView: View {
             
             // 评论按钮
             Button(action: onShowComments) {
-                Image(systemName: "bubble.left")
+                Image(systemName: "bubble.right")
                     .font(.system(size: 20))
                     .foregroundColor(.white.opacity(0.8))
             }
             
+            // 下载按钮
+            downloadButton
+            
             // 音质按钮 - 显示实际音质
             Button(action: { showQualityPicker = true }) {
                 Text(displayQuality)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
                     .background(
                         Capsule()
                             .fill(Color.white.opacity(0.2))
                     )
             }
+            .frame(minWidth: 65)
             
             Spacer()
+            
+            // AirPlay 按钮
+            AirPlayButton()
+                .frame(width: 22, height: 22)
+            
+            // 定时关闭按钮
+            Button(action: { showSleepTimer = true }) {
+                ZStack {
+                    Image(systemName: sleepTimer.isActive ? "moon.zzz.fill" : "moon.zzz")
+                        .font(.system(size: 20))
+                        .foregroundColor(sleepTimer.isActive ? .orange : .white.opacity(0.8))
+                    
+                    // 倒计时显示
+                    if case .countdown = sleepTimer.mode {
+                        Text(sleepTimer.formattedRemainingTime)
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundColor(.orange)
+                            .offset(y: 14)
+                    }
+                }
+            }
             
             // 播放模式
             Button(action: onTogglePlayMode) {
@@ -2218,12 +2614,85 @@ struct PlayerBottomBarView: View {
                     .foregroundColor(.white.opacity(0.8))
             }
         }
-        .padding(.horizontal, 40)
+        .padding(.horizontal, 32)
         .sheet(isPresented: $showQualityPicker) {
             QualityPickerView(sourceConfig: sourceConfig)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
-                .presentationBackground(.clear)
+        }
+        .sheet(isPresented: $showDownloadCenter) {
+            DownloadCenterView()
+                .presentationDetents([.large])
+        }
+        .sheet(isPresented: $showSleepTimer) {
+            SleepTimerView()
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+        }
+    }
+    
+    // MARK: - 下载按钮
+    @ViewBuilder
+    private var downloadButton: some View {
+        if isCurrentTrackDownloaded {
+            // 已下载 - 点击打开下载中心
+            Button(action: { showDownloadCenter = true }) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.green)
+            }
+        } else {
+            switch currentDownloadStatus {
+            case .idle:
+                // 未下载 - 点击开始下载
+                Button {
+                    if let track = audioPlayer.currentTrack {
+                        downloadService.download(track: track)
+                    }
+                } label: {
+                    Image(systemName: "arrow.down.circle")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white.opacity(0.8))
+                }
+            case .waiting:
+                // 等待中
+                Button(action: { showDownloadCenter = true }) {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                        .tint(.white)
+                }
+            case .downloading(let progress):
+                // 下载中 - 显示进度
+                Button(action: { showDownloadCenter = true }) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 2)
+                        Circle()
+                            .trim(from: 0, to: progress)
+                            .stroke(Color.green, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                            .rotationEffect(.degrees(-90))
+                    }
+                    .frame(width: 22, height: 22)
+                }
+            case .completed:
+                // 完成
+                Button(action: { showDownloadCenter = true }) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.green)
+                }
+            case .failed:
+                // 失败 - 点击重试
+                Button {
+                    if let track = audioPlayer.currentTrack {
+                        downloadService.retry(track: track)
+                    }
+                } label: {
+                    Image(systemName: "exclamationmark.circle")
+                        .font(.system(size: 20))
+                        .foregroundColor(.red)
+                }
+            }
         }
     }
 }
@@ -2464,6 +2933,13 @@ struct QualityOptionCard: View {
     }
 }
 
+// MARK: - DJ 过渡提示悬浮层 (已禁用)
+struct DJTransitionOverlay: View {
+    var body: some View {
+        EmptyView()
+    }
+}
+
 // MARK: - 喜欢选项弹窗
 struct LikeOptionsSheet: View {
     let track: Track
@@ -2588,6 +3064,8 @@ struct LikeOptionsSheet: View {
                 await MainActor.run {
                     isLiking = false
                     showToastMessage("已添加到网易云喜欢")
+                    LikedSongsStore.shared.markDirty()
+                    NotificationCenter.default.post(name: .likedSongsChanged, object: nil)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         dismiss()
                     }
@@ -2698,6 +3176,7 @@ struct ToastView: View {
 // MARK: - 登录弹窗通知
 extension Notification.Name {
     static let showLoginSheet = Notification.Name("showLoginSheet")
+    static let likedSongsChanged = Notification.Name("likedSongsChanged")
 }
 
 #Preview {

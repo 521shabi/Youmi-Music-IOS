@@ -16,164 +16,218 @@ enum HapticFeedback {
 
 struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
-    @State private var loginMethod: LoginMethod = .captcha
     @State private var showMainView = false
-    
-    enum LoginMethod {
-        case password
-        case captcha
-        case qrcode
-        case cookie
-    }
+    @State private var animateGradient = false
+    @State private var showContent = false
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                // Logo
-                Image(systemName: "music.note.list")
-                    .font(.system(size: 60))
-                    .foregroundColor(.red)
-                    .padding(.top, 40)
+        GeometryReader { geometry in
+            ZStack {
+                // 动态渐变背景
+                animatedBackground
                 
-                Text("Youmi")
-                    .font(.largeTitle)
+                // 主内容
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        Spacer(minLength: geometry.size.height * 0.08)
+                        
+                        // Logo 区域
+                        logoSection
+                            .opacity(showContent ? 1 : 0)
+                            .offset(y: showContent ? 0 : -30)
+                        
+                        Spacer(minLength: 40)
+                        
+                        // 登录卡片
+                        loginCard
+                            .opacity(showContent ? 1 : 0)
+                            .offset(y: showContent ? 0 : 30)
+                        
+                        Spacer(minLength: 30)
+                        
+                        // 跳过登录
+                        skipButton
+                            .opacity(showContent ? 1 : 0)
+                        
+                        Spacer(minLength: geometry.safeAreaInsets.bottom + 20)
+                    }
+                    .frame(minHeight: geometry.size.height)
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
+                animateGradient = true
+            }
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.8).delay(0.2)) {
+                showContent = true
+            }
+        }
+        .fullScreenCover(isPresented: Binding(
+            get: { authViewModel.isLoggedIn || showMainView },
+            set: { _ in }
+        )) {
+            MainTabView()
+                .environmentObject(authViewModel)
+        }
+    }
+    
+    // MARK: - 动态渐变背景
+    private var animatedBackground: some View {
+        ZStack {
+            // 基础渐变
+            LinearGradient(
+                colors: colorScheme == .dark
+                    ? [Color(red: 0.1, green: 0.05, blue: 0.15), Color(red: 0.05, green: 0.02, blue: 0.1)]
+                    : [Color(red: 1, green: 0.95, blue: 0.97), Color(red: 0.98, green: 0.94, blue: 0.96)],
+                startPoint: animateGradient ? .topLeading : .bottomLeading,
+                endPoint: animateGradient ? .bottomTrailing : .topTrailing
+            )
+            
+            // 装饰圆圈
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [Color.red.opacity(0.3), Color.red.opacity(0)],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 200
+                    )
+                )
+                .frame(width: 400, height: 400)
+                .offset(x: animateGradient ? 100 : -100, y: animateGradient ? -200 : -150)
+                .blur(radius: 60)
+            
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [Color.pink.opacity(0.25), Color.pink.opacity(0)],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 180
+                    )
+                )
+                .frame(width: 360, height: 360)
+                .offset(x: animateGradient ? -80 : 80, y: animateGradient ? 300 : 350)
+                .blur(radius: 50)
+        }
+    }
+    
+    // MARK: - Logo 区域
+    private var logoSection: some View {
+        VStack(spacing: 16) {
+            // 音符动画 Logo
+            ZStack {
+                // 光晕背景
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.red.opacity(0.4), Color.red.opacity(0)],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 80
+                        )
+                    )
+                    .frame(width: 160, height: 160)
+                    .blur(radius: 20)
+                
+                // Logo 圆形背景
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.red, Color.red.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 100, height: 100)
+                    .shadow(color: Color.red.opacity(0.5), radius: 20, y: 10)
+                
+                Image(systemName: "music.note")
+                    .font(.system(size: 44, weight: .medium))
+                    .foregroundColor(.white)
+            }
+            
+            // App 名称
+            Text("Youmi")
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.primary, .primary.opacity(0.8)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+            
+            Text("畅享音乐，尽在指尖")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    // MARK: - 登录卡片
+    private var loginCard: some View {
+        VStack(spacing: 24) {
+            // 标题
+            VStack(spacing: 8) {
+                Text("欢迎登录")
+                    .font(.title2)
                     .fontWeight(.bold)
                 
-                // 登录方式选择
-                Picker("登录方式", selection: $loginMethod) {
-                    Text("验证码").tag(LoginMethod.captcha)
-                    Text("密码").tag(LoginMethod.password)
-                    Text("Cookie").tag(LoginMethod.cookie)
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 40)
-                
-                switch loginMethod {
-                case .password:
-                    passwordLoginView
-                case .captcha:
-                    captchaLoginView
-                case .qrcode:
-                    qrCodeLoginView
-                case .cookie:
-                    cookieLoginView
-                }
-                
-                Spacer()
-                
-                // 跳过登录
-                Button(action: {
-                    showMainView = true
-                }) {
-                    Text("跳过登录，直接进入")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-                .padding(.bottom, 30)
+                Text("使用 Cookie 快速登录您的账号")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
             }
-            .navigationBarHidden(true)
-            .fullScreenCover(isPresented: Binding(
-                get: { authViewModel.isLoggedIn || showMainView },
-                set: { _ in }
-            )) {
-                MainTabView()
-                    .environmentObject(authViewModel)
-            }
+            
+            // Cookie 登录表单
+            ModernCookieLoginForm(viewModel: authViewModel)
         }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(colorScheme == .dark ? 0.2 : 0.8),
+                                    Color.white.opacity(colorScheme == .dark ? 0.05 : 0.3)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+                .shadow(color: Color.black.opacity(0.1), radius: 30, y: 15)
+        )
+        .padding(.horizontal, 24)
     }
     
-    // MARK: - 密码登录视图
-    private var passwordLoginView: some View {
-        LoginForm(viewModel: authViewModel)
-    }
-    
-    // MARK: - 验证码登录视图
-    private var captchaLoginView: some View {
-        CaptchaLoginForm(viewModel: authViewModel)
-    }
-    
-    // MARK: - Cookie 登录视图
-    private var cookieLoginView: some View {
-        CookieLoginForm(viewModel: authViewModel)
-    }
-
-    // MARK: - 二维码登录视图
-    private var qrCodeLoginView: some View {
-        VStack(spacing: 16) {
-            if let qrImage = authViewModel.qrImage {
-                QRCodeImageView(qrImage: qrImage)
-                qrStatusView
-            } else {
-                generateQRButton
-            }
-
-            if let error = authViewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
+    // MARK: - 跳过按钮
+    private var skipButton: some View {
+        Button(action: {
+            HapticFeedback.light()
+            showMainView = true
+        }) {
+            HStack(spacing: 6) {
+                Text("暂不登录，先看看")
+                Image(systemName: "arrow.right")
                     .font(.caption)
             }
-
-            Text("请使用网易云音乐 App 扫码登录")
-                .font(.caption)
-                .foregroundColor(.gray)
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .background(
+                Capsule()
+                    .fill(Color.primary.opacity(0.05))
+            )
         }
-        .onDisappear {
-            authViewModel.stopQRStatusCheck()
-        }
-    }
-
-    private var generateQRButton: some View {
-        Button(action: {
-            Task { await authViewModel.startQRLogin() }
-        }) {
-            if authViewModel.isLoading {
-                ProgressView()
-            } else {
-                VStack {
-                    Image(systemName: "qrcode")
-                        .font(.system(size: 80))
-                    Text("点击生成二维码")
-                        .padding(.top, 10)
-                }
-            }
-        }
-        .foregroundColor(.gray)
-        .frame(width: 200, height: 200)
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
-    }
-
-    // MARK: - 二维码状态视图
-    @ViewBuilder
-    private var qrStatusView: some View {
-        switch authViewModel.qrStatus {
-        case .waiting:
-            HStack {
-                ProgressView().scaleEffect(0.8)
-                Text("等待扫码...")
-            }
-            .foregroundColor(.gray)
-        case .scanned:
-            HStack {
-                Image(systemName: "checkmark.circle").foregroundColor(.green)
-                Text("已扫码，请在手机上确认")
-            }
-            .foregroundColor(.green)
-        case .confirmed:
-            HStack {
-                Image(systemName: "checkmark.circle.fill")
-                Text("登录成功！")
-            }
-            .foregroundColor(.green)
-        case .expired:
-            VStack {
-                Text("二维码已过期").foregroundColor(.red)
-                Button("重新生成") {
-                    Task { await authViewModel.startQRLogin() }
-                }
-                .foregroundColor(.blue)
-            }
-        }
+        .buttonStyle(ScaleButtonStyle())
     }
 }
 
@@ -261,111 +315,194 @@ struct AnimatedInputField: View {
     }
 }
 
-// MARK: - 按照截图设计的底部导航栏
-struct CustomTabBar: View {
+// MARK: - 旧版底部导航栏 (iOS 26 以下)
+struct LegacyCustomTabBar: View {
     @Binding var selectedTab: Int
     @Binding var isSearchMode: Bool
     var animation: Namespace.ID
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @EnvironmentObject var themeManager: ThemeManager
     @State private var showPlayer = false
+    @State private var showMoodRecommend = false
+
+    // iPad 适配
+    private var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
 
     // Tab 配置数据
     private static let tabItems: [(icon: String, title: String)] = [
         ("house.fill", "主页"),
         ("square.grid.2x2", "新发现"),
-        ("person.fill", "我的"),
-        ("gearshape.fill", "设置")
+        ("apple.logo", "Apple"),
+        ("person.fill", "我的")
     ]
-
-    private var showMiniPlayer: Bool {
-        audioPlayer.currentTrack != nil
+    
+    // 主题颜色
+    private var tabColors: ThemedTabColors {
+        ThemedTabColors(themeStyle: themeManager.themeStyle)
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            if showMiniPlayer {
-                MiniPlayerBar(showPlayer: $showPlayer)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            }
+            // MiniPlayer 独立组件，避免 AudioPlayer 状态变化影响整个 TabBar
+            MiniPlayerContainer(showPlayer: $showPlayer, isIPad: isIPad)
 
-            // 底部 Tab 栏
+            // 底部 Tab 栏 - 完全静态，不依赖 AudioPlayer
             tabBarContent
         }
-        .background(.clear)
         .fullScreenCover(isPresented: $showPlayer) {
             PlayerView()
         }
+        .fullScreenCover(isPresented: $showMoodRecommend) {
+            MoodRecommendView()
+        }
     }
-    
+
     // MARK: - Tab 栏内容
     private var tabBarContent: some View {
         HStack(spacing: 0) {
             HStack(spacing: 0) {
                 ForEach(Array(Self.tabItems.enumerated()), id: \.offset) { index, item in
-                    AppleMusicTabButton(
+                    ThemedTabButton(
                         icon: item.icon,
                         title: item.title,
-                        isSelected: selectedTab == index
+                        isSelected: selectedTab == index,
+                        isIPad: isIPad,
+                        tabColors: tabColors
                     ) {
                         selectTab(index)
                     }
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.leading, 16)
-            .padding(.vertical, 8)
+            .frame(maxWidth: isIPad ? 400 : .infinity)
+            .padding(.leading, isIPad ? 0 : 16)
+            .padding(.vertical, isIPad ? 10 : 8)
             .background(
-                EnhancedLiquidGlassBackground(cornerRadius: 32)
+                ThemedTabBarBackground(cornerRadius: 32)
             )
 
-            // 搜索按钮
+            // 深夜电台按钮 - 移除永久动画，改用静态渐变
+            Button(action: {
+                HapticFeedback.medium()
+                showMoodRecommend = true
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    themeManager.themeStyle == .strangerThings 
+                                        ? Color(red: 1.0, green: 0.2, blue: 0.3).opacity(0.3)
+                                        : Color.purple.opacity(0.3),
+                                    Color.clear
+                                ],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: isIPad ? 32 : 28
+                            )
+                        )
+                        .frame(width: isIPad ? 64 : 56, height: isIPad ? 64 : 56)
+
+                    Image(systemName: "moon.stars.fill")
+                        .font(.system(size: isIPad ? 22 : 20, weight: .medium))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: themeManager.themeStyle == .strangerThings
+                                    ? [Color(red: 1.0, green: 0.2, blue: 0.3), Color(red: 0.2, green: 0.6, blue: 1.0)]
+                                    : [Color.purple.opacity(0.9), Color.indigo.opacity(0.8)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: isIPad ? 64 : 56, height: isIPad ? 64 : 56)
+                }
+            }
+            .background(
+                ThemedCircleBackground()
+            )
+            .buttonStyle(LiquidButtonStyle())
+            .padding(.leading, isIPad ? 12 : 8)
+
+            // 搜索按钮（悬浮圆形）
             Button(action: {
                 HapticFeedback.light()
                 isSearchMode = true
             }) {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.primary)
-                    .frame(width: 56, height: 56)
+                    .font(.system(size: isIPad ? 22 : 20, weight: .medium))
+                    .foregroundColor(tabColors.unselectedColor)
+                    .frame(width: isIPad ? 64 : 56, height: isIPad ? 64 : 56)
             }
             .background(
-                EnhancedLiquidGlassCircleBackground()
+                ThemedCircleBackground()
             )
             .buttonStyle(LiquidButtonStyle())
-            .padding(.leading, 12)
+            .padding(.leading, isIPad ? 12 : 8)
         }
+        .frame(maxWidth: isIPad ? 650 : .infinity)
         .padding(.horizontal, 16)
-        .padding(.bottom, -20)
+        .padding(.bottom, isIPad ? 8 : 4)
     }
 
     private func selectTab(_ index: Int) {
         HapticFeedback.light()
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-            selectedTab = index
-        }
+        selectedTab = index
     }
 }
 
-// MARK: - Apple Music 风格 Tab 按钮
+// MARK: - 主题感知 Tab 按钮 (旧版)
+struct ThemedTabButton: View {
+    let icon: String
+    let title: String
+    let isSelected: Bool
+    var isIPad: Bool = false
+    let tabColors: ThemedTabColors
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: isIPad ? 6 : 4) {
+                Image(systemName: icon)
+                    .font(.system(size: isIPad ? 24 : 22, weight: .medium))
+                    .foregroundColor(isSelected ? tabColors.selectedColor : tabColors.unselectedColor)
+                    // 只对图标颜色变化添加动画
+                    .animation(.easeOut(duration: 0.15), value: isSelected)
+
+                Text(title)
+                    .font(.system(size: isIPad ? 11 : 10, weight: .medium))
+                    .foregroundColor(isSelected ? tabColors.selectedColor : tabColors.secondaryColor)
+                    .animation(.easeOut(duration: 0.15), value: isSelected)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+            .padding(.vertical, isIPad ? 6 : 4)
+        }
+        .buttonStyle(LiquidButtonStyle())
+    }
+}
+
+// MARK: - Apple Music 风格 Tab 按钮（保留兼容）
 struct AppleMusicTabButton: View {
     let icon: String
     let title: String
     let isSelected: Bool
+    var isIPad: Bool = false
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            VStack(spacing: isIPad ? 6 : 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.system(size: isIPad ? 24 : 22, weight: .medium))
                     .foregroundColor(isSelected ? .red : .primary)
-                
+
                 Text(title)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: isIPad ? 11 : 10, weight: .medium))
                     .foregroundColor(isSelected ? .red : .secondary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 4)
+            .padding(.vertical, isIPad ? 6 : 4)
         }
         .buttonStyle(LiquidButtonStyle())
     }
@@ -494,90 +631,191 @@ struct EnhancedLiquidGlassCircleBackground: View {
     }
 }
 
+// MARK: - MiniPlayer 容器（隔离 AudioPlayer 订阅）
+/// 关键优化：只订阅 currentTrack 的变化，不订阅整个 AudioPlayer
+private struct MiniPlayerContainer: View {
+    @Binding var showPlayer: Bool
+    let isIPad: Bool
+    
+    // 只订阅是否有歌曲在播放
+    @State private var hasTrack: Bool = false
+    
+    var body: some View {
+        Group {
+            if hasTrack {
+                MiniPlayerBar(showPlayer: $showPlayer)
+                    .frame(maxWidth: isIPad ? 600 : .infinity)
+            }
+        }
+        .onReceive(AudioPlayer.shared.$currentTrack.map { $0 != nil }.removeDuplicates()) { has in
+            hasTrack = has
+        }
+    }
+}
+
 // MARK: - 迷你播放器条
 struct MiniPlayerBar: View {
     @Binding var showPlayer: Bool
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.colorScheme) private var colorScheme
+    
+    // 只订阅需要的属性，避免不必要的重绘
+    @State private var currentTrack: Track?
+    @State private var isPlaying: Bool = false
+    
+    private var textColor: Color {
+        themeManager.themeStyle == .strangerThings ? .white : .primary
+    }
+    
+    private var secondaryTextColor: Color {
+        themeManager.themeStyle == .strangerThings ? .white.opacity(0.6) : .secondary
+    }
 
     var body: some View {
-        Button(action: {
-            HapticFeedback.light()
-            showPlayer = true
-        }) {
-            HStack(spacing: 10) {
-                // 封面
-                if let coverUrl = audioPlayer.currentTrack?.coverUrl,
-                   let url = URL(string: coverUrl) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle()
-                            .fill(Color(.systemGray5))
-                    }
-                    .frame(width: 40, height: 40)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.white.opacity(colorScheme == .dark ? 0.15 : 0.3), lineWidth: 0.5)
-                    )
-                }
-                
-                // 歌曲信息
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(audioPlayer.currentTrack?.name ?? "未播放")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
+        HStack(spacing: 8) {
+            // 封面和歌曲信息区域 - 使用 Button 确保点击可靠
+            Button {
+                HapticFeedback.light()
+                showPlayer = true
+            } label: {
+                HStack(spacing: 10) {
+                    // 封面
+                    miniPlayerCover
                     
-                    Text(audioPlayer.currentTrack?.artistName ?? "")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
+                    // 歌曲信息
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(currentTrack?.name ?? "未播放")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(textColor)
+                            .lineLimit(1)
+                        
+                        Text(currentTrack?.artistName ?? "")
+                            .font(.system(size: 12))
+                            .foregroundColor(secondaryTextColor)
+                            .lineLimit(1)
+                    }
+                    
+                    Spacer(minLength: 0)
                 }
-                
-                Spacer(minLength: 0)
-                
-                // 播放按钮
-                Button(action: {
-                    HapticFeedback.light()
-                    audioPlayer.togglePlayPause()
-                }) {
-                    Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.primary)
-                        .frame(width: 32, height: 32)
-                }
-                .buttonStyle(LiquidButtonStyle())
-                
-                // 下一首按钮
-                Button(action: {
-                    HapticFeedback.light()
-                    audioPlayer.playNext()
-                }) {
-                    Image(systemName: "forward.fill")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.primary)
-                        .frame(width: 32, height: 32)
-                }
-                .buttonStyle(LiquidButtonStyle())
+                .contentShape(Rectangle())
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 6)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(colorScheme == .dark ? Color.white.opacity(0.05) : Color.white.opacity(0.3))
-                    )
-            )
-            .padding(.horizontal, 12)
-            .padding(.top, -60)
+            .buttonStyle(MiniPlayerTapStyle())
+            
+            // 播放按钮
+            Button {
+                HapticFeedback.light()
+                AudioPlayer.shared.togglePlayPause()
+            } label: {
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(textColor)
+                    .frame(width: 52, height: 52)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(MiniPlayerTapStyle())
+            
+            // 下一首按钮
+            Button {
+                HapticFeedback.light()
+                AudioPlayer.shared.playNext()
+            } label: {
+                Image(systemName: "forward.fill")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(textColor)
+                    .frame(width: 52, height: 52)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(MiniPlayerTapStyle())
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .frame(height: 72)
+        .background(miniPlayerBackground)
+        .clipShape(Capsule())
+        .contentShape(Capsule())
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
+        .onReceive(AudioPlayer.shared.$currentTrack.removeDuplicates(by: { lhs, rhs in
+            lhs?.id == rhs?.id && lhs?.coverUrl == rhs?.coverUrl
+        })) { track in
+            currentTrack = track
+        }
+        .onReceive(AudioPlayer.shared.$isPlaying.removeDuplicates()) { playing in
+            isPlaying = playing
+        }
+    }
+    
+    // MARK: - 封面视图
+    @ViewBuilder
+    private var miniPlayerCover: some View {
+        Group {
+            if let coverUrl = currentTrack?.coverUrl,
+               let url = URL(string: coverUrl) {
+                CachedAsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    coverPlaceholder
+                }
+                .id(coverUrl)
+            } else {
+                coverPlaceholder
+            }
+        }
+        .frame(width: 44, height: 44)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(
+                    themeManager.themeStyle == .strangerThings
+                        ? Color(red: 1.0, green: 0.2, blue: 0.3).opacity(0.5)
+                        : Color.white.opacity(colorScheme == .dark ? 0.15 : 0.3),
+                    lineWidth: 0.5
+                )
+        )
+    }
+    
+    private var coverPlaceholder: some View {
+        Rectangle()
+            .fill(Color(.systemGray5))
+            .overlay(
+                Image(systemName: "music.note")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary)
+            )
+    }
+    
+    @ViewBuilder
+    private var miniPlayerBackground: some View {
+        if #available(iOS 26.0, *) {
+            Capsule()
+                .fill(.clear)
+                .glassEffect(.regular)
+                .allowsHitTesting(false)
+        } else {
+            ThemedCapsuleMiniPlayerBackground()
+        }
+    }
+}
+
+// MARK: - 迷你播放器按钮样式
+private struct MiniPlayerTapStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.6 : 1.0)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+// MARK: - 迷你播放器控制按钮样式
+struct MiniPlayerControlButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.9 : 1.0)
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -900,165 +1138,309 @@ struct CaptchaLoginForm: View {
     }
 }
 
-// MARK: - Cookie 登录表单组件
-struct CookieLoginForm: View {
+// MARK: - 现代化 Cookie 登录表单
+struct ModernCookieLoginForm: View {
     @ObservedObject var viewModel: AuthViewModel
     @State private var cookie = ""
-    @State private var showHelp = false
+    @State private var showHelpSheet = false
+    @FocusState private var isInputFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
     var onSuccess: (() -> Void)? = nil
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                // Cookie 输入
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Cookie")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Button(action: { showHelp.toggle() }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "questionmark.circle")
-                                Text("如何获取")
-                            }
-                            .font(.caption)
-                            .foregroundColor(.blue)
+        VStack(spacing: 20) {
+            // Cookie 输入区域
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Label("MUSIC_U Cookie", systemImage: "key.fill")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        HapticFeedback.light()
+                        showHelpSheet = true
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "questionmark.circle.fill")
+                            Text("如何获取")
                         }
+                        .font(.caption)
+                        .foregroundColor(.red)
                     }
-                    .padding(.horizontal, 30)
+                }
+                
+                // 现代化输入框
+                ZStack(alignment: .topLeading) {
+                    if cookie.isEmpty {
+                        Text("粘贴您的 MUSIC_U Cookie...")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary.opacity(0.6))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
+                    }
                     
                     TextEditor(text: $cookie)
-                        .frame(height: 100)
-                        .padding(8)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
-                        .padding(.horizontal, 30)
+                        .font(.system(.subheadline, design: .monospaced))
+                        .focused($isInputFocused)
+                        .scrollContentBackground(.hidden)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
                 }
-                
-                // 帮助说明
-                if showHelp {
-                    cookieHelpView
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                }
-                
-                // 错误信息
-                if let error = viewModel.errorMessage {
+                .frame(height: 100)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(colorScheme == .dark ? Color.white.opacity(0.05) : Color.black.opacity(0.03))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(
+                                    isInputFocused ? Color.red.opacity(0.5) : Color.clear,
+                                    lineWidth: 2
+                                )
+                        )
+                )
+                .animation(.easeOut(duration: 0.2), value: isInputFocused)
+            }
+            
+            // 错误信息
+            if let error = viewModel.errorMessage {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
                     Text(error)
                         .foregroundColor(.red)
-                        .font(.caption)
-                        .padding(.horizontal, 30)
                 }
-                
-                // 登录按钮
-                Button(action: {
-                    Task {
-                        await viewModel.loginWithCookie(cookie: cookie.trimmingCharacters(in: .whitespacesAndNewlines))
-                        if viewModel.isLoggedIn {
-                            onSuccess?()
-                        }
+                .font(.caption)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.red.opacity(0.1))
+                )
+            }
+            
+            // 登录按钮
+            Button(action: {
+                HapticFeedback.medium()
+                isInputFocused = false
+                Task {
+                    await viewModel.loginWithCookie(cookie: cookie.trimmingCharacters(in: .whitespacesAndNewlines))
+                    if viewModel.isLoggedIn {
+                        onSuccess?()
                     }
-                }) {
-                    ZStack {
-                        if viewModel.isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
+                }
+            }) {
+                ZStack {
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        HStack(spacing: 8) {
                             Text("登录")
                                 .fontWeight(.semibold)
+                            Image(systemName: "arrow.right")
+                                .font(.subheadline.bold())
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 54)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(
+                    Group {
+                        if cookie.isEmpty {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.secondary.opacity(0.2))
+                        } else {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.red, Color.red.opacity(0.85)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .shadow(color: Color.red.opacity(0.4), radius: 15, y: 8)
+                        }
+                    }
+                )
+                .foregroundColor(cookie.isEmpty ? .secondary : .white)
+            }
+            .disabled(cookie.isEmpty || viewModel.isLoading)
+            .scaleEffect(viewModel.isLoading ? 0.98 : 1)
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: viewModel.isLoading)
+            .buttonStyle(ScaleButtonStyle())
+        }
+        .sheet(isPresented: $showHelpSheet) {
+            CookieHelpSheet()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+}
+
+// MARK: - Cookie 获取帮助弹窗
+struct CookieHelpSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private let steps = [
+        ("打开网易云音乐网页版", "在电脑浏览器访问 music.163.com 并登录账号", "globe"),
+        ("打开开发者工具", "按 F12 或右键选择「检查」", "hammer.fill"),
+        ("找到 Cookies", "点击 Application → Cookies → music.163.com", "folder.fill"),
+        ("复制 MUSIC_U", "找到名为 MUSIC_U 的条目，复制其值", "doc.on.doc.fill")
+    ]
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // 头部图标
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.red.opacity(0.2), Color.orange.opacity(0.2)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 80, height: 80)
+                        
+                        Image(systemName: "key.fill")
+                            .font(.system(size: 32))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.red, .orange],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    .padding(.top, 20)
+                    
+                    Text("如何获取 Cookie")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    
+                    // 步骤列表
+                    VStack(spacing: 16) {
+                        ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                            HelpStepCard(
+                                step: index + 1,
+                                title: step.0,
+                                detail: step.1,
+                                icon: step.2
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    // 提示卡片
+                    HStack(spacing: 12) {
+                        Image(systemName: "lightbulb.fill")
+                            .font(.title3)
+                            .foregroundColor(.orange)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("小提示")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                            Text("只需复制 MUSIC_U 的值即可，无需全部 Cookie")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(16)
                     .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.orange.opacity(0.1))
+                    )
+                    .padding(.horizontal, 20)
+                    
+                    Spacer(minLength: 40)
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - 帮助步骤卡片
+struct HelpStepCard: View {
+    let step: Int
+    let title: String
+    let detail: String
+    let icon: String
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // 步骤编号
+            ZStack {
+                Circle()
+                    .fill(
                         LinearGradient(
                             colors: [Color.red, Color.red.opacity(0.8)],
-                            startPoint: .leading,
-                            endPoint: .trailing
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
                     )
-                    .foregroundColor(.white)
-                    .cornerRadius(27)
-                    .shadow(color: Color.red.opacity(0.3), radius: 10, y: 5)
-                }
-                .padding(.horizontal, 30)
-                .disabled(cookie.isEmpty || viewModel.isLoading)
-                .opacity(cookie.isEmpty ? 0.6 : 1)
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: showHelp)
-    }
-    
-    // MARK: - Cookie 获取帮助视图
-    private var cookieHelpView: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(" Cookie 获取步骤")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-            
-            VStack(alignment: .leading, spacing: 10) {
-                helpStepView(
-                    step: 1,
-                    title: "打开网易云音乐网页版",
-                    detail: "在电脑浏览器访问 music.163.com 并登录账号"
-                )
+                    .frame(width: 36, height: 36)
                 
-                helpStepView(
-                    step: 2,
-                    title: "打开开发者工具",
-                    detail: "按 F12 或右键选择“检查”"
-                )
-                
-                helpStepView(
-                    step: 3,
-                    title: "找到 Cookies",
-                    detail: "点击 Application(应用) → Cookies → music.163.com"
-                )
-                
-                helpStepView(
-                    step: 4,
-                    title: "复制 MUSIC_U",
-                    detail: "找到名为 MUSIC_U 的条目，复制其值"
-                )
-            }
-            
-            // 提示
-            HStack(spacing: 6) {
-                Image(systemName: "lightbulb.fill")
-                    .foregroundColor(.orange)
-                    .font(.caption)
-                Text("只需复制 MUSIC_U 的值即可，无需全部 Cookie")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.top, 4)
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
-        )
-        .padding(.horizontal, 30)
-    }
-    
-    private func helpStepView(step: Int, title: String, detail: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Text("\(step)")
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .frame(width: 20, height: 20)
-                .background(Circle().fill(Color.red))
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text("\(step)")
                     .font(.subheadline)
-                    .fontWeight(.medium)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+            }
+            
+            // 内容
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Image(systemName: icon)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                    Text(title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                }
+                
                 Text(detail)
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            
+            Spacer()
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(colorScheme == .dark ? Color.white.opacity(0.05) : Color.black.opacity(0.03))
+        )
+    }
+}
+
+// MARK: - 兼容旧版 CookieLoginForm
+struct CookieLoginForm: View {
+    @ObservedObject var viewModel: AuthViewModel
+    var onSuccess: (() -> Void)? = nil
+    
+    var body: some View {
+        ModernCookieLoginForm(viewModel: viewModel, onSuccess: onSuccess)
     }
 }
 
@@ -1066,148 +1448,65 @@ struct CookieLoginForm: View {
 struct LoginSheetView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) var dismiss
-    @State private var loginMethod: LoginView.LoginMethod = .captcha
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                // Logo
-                Image(systemName: "music.note.list")
-                    .font(.system(size: 60))
-                    .foregroundColor(.red)
-                    .padding(.top, 40)
-                
-                Text("Youmi")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                
-                // 登录方式选择
-                Picker("登录方式", selection: $loginMethod) {
-                    Text("验证码").tag(LoginView.LoginMethod.captcha)
-                    Text("密码").tag(LoginView.LoginMethod.password)
-                    Text("Cookie").tag(LoginView.LoginMethod.cookie)
+            ScrollView {
+                VStack(spacing: 28) {
+                    // Logo
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.red, Color.red.opacity(0.8)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 80, height: 80)
+                            .shadow(color: Color.red.opacity(0.4), radius: 15, y: 8)
+                        
+                        Image(systemName: "music.note")
+                            .font(.system(size: 36, weight: .medium))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.top, 30)
+                    
+                    VStack(spacing: 8) {
+                        Text("欢迎登录")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Text("使用 Cookie 快速登录您的账号")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    // Cookie 登录表单
+                    ModernCookieLoginForm(viewModel: authViewModel) {
+                        dismiss()
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    Spacer(minLength: 40)
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 40)
-                
-                switch loginMethod {
-                case .captcha:
-                    // 验证码登录
-                    CaptchaLoginForm(viewModel: authViewModel) {
-                        dismiss()
-                    }
-                    .padding(.top, 10)
-                case .password:
-                    // 密码登录表单
-                    LoginForm(viewModel: authViewModel) {
-                        dismiss()
-                    }
-                    .padding(.top, 10)
-                case .qrcode:
-                    // 二维码登录
-                    qrCodeLoginView
-                        .padding(.top, 10)
-                case .cookie:
-                    // Cookie 登录
-                    CookieLoginForm(viewModel: authViewModel) {
-                        dismiss()
-                    }
-                    .padding(.top, 10)
-                }
-                
-                Spacer()
             }
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
-                        dismiss()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
-            .onChange(of: authViewModel.isLoggedIn) { _, newValue in
+            .onChangeCompat(of: authViewModel.isLoggedIn) { _, newValue in
                 if newValue {
                     dismiss()
                 }
-            }
-        }
-    }
-    
-    // MARK: - 二维码登录视图
-    private var qrCodeLoginView: some View {
-        VStack(spacing: 16) {
-            if let qrImage = authViewModel.qrImage {
-                QRCodeImageView(qrImage: qrImage)
-                qrStatusView
-            } else {
-                generateQRButton
-            }
-
-            if let error = authViewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
-
-            Text("请使用网易云音乐 App 扫码登录")
-                .font(.caption)
-                .foregroundColor(.gray)
-        }
-        .onDisappear {
-            authViewModel.stopQRStatusCheck()
-        }
-    }
-
-    private var generateQRButton: some View {
-        Button(action: {
-            Task { await authViewModel.startQRLogin() }
-        }) {
-            if authViewModel.isLoading {
-                ProgressView()
-            } else {
-                VStack {
-                    Image(systemName: "qrcode")
-                        .font(.system(size: 80))
-                    Text("点击生成二维码")
-                        .padding(.top, 10)
-                }
-            }
-        }
-        .foregroundColor(.gray)
-        .frame(width: 200, height: 200)
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
-    }
-
-    // MARK: - 二维码状态视图
-    @ViewBuilder
-    private var qrStatusView: some View {
-        switch authViewModel.qrStatus {
-        case .waiting:
-            HStack {
-                ProgressView().scaleEffect(0.8)
-                Text("等待扫码...")
-            }
-            .foregroundColor(.gray)
-        case .scanned:
-            HStack {
-                Image(systemName: "checkmark.circle").foregroundColor(.green)
-                Text("已扫码，请在手机上确认")
-            }
-            .foregroundColor(.green)
-        case .confirmed:
-            HStack {
-                Image(systemName: "checkmark.circle.fill")
-                Text("登录成功！")
-            }
-            .foregroundColor(.green)
-        case .expired:
-            VStack {
-                Text("二维码已过期").foregroundColor(.red)
-                Button("重新生成") {
-                    Task { await authViewModel.startQRLogin() }
-                }
-                .foregroundColor(.blue)
             }
         }
     }

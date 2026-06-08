@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Apple Music 液态玻璃风格音乐库页
 struct LibraryView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var localStorage = LocalStorageService.shared
     @StateObject private var localMusicService = LocalMusicService.shared
     @State private var showLogin = false
@@ -12,6 +13,15 @@ struct LibraryView: View {
     @State private var isLoadingCloud = false
     
     private let userService = UserService.shared
+    
+    // 主题颜色
+    private var textColor: Color {
+        themeManager.themeStyle == .strangerThings ? .white : .primary
+    }
+    
+    private var secondaryTextColor: Color {
+        themeManager.themeStyle == .strangerThings ? .white.opacity(0.6) : .secondary
+    }
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -29,8 +39,17 @@ struct LibraryView: View {
             }
             .padding(.bottom, 120)
         }
-        .background(LiquidGlassBackground(colors: [.blue.opacity(0.08), .purple.opacity(0.06), .pink.opacity(0.04)]))
+        .background(themedBackground)
         .navigationTitle("我的")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink(destination: SettingsView()) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(.primary)
+                }
+            }
+        }
         .fullScreenCover(isPresented: $showLogin) {
             LoginSheetView()
                 .environmentObject(authViewModel)
@@ -44,12 +63,12 @@ struct LibraryView: View {
                 await loadCloudData()
             }
         }
-        .onChange(of: authViewModel.currentUser) { _, newUser in
+        .onChangeCompat(of: authViewModel.currentUser) { _, newUser in
             if newUser != nil && cloudPlaylists.isEmpty {
                 Task { await loadCloudData() }
             }
         }
-        .onChange(of: authViewModel.isLoggedIn) { _, isLoggedIn in
+        .onChangeCompat(of: authViewModel.isLoggedIn) { _, isLoggedIn in
             if !isLoggedIn {
                 // 退出登录时清空数据
                 cloudPlaylists = []
@@ -57,17 +76,35 @@ struct LibraryView: View {
                 likedSongIds = []
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .likedSongsChanged)) { _ in
+            Task { await loadCloudData() }
+        }
+    }
+    
+    // MARK: - 主题背景
+    @ViewBuilder
+    private var themedBackground: some View {
+        switch themeManager.themeStyle {
+        case .standard:
+            LiquidGlassBackground(colors: [.blue.opacity(0.08), .purple.opacity(0.06), .pink.opacity(0.04)])
+        case .strangerThings:
+            StrangerThingsBackground()
+        }
     }
     
     // MARK: - 加载云端数据
     private func loadCloudData() async {
         guard let userId = authViewModel.currentUser?.userId else {
+            #if DEBUG
             print("未获取到 userId")
+            #endif
             return
         }
         guard !isLoadingCloud else { return }
         isLoadingCloud = true
+        #if DEBUG
         print("开始加载云端数据, userId: \(userId)")
+        #endif
         
         do {
             async let playlists = userService.getUserPlaylists(uid: userId)
@@ -78,9 +115,11 @@ struct LibraryView: View {
             cloudAlbums = try await albums
             likedSongIds = try await likeIds
         } catch {
+            #if DEBUG
             print("加载云端数据失败: \(error)")
+            #endif
         }
-        
+
         isLoadingCloud = false
     }
     
@@ -118,12 +157,14 @@ struct LibraryView: View {
     private var cloudMusicSection: some View {
         LiquidGlassSection(title: "网易Max") {
             if isLoadingCloud {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .padding(.vertical, 40)
-                    Spacer()
-                }
+                GridSkeletonView(
+                    count: 6,
+                    columns: [
+                        GridItem(.flexible(), spacing: 12),
+                        GridItem(.flexible(), spacing: 12),
+                        GridItem(.flexible(), spacing: 12)
+                    ]
+                )
             } else {
                 LazyVGrid(columns: [
                     GridItem(.flexible(), spacing: 12),
@@ -170,59 +211,75 @@ struct LibraryView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    
+                    // 我的云盘
+                    NavigationLink {
+                        CloudDiskView()
+                    } label: {
+                        CloudFeatureCard(
+                            icon: "cloud.fill",
+                            iconColor: .blue,
+                            title: "我的云盘",
+                            count: nil
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 4)
                 .padding(.vertical, 8)
             }
         }
     }
-    
+
     // MARK: - 液态玻璃收藏库内容
     private var liquidGlassLibraryContent: some View {
-        LiquidGlassSection(title: "本地音乐库") {
-            VStack(spacing: 0) {
-                // 本地歌曲
-                NavigationLink {
-                    LocalMusicView()
-                } label: {
-                    LiquidGlassLibraryRow(
-                        icon: "music.note.house.fill",
-                        iconColor: .green,
-                        title: "本地歌曲",
-                        count: localMusicService.localTracks.count
-                    )
-                }
-                .buttonStyle(.plain)
-                
-                LiquidGlassDivider()
-                
-                // 我喜欢的音乐
-                NavigationLink {
-                    FavoritesView()
-                } label: {
-                    LiquidGlassLibraryRow(
-                        icon: "heart.fill",
-                        iconColor: .red,
-                        title: "我喜欢的音乐",
-                        count: localStorage.favoritesCount
-                    )
-                }
-                .buttonStyle(.plain)
+        VStack(spacing: 20) {
+            // 本地音乐库
+            LiquidGlassSection(title: "本地音乐库") {
+                VStack(spacing: 0) {
+                    // 本地歌曲
+                    NavigationLink {
+                        LocalMusicView()
+                    } label: {
+                        LiquidGlassLibraryRow(
+                            icon: "music.note.house.fill",
+                            iconColor: .green,
+                            title: "本地歌曲",
+                            count: localMusicService.localTracks.count
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    
+                    LiquidGlassDivider()
+                    
+                    // 我喜欢的音乐
+                    NavigationLink {
+                        FavoritesView()
+                    } label: {
+                        LiquidGlassLibraryRow(
+                            icon: "heart.fill",
+                            iconColor: .red,
+                            title: "我喜欢的音乐",
+                            count: localStorage.favoritesCount
+                        )
+                    }
+                    .buttonStyle(.plain)
 
-                LiquidGlassDivider()
+                    LiquidGlassDivider()
 
-                // 最近播放
-                NavigationLink {
-                    PlayHistoryView()
-                } label: {
-                    LiquidGlassLibraryRow(
-                        icon: "clock.fill",
-                        iconColor: .orange,
-                        title: "最近播放",
-                        count: localStorage.historyCount
-                    )
+                    // 最近播放
+                    NavigationLink {
+                        PlayHistoryView()
+                    } label: {
+                        LiquidGlassLibraryRow(
+                            icon: "clock.fill",
+                            iconColor: .orange,
+                            title: "最近播放",
+                            count: localStorage.historyCount
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -233,7 +290,7 @@ struct CloudFeatureCard: View {
     let icon: String
     let iconColor: Color
     let title: String
-    let count: Int
+    let count: Int?
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -262,9 +319,11 @@ struct CloudFeatureCard: View {
                 .lineLimit(1)
             
             // 数量
-            Text("\(count)")
-                .font(.system(size: 11))
-                .foregroundColor(.secondary)
+            if let count = count {
+                Text("\(count)")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
@@ -438,7 +497,8 @@ struct LiquidGlassLibraryRow: View {
     let icon: String
     let iconColor: Color
     let title: String
-    let count: Int
+    var count: Int? = nil
+    var subtitle: String? = nil
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
@@ -470,15 +530,25 @@ struct LiquidGlassLibraryRow: View {
             .frame(width: 44, height: 44)
             .shadow(color: iconColor.opacity(0.2), radius: 6, x: 0, y: 3)
             
-            Text(title)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.primary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primary)
+                
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+            }
             
             Spacer()
             
-            Text("\(count)")
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
+            if let count = count {
+                Text("\(count)")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
             
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold))
@@ -586,7 +656,7 @@ struct CloudPlaylistDetailView: View {
     let playlist: CloudPlaylist
     @State private var tracks: [CloudTrack] = []
     @State private var isLoading = true
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     
     var body: some View {
         ScrollView {
@@ -667,11 +737,13 @@ struct CloudPlaylistDetailView: View {
         do {
             tracks = try await MusicService.shared.getPlaylistTracks(playlistId: playlist.id)
         } catch {
+            #if DEBUG
             print("加载歌曲失败: \(error)")
+            #endif
         }
         isLoading = false
     }
-    
+
     private func playTrack(_ track: CloudTrack, index: Int) {
         let playerTracks = tracks.map { $0.toTrack() }
         audioPlayer.setPlaylist(playerTracks, startAt: index)
@@ -684,26 +756,122 @@ struct CloudPlaylistDetailView: View {
     }
 }
 
+// MARK: - 喜欢的音乐缓存
+@MainActor
+final class LikedSongsStore: ObservableObject {
+    static let shared = LikedSongsStore()
+
+    @Published var tracks: [Track] = []
+    @Published var isLoading: Bool = false
+    @Published var loadingProgress: String = ""
+
+    private var loadTask: Task<Void, Never>?
+    private var currentPlaylistId: Int?
+    private var lastSongCount: Int?
+    private var isDirty = false
+
+    private init() {}
+
+    func ensureLoaded(playlistId: Int, songCount: Int) {
+        if currentPlaylistId == playlistId,
+           !tracks.isEmpty,
+           !isDirty,
+           lastSongCount == songCount {
+            return
+        }
+        refresh(playlistId: playlistId, songCount: songCount)
+    }
+
+    func refresh(playlistId: Int, songCount: Int) {
+        if isLoading { return }
+        tracks = []
+        isDirty = false
+        lastSongCount = songCount
+        currentPlaylistId = playlistId
+        isLoading = true
+        loadingProgress = ""
+
+        loadTask?.cancel()
+        loadTask = Task.detached(priority: .userInitiated) { [weak self] in
+            await self?.loadAll(playlistId: playlistId, songCount: songCount)
+        }
+    }
+
+    func markDirty() {
+        isDirty = true
+    }
+
+    private func loadAll(playlistId: Int, songCount: Int) async {
+        var allTracks: [Track] = []
+        let pageSize = 500
+        var offset = 0
+
+        while true {
+            if Task.isCancelled { return }
+            await MainActor.run {
+                self.loadingProgress = "正在加载 \(allTracks.count)/\(songCount)..."
+            }
+
+            do {
+                let pageTracks = try await MusicService.shared.getPlaylistAllTracks(
+                    id: playlistId,
+                    limit: pageSize,
+                    offset: offset
+                )
+
+                if pageTracks.isEmpty {
+                    break
+                }
+
+                allTracks.append(contentsOf: pageTracks)
+                offset += pageSize
+
+                if pageTracks.count < pageSize {
+                    break
+                }
+            } catch {
+                await MainActor.run {
+                    self.isLoading = false
+                }
+                return
+            }
+        }
+
+        await MainActor.run {
+            self.tracks = allTracks
+            self.isLoading = false
+            self.loadingProgress = ""
+        }
+    }
+}
+
 // MARK: - 喜欢的音乐页面
 struct CloudLikedSongsView: View {
     let playlistId: Int
     let songCount: Int
-    @State private var tracks: [CloudTrack] = []
-    @State private var isLoading = true
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @StateObject private var likedStore: LikedSongsStore = .shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
                 likedHeader
                 playAllButton
-                
+
                 if isLoading {
-                    ProgressView().padding(.top, 40)
+                    VStack(spacing: 8) {
+                        ProgressView()
+                        if !loadingProgress.isEmpty {
+                            Text(loadingProgress)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.top, 40)
                 } else {
                     LazyVStack(spacing: 0) {
                         ForEach(Array(tracks.enumerated()), id: \.element.id) { index, track in
-                            CloudTrackRow(track: track, index: index + 1) {
+                            LikedTrackRow(track: track, index: index + 1) {
                                 playTrack(track, index: index)
                             }
                             if index < tracks.count - 1 {
@@ -719,9 +887,14 @@ struct CloudLikedSongsView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle("喜欢的音乐")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await loadTracks() }
+        .onAppear {
+            likedStore.ensureLoaded(playlistId: playlistId, songCount: songCount)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .likedSongsChanged)) { _ in
+            likedStore.refresh(playlistId: playlistId, songCount: songCount)
+        }
     }
-    
+
     private var likedHeader: some View {
         VStack(spacing: 12) {
             ZStack {
@@ -761,26 +934,19 @@ struct CloudLikedSongsView: View {
         .padding(.bottom, 20)
         .disabled(tracks.isEmpty)
     }
-    
-    private func loadTracks() async {
-        do {
-            tracks = try await MusicService.shared.getPlaylistTracks(playlistId: playlistId)
-        } catch {
-            print("加载喜欢的歌曲失败: \(error)")
-        }
-        isLoading = false
+
+    private func playTrack(_ track: Track, index: Int) {
+        audioPlayer.setPlaylist(tracks, startAt: index)
     }
-    
-    private func playTrack(_ track: CloudTrack, index: Int) {
-        let playerTracks = tracks.map { $0.toTrack() }
-        audioPlayer.setPlaylist(playerTracks, startAt: index)
-    }
-    
+
     private func playAll() {
         guard !tracks.isEmpty else { return }
-        let playerTracks = tracks.map { $0.toTrack() }
-        audioPlayer.setPlaylist(playerTracks, startAt: 0)
+        audioPlayer.setPlaylist(tracks, startAt: 0)
     }
+
+    private var tracks: [Track] { likedStore.tracks }
+    private var isLoading: Bool { likedStore.isLoading }
+    private var loadingProgress: String { likedStore.loadingProgress }
 }
 
 // MARK: - 收藏的专辑页面
@@ -856,7 +1022,7 @@ struct CloudAlbumDetailView: View {
     let album: CloudAlbum
     @State private var tracks: [CloudTrack] = []
     @State private var isLoading = true
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     
     var body: some View {
         ScrollView {
@@ -933,20 +1099,85 @@ struct CloudAlbumDetailView: View {
         do {
             tracks = try await MusicService.shared.getAlbumTracks(albumId: album.id)
         } catch {
+            #if DEBUG
             print("加载专辑歌曲失败: \(error)")
+            #endif
         }
         isLoading = false
     }
-    
+
     private func playTrack(_ track: CloudTrack, index: Int) {
         let playerTracks = tracks.map { $0.toTrack() }
         audioPlayer.setPlaylist(playerTracks, startAt: index)
     }
-    
+
     private func playAll() {
         guard !tracks.isEmpty else { return }
         let playerTracks = tracks.map { $0.toTrack() }
         audioPlayer.setPlaylist(playerTracks, startAt: 0)
+    }
+}
+
+// MARK: - 喜欢音乐歌曲行视图
+struct LikedTrackRow: View {
+    let track: Track
+    let index: Int
+    let onTap: () -> Void
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
+
+    private var isPlaying: Bool {
+        audioPlayer.currentTrack?.id == track.id
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Text("\(index)")
+                    .font(.system(size: 14))
+                    .foregroundColor(isPlaying ? .red : .secondary)
+                    .frame(width: 30)
+
+                if let coverUrl = track.coverUrl, let url = URL(string: coverUrl) {
+                    AsyncImage(url: url) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle().fill(Color.gray.opacity(0.2))
+                    }
+                    .frame(width: 44, height: 44)
+                    .cornerRadius(6)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(track.name)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(isPlaying ? .red : .primary)
+                        .lineLimit(1)
+
+                    Text(track.artistName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+
+                Spacer()
+
+                if isPlaying {
+                    if #available(iOS 17.0, *) {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 14))
+                            .foregroundColor(.red)
+                            .symbolEffect(.variableColor.iterative)
+                    } else {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 14))
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -955,7 +1186,7 @@ struct CloudTrackRow: View {
     let track: CloudTrack
     let index: Int
     let onTap: () -> Void
-    @StateObject private var audioPlayer = AudioPlayer.shared
+    @ObservedObject private var audioPlayer = AudioPlayer.shared
     
     private var isPlaying: Bool {
         audioPlayer.currentTrack?.id == track.id
@@ -994,10 +1225,16 @@ struct CloudTrackRow: View {
                 Spacer()
                 
                 if isPlaying {
-                    Image(systemName: "waveform")
-                        .font(.system(size: 14))
-                        .foregroundColor(.red)
-                        .symbolEffect(.variableColor.iterative)
+                    if #available(iOS 17.0, *) {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 14))
+                            .foregroundColor(.red)
+                            .symbolEffect(.variableColor.iterative)
+                    } else {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 14))
+                            .foregroundColor(.red)
+                    }
                 }
             }
             .padding(.vertical, 10)

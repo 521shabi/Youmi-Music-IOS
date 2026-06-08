@@ -242,7 +242,9 @@ class AuthViewModel: ObservableObject {
             }
         } catch {
             // 静默处理轮询错误
+            #if DEBUG
             print("QR check error: \(error)")
+            #endif
         }
     }
     
@@ -251,7 +253,9 @@ class AuthViewModel: ObservableObject {
         do {
             currentUser = try await userService.getCurrentUserProfile()
         } catch {
+            #if DEBUG
             print("Fetch user error: \(error)")
+            #endif
         }
     }
     
@@ -276,7 +280,9 @@ class AuthViewModel: ObservableObject {
         do {
             try await authService.logout()
         } catch {
+            #if DEBUG
             print("Logout error: \(error)")
+            #endif
         }
         isLoggedIn = false
         currentUser = nil

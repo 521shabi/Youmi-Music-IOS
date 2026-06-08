@@ -10,7 +10,8 @@ struct LyricActivityAttributes: ActivityAttributes {
     var songTitle: String
     var artistName: String
     var albumArtData: Data?  // 专辑封面（压缩后的图片数据）
-    
+    var dynamicCoverURL: String?  // iOS 26+ 动态封面视频 URL
+
     /// 动态内容状态 - 歌词变化时更新
     public struct ContentState: Codable, Hashable {
         var currentLyric: String

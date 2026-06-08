@@ -219,7 +219,7 @@ struct CloudTrack: Codable, Identifiable {
             id: id,
             name: name,
             ar: ar?.map { Artist(id: $0.id, name: $0.name) },
-            al: al != nil ? Album(id: al!.id, name: al!.name, picUrl: al!.picUrl) : nil,
+            al: al.map { Album(id: $0.id, name: $0.name, picUrl: $0.picUrl) },
             artists: nil,
             album: nil,
             dt: dt,
@@ -263,4 +263,122 @@ struct CloudAlbumDetailResponse: Codable {
 struct CloudAlbumDetailData: Codable {
     let id: Int
     let name: String
+}
+
+// MARK: - 云盘响应
+
+struct CloudDiskResponse: Codable {
+    let code: Int
+    let data: [CloudDiskSong]?
+    let count: Int?       // 云盘歌曲总数
+    let size: String?     // 已用空间（字节字符串）
+    let maxSize: String?  // 总空间（字节字符串）
+    let hasMore: Bool?
+    
+    // 支持 size/maxSize 可能是 String 或 Number
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        code = try container.decode(Int.self, forKey: .code)
+        data = try container.decodeIfPresent([CloudDiskSong].self, forKey: .data)
+        count = try container.decodeIfPresent(Int.self, forKey: .count)
+        hasMore = try container.decodeIfPresent(Bool.self, forKey: .hasMore)
+        
+        // size 可能是 String 或 Number
+        if let s = try? container.decodeIfPresent(String.self, forKey: .size) {
+            size = s
+        } else if let n = try? container.decodeIfPresent(Int64.self, forKey: .size) {
+            size = String(n)
+        } else {
+            size = nil
+        }
+        
+        if let s = try? container.decodeIfPresent(String.self, forKey: .maxSize) {
+            maxSize = s
+        } else if let n = try? container.decodeIfPresent(Int64.self, forKey: .maxSize) {
+            maxSize = String(n)
+        } else {
+            maxSize = nil
+        }
+    }
+}
+
+struct CloudDiskSong: Codable, Identifiable {
+    let songId: Int
+    let songName: String
+    let artist: String?
+    let album: String?
+    let fileSize: Int?
+    let bitrate: Int?
+    let addTime: Int?         // 上传时间(ms)
+    let fileName: String?
+    let simpleSong: CloudDiskSimpleSong?
+    
+    var id: Int { songId }
+    
+    var fileSizeText: String {
+        guard let size = fileSize else { return "" }
+        let mb = Double(size) / 1024.0 / 1024.0
+        if mb >= 1 {
+            return String(format: "%.1fMB", mb)
+        } else {
+            return String(format: "%.0fKB", mb * 1024)
+        }
+    }
+    
+    func toTrack() -> Track {
+        // 优先使用 simpleSong 中的详细信息
+        if let simple = simpleSong {
+            let artists: [Artist]? = simple.ar?.compactMap { a in
+                Artist(id: a.id ?? 0, name: a.name ?? "未知")
+            }
+            let albumInfo: Album? = simple.al.map { a in
+                Album(id: a.id ?? 0, name: a.name ?? "", picUrl: a.picUrl)
+            }
+            return Track(
+                id: songId,
+                name: simple.name ?? songName,
+                ar: artists,
+                al: albumInfo,
+                artists: nil,
+                album: nil,
+                dt: simple.dt,
+                duration: nil,
+                mv: nil,
+                mvid: nil
+            )
+        }
+        
+        // 降级：用云盘自身的字段构造
+        return Track(
+            id: songId,
+            name: songName,
+            ar: artist.map { [Artist(id: 0, name: $0)] },
+            al: album.map { Album(id: 0, name: $0, picUrl: nil) },
+            artists: nil,
+            album: nil,
+            dt: nil,
+            duration: nil,
+            mv: nil,
+            mvid: nil
+        )
+    }
+}
+
+struct CloudDiskSimpleSong: Codable {
+    let id: Int?
+    let name: String?
+    let ar: [CloudDiskArtist]?
+    let al: CloudDiskAlbumInfo?
+    let dt: Int?
+}
+
+struct CloudDiskArtist: Codable {
+    let id: Int?
+    let name: String?
+}
+
+struct CloudDiskAlbumInfo: Codable {
+    let id: Int?
+    let name: String?
+    let picUrl: String?
 }

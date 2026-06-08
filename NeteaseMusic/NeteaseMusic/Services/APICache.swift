@@ -1,108 +1,124 @@
 import Foundation
 
-/// API 响应缓存（用于热搜、排行榜等不频繁更新的数据）
+/// API 响应缓存（通用 key-value 缓存 + 请求去重）
 actor APICache {
     static let shared = APICache()
-    
-    private struct CacheEntry<T> {
-        let data: T
+
+    private struct CacheEntry {
+        let data: Any
         let timestamp: Date
         let ttl: TimeInterval
-        
+
         var isExpired: Bool {
             Date().timeIntervalSince(timestamp) > ttl
         }
     }
-    
-    // 缓存存储
-    private var hotSearchCache: CacheEntry<[HotSearch]>?
-    private var toplistCache: CacheEntry<[ToplistItem]>?
-    private var bannersCache: CacheEntry<[Banner]>?
-    private var personalizedCache: CacheEntry<[RecommendPlaylist]>?
-    
-    // 默认 TTL（秒）
-    private let hotSearchTTL: TimeInterval = 10 * 60      // 热搜 10 分钟
-    private let toplistTTL: TimeInterval = 30 * 60        // 排行榜 30 分钟
-    private let bannersTTL: TimeInterval = 15 * 60        // Banner 15 分钟
-    private let personalizedTTL: TimeInterval = 5 * 60    // 推荐歌单 5 分钟
-    
+
+    // 统一缓存存储
+    private var cache: [String: CacheEntry] = [:]
+
+    // 请求去重：正在进行中的请求
+    private var inflightTasks: [String: Task<Any, Error>] = [:]
+
+    // 预设 TTL 配置
+    private let ttlConfig: [String: TimeInterval] = [
+        "hotSearch": 10 * 60,       // 热搜 10 分钟
+        "toplist": 30 * 60,         // 排行榜 30 分钟
+        "banners": 15 * 60,         // Banner 15 分钟
+        "personalized": 5 * 60,     // 推荐歌单 5 分钟
+        "playlistDetail": 5 * 60,   // 歌单详情 5 分钟
+        "artistDetail": 10 * 60,    // 歌手详情 10 分钟
+        "albumDetail": 10 * 60,     // 专辑详情 10 分钟
+        "searchResult": 3 * 60      // 搜索结果 3 分钟
+    ]
+
+    private let defaultTTL: TimeInterval = 5 * 60  // 默认 5 分钟
+
     private init() {}
-    
-    // MARK: - 热搜缓存
-    
-    func getCachedHotSearch() -> [HotSearch]? {
-        guard let cache = hotSearchCache, !cache.isExpired else {
+
+    // MARK: - 通用缓存方法
+
+    /// 获取缓存（泛型）
+    func get<T>(_ key: String) -> T? {
+        guard let entry = cache[key], !entry.isExpired else {
+            if cache[key] != nil {
+                cache.removeValue(forKey: key)  // 清理过期条目
+            }
             return nil
         }
-        print(" 使用热搜缓存")
-        return cache.data
+        return entry.data as? T
     }
-    
-    func cacheHotSearch(_ data: [HotSearch]) {
-        hotSearchCache = CacheEntry(data: data, timestamp: Date(), ttl: hotSearchTTL)
-        print(" 热搜已缓存，TTL: \(Int(hotSearchTTL))s")
+
+    /// 写入缓存（泛型，可自定义 TTL）
+    func set<T>(_ key: String, data: T, ttl: TimeInterval? = nil) {
+        let effectiveTTL = ttl ?? ttlConfig[key] ?? defaultTTL
+        cache[key] = CacheEntry(data: data, timestamp: Date(), ttl: effectiveTTL)
     }
-    
-    // MARK: - 排行榜缓存
-    
-    func getCachedToplist() -> [ToplistItem]? {
-        guard let cache = toplistCache, !cache.isExpired else {
-            return nil
+
+    /// 请求去重：如果同一个 key 的请求正在进行中，等待它完成而不是发起新请求
+    func deduplicated<T>(_ key: String, ttl: TimeInterval? = nil, fetch: @Sendable @escaping () async throws -> T) async throws -> T {
+        // 1. 先检查缓存
+        if let cached: T = get(key) {
+            return cached
         }
-        print(" 使用排行榜缓存")
-        return cache.data
-    }
-    
-    func cacheToplist(_ data: [ToplistItem]) {
-        toplistCache = CacheEntry(data: data, timestamp: Date(), ttl: toplistTTL)
-        print(" 排行榜已缓存，TTL: \(Int(toplistTTL))s")
-    }
-    
-    // MARK: - Banner 缓存
-    
-    func getCachedBanners() -> [Banner]? {
-        guard let cache = bannersCache, !cache.isExpired else {
-            return nil
+
+        // 2. 检查是否有正在进行的请求
+        if let existingTask = inflightTasks[key] {
+            if let result = try await existingTask.value as? T {
+                return result
+            }
         }
-        print(" 使用 Banner 缓存")
-        return cache.data
-    }
-    
-    func cacheBanners(_ data: [Banner]) {
-        bannersCache = CacheEntry(data: data, timestamp: Date(), ttl: bannersTTL)
-        print(" Banner 已缓存，TTL: \(Int(bannersTTL))s")
-    }
-    
-    // MARK: - 推荐歌单缓存
-    
-    func getCachedPersonalized() -> [RecommendPlaylist]? {
-        guard let cache = personalizedCache, !cache.isExpired else {
-            return nil
+
+        // 3. 创建新请求
+        let task = Task<Any, Error> {
+            let result = try await fetch()
+            return result as Any
         }
-        print(" 使用推荐歌单缓存")
-        return cache.data
+        inflightTasks[key] = task
+
+        do {
+            let result = try await task.value
+            inflightTasks.removeValue(forKey: key)
+
+            // 缓存结果
+            if let typedResult = result as? T {
+                set(key, data: typedResult, ttl: ttl)
+                return typedResult
+            }
+            throw NSError(domain: "APICache", code: -1, userInfo: [NSLocalizedDescriptionKey: "类型转换失败"])
+        } catch {
+            inflightTasks.removeValue(forKey: key)
+            throw error
+        }
     }
-    
-    func cachePersonalized(_ data: [RecommendPlaylist]) {
-        personalizedCache = CacheEntry(data: data, timestamp: Date(), ttl: personalizedTTL)
-        print(" 推荐歌单已缓存，TTL: \(Int(personalizedTTL))s")
+
+    /// 清除指定 key 的缓存
+    func remove(_ key: String) {
+        cache.removeValue(forKey: key)
     }
-    
+
+    // MARK: - 兼容旧接口（保持向后兼容）
+
+    func getCachedHotSearch() -> [HotSearch]? { get("hotSearch") }
+    func cacheHotSearch(_ data: [HotSearch]) { set("hotSearch", data: data) }
+
+    func getCachedToplist() -> [ToplistItem]? { get("toplist") }
+    func cacheToplist(_ data: [ToplistItem]) { set("toplist", data: data) }
+
+    func getCachedBanners() -> [Banner]? { get("banners") }
+    func cacheBanners(_ data: [Banner]) { set("banners", data: data) }
+
+    func getCachedPersonalized() -> [RecommendPlaylist]? { get("personalized") }
+    func cachePersonalized(_ data: [RecommendPlaylist]) { set("personalized", data: data) }
+
     // MARK: - 清理缓存
-    
+
     func clearAll() {
-        hotSearchCache = nil
-        toplistCache = nil
-        bannersCache = nil
-        personalizedCache = nil
-        print(" API 缓存已清空")
+        cache.removeAll()
+        inflightTasks.values.forEach { $0.cancel() }
+        inflightTasks.removeAll()
     }
-    
-    func clearHotSearch() {
-        hotSearchCache = nil
-    }
-    
-    func clearToplist() {
-        toplistCache = nil
-    }
+
+    func clearHotSearch() { remove("hotSearch") }
+    func clearToplist() { remove("toplist") }
 }
