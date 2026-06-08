@@ -1,10 +1,3 @@
-<p align="center">
-  <img src="screenshots/hot-chart.jpg" width="200"/>
-  <img src="screenshots/album-detail.jpg" width="200"/>
-  <img src="screenshots/new-songs-chart.jpg" width="200"/>
-  <img src="screenshots/rankings.jpg" width="200"/>
-</p>
-
 <h1 align="center">🎵 Youmi Music iOS</h1>
 
 <p align="center">
