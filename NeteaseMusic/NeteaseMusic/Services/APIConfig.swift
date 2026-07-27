@@ -5,7 +5,7 @@ struct APIConfig {
     /// NeteaseCloudMusicApi 服务器地址
     /// 你需要自己部署或使用公共API服务
     /// 部署方式参考: https://github.com/Binaryify/NeteaseCloudMusicApi
-    static var baseURL: String = "https://youmimusicapi.preview.aliyun-zeabur.cn"
+    static var baseURL: String = "http://localhost:3000"
     
     /// 设置自定义服务器地址
     static func setBaseURL(_ url: String) {

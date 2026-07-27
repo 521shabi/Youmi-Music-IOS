@@ -64,7 +64,7 @@ class MusicSourceConfig: ObservableObject {
     }
     
     // 网易云 API 地址
-    let neteaseApiURL = "https://netease-url.preview.aliyun-zeabur.cn/song"
+    let neteaseApiURL = "http://localhost:3000/song/url"
     
     /// API Key
     @Published var apiKey: String {
