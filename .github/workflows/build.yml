@@ -21,16 +21,11 @@ jobs:
         xcodebuild -version
         xcodebuild -showsdks
     
-    - name: List schemes
-      run: |
-        cd NeteaseMusic
-        xcodebuild -list -project NeteaseMusic.xcodeproj
-    
-    - name: Build Archive
+    - name: Build Archive (only main app)
       run: |
         cd NeteaseMusic
         xcodebuild -project NeteaseMusic.xcodeproj \
-          -scheme NeteaseMusic \
+          -target NeteaseMusic \
           -configuration Release \
           -sdk iphoneos \
           -archivePath $PWD/build/NeteaseMusic.xcarchive \
