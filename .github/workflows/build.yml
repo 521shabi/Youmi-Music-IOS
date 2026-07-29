@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: macos-15
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
     
@@ -69,12 +71,52 @@ jobs:
           ls -la *.ipa
         else
           echo "Archive not found, skipping IPA packaging"
+          exit 1
         fi
     
-    - name: Upload IPA
+    - name: Upload IPA Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Youmi-Music-IPA
         path: NeteaseMusic/build/Youmi-Music.ipa
         retention-days: 30
-      if: always()
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Youmi Music v${{ github.run_number }}
+        body: |
+          ## 🎵 Youmi Music iOS 音乐播放器
+          
+          ### 更新内容
+          - 完整的网易云音乐客户端
+          - 支持自建 API 服务器
+          - 灵动岛歌词显示
+          - 桌面小组件
+          - Apple Music 集成
+          
+          ### 安装说明
+          1. 下载下方 IPA 文件
+          2. 使用 AltStore 或 Sideloadly 安装到 iPhone
+          3. 启动应用，在设置中配置 API 服务器地址
+          
+          ### API 服务器
+          默认服务器地址：`https://youmimusicapi.preview.aliyun-zeabur.cn`
+          
+          如需自建服务器，请参考项目文档
+        draft: false
+        prerelease: false
+    
+    - name: Upload IPA to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: NeteaseMusic/build/Youmi-Music.ipa
+        asset_name: Youmi-Music-v${{ github.run_number }}.ipa
+        asset_content_type: application/octet-stream
